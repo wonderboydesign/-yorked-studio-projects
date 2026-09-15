@@ -178,7 +178,7 @@ export default function App() {
             onClick={() => setView("dashboard")}
             className="font-sans text-lg font-bold tracking-tight text-ink hover:opacity-70 transition-opacity"
           >
-            B.
+           <img src="/logo-header.png" alt="Logo" className="h-8 w-auto" />
           </button>
           <nav className="flex gap-5">
             {VIEWS.map((v) => (
