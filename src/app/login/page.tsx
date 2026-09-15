@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const router = useRouter();
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -16,14 +17,14 @@ export default function LoginPage() {
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
+      body: JSON.stringify({ email, password }),
     });
     setLoading(false);
     if (res.ok) {
       router.push("/");
       router.refresh();
     } else {
-      setError("Contraseña incorrecta.");
+      setError("Correo o contraseña incorrectos.");
     }
   }
 
@@ -33,6 +34,18 @@ export default function LoginPage() {
         <h1 className="text-2xl font-semibold tracking-tight mb-1">Brada</h1>
         <p className="text-muted text-sm mb-8">Gestión interna de proyectos</p>
 
+        <label htmlFor="email" className="block text-sm font-medium mb-2">
+          Correo
+        </label>
+        <input
+          id="email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          autoFocus
+          className="w-full border border-line rounded-md px-3 py-2 text-sm mb-3 bg-surface text-ink focus:border-accent"
+        />
+
         <label htmlFor="password" className="block text-sm font-medium mb-2">
           Contraseña
         </label>
@@ -41,7 +54,6 @@ export default function LoginPage() {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          autoFocus
           className="w-full border border-line rounded-md px-3 py-2 text-sm mb-3 bg-surface text-ink focus:border-accent"
         />
 
@@ -49,7 +61,7 @@ export default function LoginPage() {
 
         <button
           type="submit"
-          disabled={loading || !password}
+          disabled={loading || !email || !password}
           className="w-full bg-ink text-paper rounded-md py-2 text-sm font-medium disabled:opacity-40"
         >
           {loading ? "Entrando…" : "Entrar"}

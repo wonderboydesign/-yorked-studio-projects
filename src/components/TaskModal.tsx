@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Project, Task, Status, STATUS_LABELS, STATUS_ORDER, STATUS_COLORS } from "@/lib/types";
+import { Project, Task, User, Status, STATUS_LABELS, STATUS_ORDER, STATUS_COLORS } from "@/lib/types";
 import { toISODate, localToday } from "@/lib/date";
 
 export default function TaskModal({
   task,
   projects,
+  users,
   defaultProjectId,
   defaultStartDate,
   onClose,
@@ -15,6 +16,7 @@ export default function TaskModal({
 }: {
   task?: Task | null;
   projects: Project[];
+  users: User[];
   defaultProjectId?: string;
   defaultStartDate?: string;
   onClose: () => void;
@@ -28,6 +30,7 @@ export default function TaskModal({
   const initialStartDate = task ? task.startDate.slice(0, 10) : defaultStartDate || today;
   const initialEndDate = task ? task.endDate.slice(0, 10) : defaultStartDate || today;
   const initialNotes = task?.notes || "";
+  const initialAssigneeId = task?.assigneeId || "";
 
   const [name, setName] = useState(initialName);
   const [projectId, setProjectId] = useState(initialProjectId);
@@ -35,6 +38,7 @@ export default function TaskModal({
   const [startDate, setStartDate] = useState(initialStartDate);
   const [endDate, setEndDate] = useState(initialEndDate);
   const [notes, setNotes] = useState(initialNotes);
+  const [assigneeId, setAssigneeId] = useState(initialAssigneeId);
   const [saving, setSaving] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [confirmingDiscard, setConfirmingDiscard] = useState(false);
@@ -45,7 +49,8 @@ export default function TaskModal({
     status !== initialStatus ||
     startDate !== initialStartDate ||
     endDate !== initialEndDate ||
-    notes !== initialNotes;
+    notes !== initialNotes ||
+    assigneeId !== initialAssigneeId;
 
   function attemptClose() {
     if (dirty) setConfirmingDiscard(true);
@@ -71,6 +76,7 @@ export default function TaskModal({
       startDate,
       endDate,
       notes: notes || null,
+      assigneeId: assigneeId || null,
     });
     setSaving(false);
   }
@@ -107,6 +113,21 @@ export default function TaskModal({
                 {projects.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1">Asignado a</label>
+              <select
+                value={assigneeId}
+                onChange={(e) => setAssigneeId(e.target.value)}
+                className="w-full border border-line rounded-md px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
+              >
+                <option value="">Sin asignar</option>
+                {users.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.name}
                   </option>
                 ))}
               </select>

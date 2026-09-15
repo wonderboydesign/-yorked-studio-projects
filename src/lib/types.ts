@@ -1,5 +1,11 @@
 export type Status = "TODO" | "IN_PROGRESS" | "IN_REVIEW" | "DONE";
 
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -21,6 +27,8 @@ export interface Task {
     notes: string | null;
   updatedAt: string;
   project?: Project;
+  assigneeId: string | null;
+  assignee?: User | null;
 }
 
 export const STATUS_LABELS: Record<Status, string> = {

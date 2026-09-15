@@ -14,6 +14,7 @@ export async function PATCH(
   if (body.endDate !== undefined) data.endDate = new Date(body.endDate);
   if (body.status !== undefined) data.status = body.status;
   if (body.notes !== undefined) data.notes = body.notes;
+  if (body.assigneeId !== undefined) data.assigneeId = body.assigneeId || null;
 
   const task = await prisma.task.update({
     where: { id: params.id },

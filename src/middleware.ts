@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AUTH_COOKIE_NAME, isValidSessionToken } from "@/lib/auth";
+import { AUTH_COOKIE_NAME, verifySessionToken } from "@/lib/auth";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -16,7 +16,7 @@ export async function middleware(request: NextRequest) {
 
   const token = request.cookies.get(AUTH_COOKIE_NAME)?.value;
 
-  if (!(await isValidSessionToken(token))) {
+  if (!(await verifySessionToken(token))) {
     if (pathname.startsWith("/api")) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }

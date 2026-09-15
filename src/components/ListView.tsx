@@ -33,6 +33,7 @@ export default function ListView({
           <th className="px-4 py-2 font-display">Proyecto</th>
           <th className="px-4 py-2 font-display">Inicio</th>
           <th className="px-4 py-2 font-display">Fin</th>
+          <th className="px-4 py-2 font-display">Asignado</th>
           <th className="px-4 py-2 font-display">Estado</th>
         </tr>
       </thead>
@@ -56,6 +57,7 @@ export default function ListView({
               </td>
               <td className="px-4 py-2.5 text-[10px] text-muted">{capMonth(formatLong(parseDate(t.startDate)))}</td>
               <td className="px-4 py-2.5 text-[10px] text-muted">{capMonth(formatLong(parseDate(t.endDate)))}</td>
+              <td className="px-4 py-2.5 text-[10px] text-muted">{t.assignee?.name || "—"}</td>
               <td className="px-4 py-2.5">
                 <span
                   className="text-[11px] px-2.5 py-1 rounded-md"

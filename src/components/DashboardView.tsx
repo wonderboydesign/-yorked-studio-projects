@@ -34,12 +34,16 @@ export default function DashboardView({
   projects,
   onSelectTask,
   onOpenProjects,
+  onOpenTeam,
+  currentUserName,
   onLogout,
 }: {
   tasks: Task[];
   projects: Project[];
   onSelectTask: (t: Task) => void;
   onOpenProjects: () => void;
+  onOpenTeam: () => void;
+  currentUserName?: string;
   onLogout: () => void;
 }) {
   const projectMap = Object.fromEntries(projects.map((p) => [p.id, p]));
@@ -235,11 +239,22 @@ export default function DashboardView({
       </div>
 
       <div className="flex items-center justify-end gap-5 pt-2">
+        {currentUserName && (
+          <span className="font-display text-xs tracking-wider text-muted">
+            Hola, {currentUserName}
+          </span>
+        )}
         <button
           onClick={onOpenProjects}
           className="font-display text-xs tracking-wider text-muted hover:text-ink"
         >
           Proyectos
+        </button>
+        <button
+          onClick={onOpenTeam}
+          className="font-display text-xs tracking-wider text-muted hover:text-ink"
+        >
+          Equipo
         </button>
         <button
           onClick={onLogout}

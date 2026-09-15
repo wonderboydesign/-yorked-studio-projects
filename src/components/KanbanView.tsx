@@ -44,8 +44,9 @@ export default function KanbanView({
                         />
                         {project?.name}
                       </span>
-                      <span className="text-[10px] text-muted">
-                        {capMonth(formatShort(parseDate(t.endDate)))}
+                      <span className="flex items-center gap-1.5 text-[10px] text-muted shrink-0">
+                        <span className="truncate max-w-[80px]">{t.assignee?.name || "—"}</span>
+                        <span>{capMonth(formatShort(parseDate(t.endDate)))}</span>
                       </span>
                     </div>
                     <select

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Project, Task, Status } from "@/lib/types";
+import { Project, Task, User, Status } from "@/lib/types";
 import { toISODate } from "@/lib/date";
 import ProjectModal from "./ProjectModal";
 import TaskModal from "./TaskModal";
@@ -12,6 +12,7 @@ import CalendarView from "./CalendarView";
 import GanttView from "./GanttView";
 import ProjectsPanel from "./ProjectsPanel";
 import DashboardView from "./DashboardView";
+import TeamPanel from "./TeamPanel";
 
 type View = "dashboard" | "gantt" | "list" | "kanban" | "calendar";
 
@@ -26,10 +27,14 @@ export default function App() {
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [view, setView] = useState<View>("dashboard");
   const [projectFilter, setProjectFilter] = useState<string>("all");
+  const [myTasksOnly, setMyTasksOnly] = useState(false);
   const [loading, setLoading] = useState(true);
   const [projectsPanelOpen, setProjectsPanelOpen] = useState(false);
+  const [teamPanelOpen, setTeamPanelOpen] = useState(false);
   const [addMenuOpen, setAddMenuOpen] = useState(false);
   const addMenuRef = useRef<HTMLDivElement>(null);
   const [darkMode, setDarkMode] = useState(false);
@@ -70,18 +75,27 @@ export default function App() {
   });
 
   const load = useCallback(async () => {
-    const [projectsRes, tasksRes] = await Promise.all([
+    const [projectsRes, tasksRes, usersRes] = await Promise.all([
       fetch("/api/projects"),
       fetch("/api/tasks"),
+      fetch("/api/users"),
     ]);
     setProjects(await projectsRes.json());
     setTasks(await tasksRes.json());
+    setUsers(await usersRes.json());
     setLoading(false);
   }, []);
 
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then(setCurrentUser)
+      .catch(() => setCurrentUser(null));
+  }, []);
 
   useEffect(() => {
     if (projectFilter === "all") return;
@@ -165,10 +179,14 @@ export default function App() {
   const activeProjects = projects.filter((p) => !p.archived);
   const archivedProjectIds = new Set(projects.filter((p) => p.archived).map((p) => p.id));
   const visibleTasks = tasks.filter((t) => !archivedProjectIds.has(t.projectId));
-  const filteredTasks =
+  const projectScopedTasks =
     projectFilter === "all"
       ? visibleTasks
       : visibleTasks.filter((t) => t.projectId === projectFilter);
+  const filteredTasks =
+    myTasksOnly && currentUser
+      ? projectScopedTasks.filter((t) => t.assigneeId === currentUser.id)
+      : projectScopedTasks;
 
   return (
     <div className="min-h-screen">
@@ -200,6 +218,17 @@ export default function App() {
         </div>
         <div className="flex flex-col items-end gap-1 w-full sm:w-auto">
           <div className="flex items-center gap-4">
+            <button
+              onClick={() => setMyTasksOnly((v) => !v)}
+              disabled={!currentUser}
+              className={`font-display text-xs tracking-wider rounded-full px-3 py-1.5 border transition-colors disabled:opacity-40 ${
+                myTasksOnly
+                  ? "border-ink text-ink bg-button"
+                  : "border-line text-muted hover:text-ink"
+              }`}
+            >
+              Mis tareas
+            </button>
             <div className="relative group border border-line rounded-full px-3 py-1.5">
               <select
                 value={projectFilter}
@@ -421,6 +450,8 @@ export default function App() {
                 }
                 onSelectTask={(t) => setTaskModal({ open: true, task: t })}
                 onOpenProjects={() => setProjectsPanelOpen(true)}
+                onOpenTeam={() => setTeamPanelOpen(true)}
+                currentUserName={currentUser?.name}
                 onLogout={handleLogout}
               />
             )}
@@ -473,6 +504,7 @@ export default function App() {
         <TaskModal
           task={taskModal.task}
           projects={activeProjects}
+          users={users}
           defaultProjectId={projectFilter !== "all" ? projectFilter : undefined}
           defaultStartDate={taskModal.defaultStartDate}
           onClose={() => setTaskModal({ open: false })}
@@ -489,6 +521,14 @@ export default function App() {
             setProjectsPanelOpen(false);
             setProjectModal({ open: true, project: p });
           }}
+        />
+      )}
+      {teamPanelOpen && (
+        <TeamPanel
+          users={users}
+          currentUserId={currentUser?.id}
+          onClose={() => setTeamPanelOpen(false)}
+          onChanged={load}
         />
       )}
     </div>

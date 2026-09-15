@@ -2,7 +2,23 @@ const COOKIE_NAME = "brada_auth";
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 30; // 30 días
 
 function getSecret() {
-  return process.env.APP_SECRET || process.env.APP_PASSWORD || "dev-secret";
+  return process.env.APP_SECRET || "dev-secret";
+}
+
+// Uses atob/btoa (not Buffer) so this stays compatible with the Edge runtime middleware.
+function base64urlEncode(value: string): string {
+  const bytes = new TextEncoder().encode(value);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function base64urlDecode(value: string): string {
+  const padded = value.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(value.length / 4) * 4, "=");
+  const binary = atob(padded);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
 }
 
 async function hmac(value: string): Promise<string> {
@@ -28,26 +44,29 @@ function constantTimeEqual(a: string, b: string): boolean {
   return result === 0;
 }
 
-export async function createSessionToken(): Promise<string> {
-  const payload = `ok.${Date.now()}`;
+export async function createSessionToken(userId: string): Promise<string> {
+  const payload = base64urlEncode(JSON.stringify({ uid: userId, ts: Date.now() }));
   const signature = await hmac(payload);
   return `${payload}.${signature}`;
 }
 
-export async function isValidSessionToken(token: string | undefined | null): Promise<boolean> {
-  if (!token) return false;
-  const parts = token.split(".");
-  if (parts.length !== 3) return false;
-  const [marker, ts, signature] = parts;
-  const payload = `${marker}.${ts}`;
+export async function verifySessionToken(
+  token: string | undefined | null
+): Promise<{ userId: string } | null> {
+  if (!token) return null;
+  const dotIndex = token.lastIndexOf(".");
+  if (dotIndex === -1) return null;
+  const payload = token.slice(0, dotIndex);
+  const signature = token.slice(dotIndex + 1);
   const expected = await hmac(payload);
-  return marker === "ok" && constantTimeEqual(signature, expected);
-}
-
-export function checkPassword(candidate: string): boolean {
-  const real = process.env.APP_PASSWORD || "";
-  if (!real) return false;
-  return constantTimeEqual(candidate, real);
+  if (!constantTimeEqual(signature, expected)) return null;
+  try {
+    const { uid } = JSON.parse(base64urlDecode(payload));
+    if (typeof uid !== "string" || !uid) return null;
+    return { userId: uid };
+  } catch {
+    return null;
+  }
 }
 
 export const AUTH_COOKIE_NAME = COOKIE_NAME;
