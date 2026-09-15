@@ -64,7 +64,7 @@ Abre http://localhost:3000 y entra con el correo y contraseña que acabas de cre
 4. Dale a "Deploy". En un par de minutos tendrás una URL pública como `tu-proyecto.vercel.app`.
 5. Ábrela desde tu celular: te pedirá tu correo y contraseña y ya funciona como cualquier página web, sin pasar por Claude. Puedes "Agregar a pantalla de inicio" desde el navegador del celular para que se sienta como una app.
 
-Nota: la primera vez que despliegues, corre `npx prisma db push` una vez apuntando a la misma `DATABASE_URL` de producción, para crear las tablas ahí también, y `npm run db:seed` (con las variables `SEED_*` apuntando a esa misma base) para tener con qué entrar.
+Nota: el script `build` corre `prisma db push` automáticamente antes de compilar, así que Vercel sincroniza el schema con la base de producción en cada deploy. Lo único que tienes que correr a mano una vez, apuntando a esa misma `DATABASE_URL` de producción, es `npm run db:seed` (con las variables `SEED_*`) para tener con qué entrar.
 
 ## Estructura
 
