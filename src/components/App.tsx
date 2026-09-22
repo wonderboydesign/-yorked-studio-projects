@@ -305,6 +305,12 @@ export default function App() {
         >
           Programar Meet
         </button>
+        <button
+          onClick={() => window.open("https://wonderboy.mx/dashboard/", "_blank", "noopener,noreferrer")}
+          className="font-display text-xs tracking-wider text-muted hover:text-ink"
+        >
+          Finanzas
+        </button>
       </div>
 
       <div className="fixed bottom-[26px] sm:bottom-4 right-6 z-10 flex items-center gap-4">
