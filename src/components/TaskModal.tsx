@@ -132,7 +132,24 @@ export default function TaskModal({
           setUploadError(`No se pudo guardar "${file.name}".`);
         }
       } catch (err) {
-        setUploadError(err instanceof Error ? err.message : `Error al subir "${file.name}".`);
+        let message = err instanceof Error ? err.message : `Error al subir "${file.name}".`;
+        try {
+          const diag = await fetch("/api/blob-upload-token", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              type: "blob.generate-client-token",
+              payload: { pathname: file.name, clientPayload: null, multipart: false },
+            }),
+          });
+          if (!diag.ok) {
+            const diagBody = await diag.json().catch(() => null);
+            message = `[${diag.status}] ${diagBody?.error || message}`;
+          }
+        } catch {
+          // el fetch de diagnóstico falló también; nos quedamos con el mensaje original
+        }
+        setUploadError(message);
       } finally {
         setUploadingCount((n) => n - 1);
       }
