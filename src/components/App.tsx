@@ -13,6 +13,7 @@ import GanttView from "./GanttView";
 import ProjectsPanel from "./ProjectsPanel";
 import DashboardView from "./DashboardView";
 import TeamPanel from "./TeamPanel";
+import NotificationBell from "./NotificationBell";
 
 type View = "dashboard" | "gantt" | "list" | "kanban" | "calendar";
 
@@ -229,6 +230,12 @@ export default function App() {
             >
               Mis tareas
             </button>
+            <button
+              onClick={() => setTeamPanelOpen(true)}
+              className="font-display text-xs tracking-wider rounded-full px-3 py-1.5 border border-line text-muted hover:text-ink"
+            >
+              Equipo
+            </button>
             <div className="relative group border border-line rounded-full px-3 py-1.5">
               <select
                 value={projectFilter}
@@ -301,6 +308,13 @@ export default function App() {
       </div>
 
       <div className="fixed bottom-[26px] sm:bottom-4 right-6 z-10 flex items-center gap-4">
+        <NotificationBell
+          enabled={!!currentUser}
+          onOpenTask={(taskId) => {
+            const task = tasks.find((t) => t.id === taskId);
+            if (task) setTaskModal({ open: true, task });
+          }}
+        />
         <button
           onClick={toggleDarkMode}
           className="transition-colors px-3 py-1.5 rounded-md flex items-center justify-center bg-button hover:bg-button-hover"
@@ -450,7 +464,6 @@ export default function App() {
                 }
                 onSelectTask={(t) => setTaskModal({ open: true, task: t })}
                 onOpenProjects={() => setProjectsPanelOpen(true)}
-                onOpenTeam={() => setTeamPanelOpen(true)}
                 currentUserName={currentUser?.name}
                 onLogout={handleLogout}
               />

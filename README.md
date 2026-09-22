@@ -1,13 +1,13 @@
-# Brada — Tareas
+# Yorked Studio — Tareas
 
-Gestor de proyectos y tareas personalizado (estilo Asana), con vista Gantt (día/semana/mes/año), Lista, Kanban y Calendario. Cada persona del equipo tiene su propia cuenta (correo y contraseña) y las tareas se le pueden asignar, con la identidad visual de Brada (negro/blanco + acento azul, tipografía Inter).
+Gestor de proyectos y tareas personalizado (estilo Asana), con vista Gantt (día/semana/mes/año), Lista, Kanban y Calendario. Cada persona del equipo tiene su propia cuenta (correo y contraseña) y las tareas se le pueden asignar, con la identidad visual de Yorked Studio (negro/blanco + acento azul, tipografía Inter).
 
 ## 1. Instalación local
 
 Necesitas [Node.js](https://nodejs.org) 18 o superior instalado.
 
 ```bash
-cd brada-tasks
+cd yorked-studio-tasks
 npm install
 ```
 
@@ -48,7 +48,15 @@ SEED_NAME="Tu nombre" SEED_EMAIL="tu@correo.com" SEED_PASSWORD="algo-largo-y-seg
 
 A partir de ahí, cualquier persona ya logueada puede crear/editar/eliminar cuentas de compañeros desde el panel "Equipo" dentro de la app — no hace falta volver a correr el script.
 
-## 4. Correr en local
+## 4. Correos de "te asignaron una tarea" (opcional)
+
+Cuando asignas una tarea a alguien, la app le manda un correo avisándole (si no configuras esto, simplemente no se envía nada, todo lo demás sigue funcionando igual).
+
+1. Crea una cuenta gratis en [resend.com](https://resend.com).
+2. Genera una API key y ponla en `.env` como `RESEND_API_KEY`.
+3. Mientras no verifiques un dominio propio en Resend, solo puedes enviar correos de prueba al correo con el que te registraste ahí — para poder avisarle a cualquier persona de tu equipo, verifica un dominio en Resend (Domains → Add Domain) y pon `RESEND_FROM_EMAIL="Yorked Studio <tareas@tudominio.com>"` en `.env`.
+
+## 5. Correr en local
 
 ```bash
 npm run dev
@@ -56,11 +64,11 @@ npm run dev
 
 Abre http://localhost:3000 y entra con el correo y contraseña que acabas de crear.
 
-## 5. Desplegar en Vercel (para verla desde tu celular sin usar Claude)
+## 6. Desplegar en Vercel (para verla desde tu celular sin usar Claude)
 
 1. Sube esta carpeta a un repositorio de GitHub (puede ser privado).
 2. Entra a https://vercel.com, crea una cuenta gratis y elige "Import Project" desde ese repositorio.
-3. En "Environment Variables" agrega las variables de tu `.env` (`APP_SECRET`, `DATABASE_URL`).
+3. En "Environment Variables" agrega las variables de tu `.env` (`APP_SECRET`, `DATABASE_URL`, y si las usas, `RESEND_API_KEY`/`RESEND_FROM_EMAIL`).
 4. Dale a "Deploy". En un par de minutos tendrás una URL pública como `tu-proyecto.vercel.app`.
 5. Ábrela desde tu celular: te pedirá tu correo y contraseña y ya funciona como cualquier página web, sin pasar por Claude. Puedes "Agregar a pantalla de inicio" desde el navegador del celular para que se sienta como una app.
 

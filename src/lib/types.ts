@@ -31,6 +31,15 @@ export interface Task {
   assignee?: User | null;
 }
 
+export interface Notification {
+  id: string;
+  message: string;
+  read: boolean;
+  createdAt: string;
+  taskId: string;
+  task: { id: string; name: string };
+}
+
 export const STATUS_LABELS: Record<Status, string> = {
   TODO: "Por hacer",
   IN_PROGRESS: "En progreso",

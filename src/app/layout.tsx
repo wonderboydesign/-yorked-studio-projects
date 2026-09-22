@@ -12,7 +12,7 @@ const btsMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Brada Task Manager",
+  title: "Yorked Studio Task Manager",
   description: "Gestión interna de proyectos y tareas",
   icons: {
   icon: [

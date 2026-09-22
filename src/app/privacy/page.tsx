@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Política de privacidad — Brada Task Manager",
+  title: "Política de privacidad — Yorked Studio Task Manager",
 };
 
 export default function PrivacyPage() {
@@ -10,9 +10,9 @@ export default function PrivacyPage() {
       <p style={{ color: "#898780", marginBottom: 32 }}>Última actualización: septiembre de 2026</p>
 
       <p>
-        Brada Task Manager es una herramienta interna de uso personal, desarrollada
-        y operada por Manuel para la gestión de proyectos y tareas de Brada Studio.
-        No está destinada al público general ni a terceros.
+        Yorked Studio Task Manager es una herramienta interna de uso personal,
+        desarrollada y operada por Yorked Studio para la gestión de sus propios
+        proyectos y tareas. No está destinada al público general ni a terceros.
       </p>
 
       <h2 style={{ fontSize: 16, marginTop: 24 }}>¿Qué información se utiliza?</h2>

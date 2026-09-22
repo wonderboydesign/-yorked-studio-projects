@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Términos de servicio — Brada Task Manager",
+  title: "Términos de servicio — Yorked Studio Task Manager",
 };
 
 export default function TermsPage() {
@@ -10,9 +10,9 @@ export default function TermsPage() {
       <p style={{ color: "#898780", marginBottom: 32 }}>Última actualización: septiembre de 2026</p>
 
       <p>
-        Brada Task Manager es una herramienta de uso interno y personal, creada
-        para la gestión de proyectos y tareas de Brada Studio. No se ofrece como
-        producto o servicio al público general.
+        Yorked Studio Task Manager es una herramienta de uso interno y personal,
+        creada para la gestión de proyectos y tareas de Yorked Studio. No se
+        ofrece como producto o servicio al público general.
       </p>
 
       <h2 style={{ fontSize: 16, marginTop: 24 }}>Uso de la aplicación</h2>

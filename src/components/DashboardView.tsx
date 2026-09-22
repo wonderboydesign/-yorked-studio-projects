@@ -34,7 +34,6 @@ export default function DashboardView({
   projects,
   onSelectTask,
   onOpenProjects,
-  onOpenTeam,
   currentUserName,
   onLogout,
 }: {
@@ -42,7 +41,6 @@ export default function DashboardView({
   projects: Project[];
   onSelectTask: (t: Task) => void;
   onOpenProjects: () => void;
-  onOpenTeam: () => void;
   currentUserName?: string;
   onLogout: () => void;
 }) {
@@ -249,12 +247,6 @@ export default function DashboardView({
           className="font-display text-xs tracking-wider text-muted hover:text-ink"
         >
           Proyectos
-        </button>
-        <button
-          onClick={onOpenTeam}
-          className="font-display text-xs tracking-wider text-muted hover:text-ink"
-        >
-          Equipo
         </button>
         <button
           onClick={onLogout}

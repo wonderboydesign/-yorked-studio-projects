@@ -31,7 +31,7 @@ export default function LoginPage() {
   return (
     <main className="min-h-screen flex items-center justify-center px-6">
       <form onSubmit={handleSubmit} className="w-full max-w-sm">
-        <h1 className="text-2xl font-semibold tracking-tight mb-1">Brada</h1>
+        <h1 className="text-2xl font-semibold tracking-tight mb-1">Yorked Studio</h1>
         <p className="text-muted text-sm mb-8">Gestión interna de proyectos</p>
 
         <label htmlFor="email" className="block text-sm font-medium mb-2">
