@@ -56,7 +56,17 @@ Cuando asignas una tarea a alguien, la app le manda un correo avisándole (si no
 2. Genera una API key y ponla en `.env` como `RESEND_API_KEY`.
 3. Mientras no verifiques un dominio propio en Resend, solo puedes enviar correos de prueba al correo con el que te registraste ahí — para poder avisarle a cualquier persona de tu equipo, verifica un dominio en Resend (Domains → Add Domain) y pon `RESEND_FROM_EMAIL="Yorked Studio <tareas@tudominio.com>"` en `.env`.
 
-## 5. Correr en local
+## 5. Archivos adjuntos en tareas (opcional)
+
+Cada tarea puede llevar archivos adjuntos (.ai, .svg, .pdf, .jpg, .png, .webp, hasta 50 MB cada uno). Se guardan con Vercel Blob:
+
+1. Entra a [vercel.com/dashboard](https://vercel.com/dashboard) → pestaña **Storage** → **Create Database** → **Blob**.
+2. Conéctalo a este proyecto (si ya lo desplegaste) o simplemente créalo — Vercel te da un token.
+3. Copia el token (`BLOB_READ_WRITE_TOKEN`) y ponlo en tu `.env`. Si conectaste el Blob a un proyecto ya desplegado en Vercel, esa variable también se agrega sola ahí.
+
+Sin esta variable, la sección de adjuntar archivos en una tarea simplemente da error al intentar subir algo — el resto de la app sigue funcionando igual.
+
+## 6. Correr en local
 
 ```bash
 npm run dev
@@ -64,11 +74,11 @@ npm run dev
 
 Abre http://localhost:3000 y entra con el correo y contraseña que acabas de crear.
 
-## 6. Desplegar en Vercel (para verla desde tu celular sin usar Claude)
+## 7. Desplegar en Vercel (para verla desde tu celular sin usar Claude)
 
 1. Sube esta carpeta a un repositorio de GitHub (puede ser privado).
 2. Entra a https://vercel.com, crea una cuenta gratis y elige "Import Project" desde ese repositorio.
-3. En "Environment Variables" agrega las variables de tu `.env` (`APP_SECRET`, `DATABASE_URL`, y si las usas, `RESEND_API_KEY`/`RESEND_FROM_EMAIL`).
+3. En "Environment Variables" agrega las variables de tu `.env` (`APP_SECRET`, `DATABASE_URL`, y si las usas, `RESEND_API_KEY`/`RESEND_FROM_EMAIL`/`BLOB_READ_WRITE_TOKEN`).
 4. Dale a "Deploy". En un par de minutos tendrás una URL pública como `tu-proyecto.vercel.app`.
 5. Ábrela desde tu celular: te pedirá tu correo y contraseña y ya funciona como cualquier página web, sin pasar por Claude. Puedes "Agregar a pantalla de inicio" desde el navegador del celular para que se sienta como una app.
 

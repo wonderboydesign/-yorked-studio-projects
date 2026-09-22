@@ -58,6 +58,19 @@ model Task {
   assignee      User?          @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
   assigneeId    String?
   notifications Notification[]
+  attachments   Attachment[]
+}
+
+model Attachment {
+  id          String   @id @default(cuid())
+  filename    String
+  url         String
+  pathname    String
+  contentType String
+  size        Int
+  createdAt   DateTime @default(now())
+  task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskId      String
 }
 
 model Notification {

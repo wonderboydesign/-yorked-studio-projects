@@ -529,6 +529,7 @@ export default function App() {
           onClose={() => setTaskModal({ open: false })}
           onSave={saveTask}
           onDelete={deleteTask}
+          onAttachmentsChanged={load}
         />
       )}
       {projectsPanelOpen && (

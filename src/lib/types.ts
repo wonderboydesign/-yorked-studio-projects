@@ -17,6 +17,16 @@ export interface Project {
   archived: boolean;
 }
 
+export interface Attachment {
+  id: string;
+  filename: string;
+  url: string;
+  pathname: string;
+  contentType: string;
+  size: number;
+  createdAt: string;
+}
+
 export interface Task {
   id: string;
   name: string;
@@ -29,6 +39,7 @@ export interface Task {
   project?: Project;
   assigneeId: string | null;
   assignee?: User | null;
+  attachments?: Attachment[];
 }
 
 export interface Notification {

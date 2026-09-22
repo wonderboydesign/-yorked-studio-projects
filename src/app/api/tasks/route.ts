@@ -9,6 +9,7 @@ export async function GET() {
     include: {
       project: true,
       assignee: { select: { id: true, name: true, email: true } },
+      attachments: { orderBy: { createdAt: "asc" } },
     },
     orderBy: { startDate: "asc" },
   });
