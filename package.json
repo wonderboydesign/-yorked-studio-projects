@@ -9,7 +9,8 @@
     "postinstall": "prisma generate",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "db:seed": "node prisma/seed.js"
+    "db:seed": "node prisma/seed.js",
+    "db:reset-password": "node prisma/reset-password.js"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",
