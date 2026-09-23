@@ -14,6 +14,7 @@ import ProjectsPanel from "./ProjectsPanel";
 import DashboardView from "./DashboardView";
 import TeamPanel from "./TeamPanel";
 import NotificationBell from "./NotificationBell";
+import LiveClock from "./LiveClock";
 
 type View = "dashboard" | "gantt" | "list" | "kanban" | "calendar";
 
@@ -219,6 +220,7 @@ export default function App() {
         </div>
         <div className="flex flex-col items-end gap-1 w-full sm:w-auto">
           <div className="flex items-center gap-4">
+            <LiveClock />
             <button
               onClick={() => setMyTasksOnly((v) => !v)}
               disabled={!currentUser}
