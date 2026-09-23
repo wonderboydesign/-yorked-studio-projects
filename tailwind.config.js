@@ -25,7 +25,7 @@ module.exports = {
       },
       fontFamily: {
         display: ["var(--font-doto)", "sans-serif"],
-        mono: ["var(--font-bts-mono)", "ui-monospace", "monospace"],
+        mono: ["var(--font-helvetica-now)", "Helvetica Neue", "Arial", "sans-serif"],
       },
     },
   },

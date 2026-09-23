@@ -6,9 +6,9 @@ const doto = localFont({
   src: [{ path: "./fonts/doto-800.ttf", weight: "800", style: "normal" }],
   variable: "--font-doto",
 });
-const btsMono = localFont({
-  src: "./fonts/bts-mono.otf",
-  variable: "--font-bts-mono",
+const helveticaNow = localFont({
+  src: "./fonts/HelveticaNowDisplay-Regular.otf",
+  variable: "--font-helvetica-now",
 });
 
 export const metadata: Metadata = {
@@ -44,7 +44,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${doto.variable} ${btsMono.variable} font-mono bg-paper text-ink antialiased`}>
+      <body className={`${doto.variable} ${helveticaNow.variable} font-mono bg-paper text-ink antialiased`}>
         {children}
       </body>
     </html>
