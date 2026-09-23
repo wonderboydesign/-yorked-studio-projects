@@ -191,20 +191,20 @@ export default function App() {
 
   return (
     <div className="min-h-screen">
-      <header className="px-6 py-4 flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-8 sm:-translate-y-[11px] w-full sm:w-auto justify-between sm:justify-start">
+      <header className="px-8 py-6 flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center gap-10 sm:-translate-y-[11px] w-full sm:w-auto justify-between sm:justify-start">
           <button
             onClick={() => setView("dashboard")}
             className="font-sans text-lg font-bold tracking-tight text-ink hover:opacity-70 transition-opacity"
           >
            <img src="/logo-header.png" alt="Logo" className="h-8 w-auto" />
           </button>
-          <nav className="flex gap-5">
+          <nav className="flex gap-6">
             {VIEWS.map((v) => (
               <button
                 key={v.key}
                 onClick={() => setView(v.key)}
-                className={`font-mono text-xs uppercase tracking-wider ${
+                className={`font-mono text-xs uppercase tracking-[0.15em] ${
                   view === v.key ? "text-ink" : "text-muted hover:text-ink"
                 }`}
               >
@@ -424,7 +424,7 @@ export default function App() {
       </div>
       </div>
 
-      <main className="p-6 pb-24">
+      <main className="px-8 pb-24 pt-2">
         {loading ? (
           <div className="fixed inset-0 flex items-center justify-center">
             <p className="text-sm text-muted flex items-baseline">

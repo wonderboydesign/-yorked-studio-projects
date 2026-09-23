@@ -132,8 +132,8 @@ export default function DashboardView({
 
   function Card({ title, children }: { title: string; children: React.ReactNode }) {
     return (
-      <div className="border border-line rounded-lg p-4">
-        <h3 className="font-display text-xs mb-3">{title}</h3>
+      <div className="border border-line rounded-lg p-6">
+        <h3 className="font-mono text-[11px] uppercase tracking-[0.15em] text-muted mb-4">{title}</h3>
         {children}
       </div>
     );
@@ -144,20 +144,28 @@ export default function DashboardView({
   }
 
   return (
-    <div className="space-y-4">
-      <Card title="Hoy y esta semana">
-        {thisWeek.length === 0 ? (
-          <Empty text="No tienes tareas pendientes esta semana." />
-        ) : (
-          <div className="divide-y divide-line">
-            {thisWeek.map((t) => (
-              <TaskRow key={t.id} t={t} />
-            ))}
-          </div>
-        )}
-      </Card>
+    <div className="space-y-10">
+      <div>
+        <div className="flex items-baseline gap-4 mb-6">
+          <h2 className="text-5xl font-semibold tracking-tight leading-none">{thisWeek.length}</h2>
+          <p className="text-sm text-muted">
+            {thisWeek.length === 1 ? "tarea pendiente esta semana" : "tareas pendientes esta semana"}
+          </p>
+        </div>
+        <div className="border border-line rounded-lg p-6">
+          {thisWeek.length === 0 ? (
+            <Empty text="No tienes tareas pendientes esta semana." />
+          ) : (
+            <div className="divide-y divide-line">
+              {thisWeek.map((t) => (
+                <TaskRow key={t.id} t={t} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card title="Tareas atrasadas">
           {overdue.length === 0 ? (
             <Empty text="No tienes tareas atrasadas." />

@@ -11,6 +11,9 @@ module.exports = {
       xl: ["20px", { lineHeight: "28px" }],
       "2xl": ["24px", { lineHeight: "32px" }],
       "3xl": ["30px", { lineHeight: "36px" }],
+      "4xl": ["40px", { lineHeight: "44px", letterSpacing: "-0.02em" }],
+      "5xl": ["56px", { lineHeight: "58px", letterSpacing: "-0.02em" }],
+      "6xl": ["72px", { lineHeight: "72px", letterSpacing: "-0.03em" }],
     },
     extend: {
       colors: {
