@@ -68,7 +68,7 @@ export default function ProjectModal({
 
   return (
     <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50 px-4" onClick={attemptClose}>
-      <div className="bg-surface rounded-lg w-full max-w-md p-6 border border-line" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-surface w-full max-w-md p-6 border border-line" onClick={(e) => e.stopPropagation()}>
         <h2 className="font-mono text-xs uppercase tracking-wider text-ink mb-4">
           <span className="relative top-[1px] left-[-1px] inline-block">●</span>
           {project ? "Editar proyecto" : "Nuevo proyecto"}
@@ -80,7 +80,7 @@ export default function ProjectModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               autoFocus
-              className="w-full border border-line rounded-md px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
+              className="w-full border border-line px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
             />
           </div>
           <div>
@@ -88,7 +88,7 @@ export default function ProjectModal({
             <input
               value={client}
               onChange={(e) => setClient(e.target.value)}
-              className="w-full border border-line rounded-md px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
+              className="w-full border border-line px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -98,7 +98,7 @@ export default function ProjectModal({
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full border border-line rounded-md px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
+                className="w-full border border-line px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
               />
             </div>
             <div>
@@ -107,7 +107,7 @@ export default function ProjectModal({
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full border border-line rounded-md px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
+                className="w-full border border-line px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
               />
             </div>
           </div>
@@ -139,7 +139,7 @@ export default function ProjectModal({
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
             placeholder="URL, instrucciones o cualquier nota útil"
-            className="w-full border border-line rounded-md px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
+            className="w-full border border-line px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
             />
           </div>
 
@@ -152,14 +152,14 @@ export default function ProjectModal({
                 <button
                   type="button"
                   onClick={() => setConfirmingDelete(false)}
-                  className="text-xs px-3 py-2 rounded-md border border-line"
+                  className="text-xs px-3 py-2 border border-line"
                 >
                   Cancelar
                 </button>
                 <button
                   type="button"
                   onClick={() => project && onDelete && onDelete(project.id)}
-                  className="text-xs px-3 py-2 rounded-md bg-red-600 text-paper"
+                  className="text-xs px-3 py-2 bg-red-600 text-paper"
                 >
                   Sí, eliminar
                 </button>
@@ -174,14 +174,14 @@ export default function ProjectModal({
                 <button
                   type="button"
                   onClick={() => setConfirmingDiscard(false)}
-                  className="text-xs px-3 py-2 rounded-md border border-line"
+                  className="text-xs px-3 py-2 border border-line"
                 >
                   Seguir editando
                 </button>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="text-xs px-3 py-2 rounded-md bg-red-600 text-paper"
+                  className="text-xs px-3 py-2 bg-red-600 text-paper"
                 >
                   Salir sin guardar
                 </button>
@@ -204,14 +204,14 @@ export default function ProjectModal({
               <button
                 type="button"
                 onClick={attemptClose}
-                className="text-xs px-3 py-2 rounded-md border border-line"
+                className="text-xs px-3 py-2 border border-line"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={saving || !name}
-                className="text-xs px-3 py-2 rounded-md bg-ink text-paper disabled:opacity-40"
+                className="text-xs px-3 py-2 bg-ink text-paper disabled:opacity-40"
               >
                 {saving ? "Guardando…" : "Guardar"}
               </button>

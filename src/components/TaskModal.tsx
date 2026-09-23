@@ -164,7 +164,7 @@ export default function TaskModal({
 
   return (
     <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50 px-4" onClick={attemptClose}>
-      <div className="bg-surface rounded-lg w-full max-w-md p-6 border border-line max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-surface w-full max-w-md p-6 border border-line max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <h2 className="font-mono text-xs uppercase tracking-wider text-ink mb-4">
           <span className="relative top-[1px] left-[-1px] inline-block">●</span>
           {task ? "Editar tarea" : "Nueva tarea"}
@@ -181,7 +181,7 @@ export default function TaskModal({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 autoFocus
-                className="w-full border border-line rounded-md px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
+                className="w-full border border-line px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
               />
             </div>
             <div>
@@ -189,7 +189,7 @@ export default function TaskModal({
               <select
                 value={projectId}
                 onChange={(e) => setProjectId(e.target.value)}
-                className="w-full border border-line rounded-md px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
+                className="w-full border border-line px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
               >
                 {projects.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -203,7 +203,7 @@ export default function TaskModal({
               <select
                 value={assigneeId}
                 onChange={(e) => setAssigneeId(e.target.value)}
-                className="w-full border border-line rounded-md px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
+                className="w-full border border-line px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
               >
                 <option value="">Sin asignar</option>
                 {users.map((u) => (
@@ -220,7 +220,7 @@ export default function TaskModal({
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full border border-line rounded-md px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
+                  className="w-full border border-line px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
                 />
               </div>
               <div>
@@ -229,7 +229,7 @@ export default function TaskModal({
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full border border-line rounded-md px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
+                  className="w-full border border-line px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
                 />
               </div>
             </div>
@@ -239,7 +239,7 @@ export default function TaskModal({
                 value={status}
                 onChange={(e) => setStatus(e.target.value as Status)}
                 style={{ backgroundColor: STATUS_COLORS[status], color: "#262626" }}
-                className="w-full border border-line rounded-md px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
+                className="w-full border border-line px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
               >
                 {STATUS_ORDER.map((s) => (
                   <option key={s} value={s}>
@@ -256,7 +256,7 @@ export default function TaskModal({
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
               placeholder="URL, instrucciones o cualquier nota útil"
-              className="w-full border border-line rounded-md px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
+              className="w-full border border-line px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
               />
             </div>
 
@@ -273,7 +273,7 @@ export default function TaskModal({
                       {attachments.map((a) => (
                         <li
                           key={a.id}
-                          className="flex items-center justify-between gap-2 border border-line rounded-md px-2.5 py-1.5"
+                          className="flex items-center justify-between gap-2 border border-line px-2.5 py-1.5"
                         >
                           <a
                             href={a.url}
@@ -295,7 +295,7 @@ export default function TaskModal({
                       ))}
                     </ul>
                   )}
-                  <label className="inline-block text-xs px-3 py-1.5 rounded-md border border-line cursor-pointer hover:border-ink/30">
+                  <label className="inline-block text-xs px-3 py-1.5 border border-line cursor-pointer hover:border-ink/30">
                     {uploadingCount > 0 ? "Subiendo…" : "+ Adjuntar archivo"}
                     <input
                       type="file"
@@ -323,14 +323,14 @@ export default function TaskModal({
                   <button
                     type="button"
                     onClick={() => setConfirmingDelete(false)}
-                    className="text-xs px-3 py-2 rounded-md border border-line"
+                    className="text-xs px-3 py-2 border border-line"
                   >
                     Cancelar
                   </button>
                   <button
                     type="button"
                     onClick={() => task && onDelete && onDelete(task.id)}
-                    className="text-xs px-3 py-2 rounded-md bg-red-600 text-paper"
+                    className="text-xs px-3 py-2 bg-red-600 text-paper"
                   >
                     Sí, eliminar
                   </button>
@@ -345,14 +345,14 @@ export default function TaskModal({
                   <button
                     type="button"
                     onClick={() => setConfirmingDiscard(false)}
-                    className="text-xs px-3 py-2 rounded-md border border-line"
+                    className="text-xs px-3 py-2 border border-line"
                   >
                     Seguir editando
                   </button>
                   <button
                     type="button"
                     onClick={onClose}
-                    className="text-xs px-3 py-2 rounded-md bg-red-600 text-paper"
+                    className="text-xs px-3 py-2 bg-red-600 text-paper"
                   >
                     Salir sin guardar
                   </button>
@@ -375,14 +375,14 @@ export default function TaskModal({
                 <button
                   type="button"
                   onClick={attemptClose}
-                  className="text-xs px-3 py-2 rounded-md border border-line"
+                  className="text-xs px-3 py-2 border border-line"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={saving || !name}
-                  className="text-xs px-3 py-2 rounded-md bg-ink text-paper disabled:opacity-40"
+                  className="text-xs px-3 py-2 bg-ink text-paper disabled:opacity-40"
                 >
                   {saving ? "Guardando…" : "Guardar"}
                 </button>

@@ -222,7 +222,7 @@ export default function App() {
             <button
               onClick={() => setMyTasksOnly((v) => !v)}
               disabled={!currentUser}
-              className={`font-display text-xs tracking-wider rounded-full px-3 py-1.5 border transition-colors disabled:opacity-40 ${
+              className={`font-display text-xs tracking-wider px-3 py-1.5 border transition-colors disabled:opacity-40 ${
                 myTasksOnly
                   ? "border-ink text-ink bg-button"
                   : "border-line text-muted hover:text-ink"
@@ -232,11 +232,11 @@ export default function App() {
             </button>
             <button
               onClick={() => setTeamPanelOpen(true)}
-              className="font-display text-xs tracking-wider rounded-full px-3 py-1.5 border border-line text-muted hover:text-ink"
+              className="font-display text-xs tracking-wider px-3 py-1.5 border border-line text-muted hover:text-ink"
             >
               Equipo
             </button>
-            <div className="relative group border border-line rounded-full px-3 py-1.5">
+            <div className="relative group border border-line px-3 py-1.5">
               <select
                 value={projectFilter}
                 onChange={(e) => setProjectFilter(e.target.value)}
@@ -279,7 +279,7 @@ export default function App() {
         </div>
       </header>
 
-      <div className="fixed bottom-[26px] sm:bottom-4 left-6 flex items-center gap-5 z-10 bg-paper px-3 py-2 rounded-md shadow-sm">
+      <div className="fixed bottom-[26px] sm:bottom-4 left-6 flex items-center gap-5 z-10 bg-paper px-3 py-2 shadow-sm">
         <button
           onClick={() => window.open("https://meet.google.com/new", "_blank", "noopener,noreferrer")}
           className="font-display text-xs tracking-wider text-muted hover:text-ink"
@@ -323,7 +323,7 @@ export default function App() {
         />
         <button
           onClick={toggleDarkMode}
-          className="transition-colors px-3 py-1.5 rounded-md flex items-center justify-center bg-button hover:bg-button-hover"
+          className="transition-colors px-3 py-1.5 flex items-center justify-center bg-button hover:bg-button-hover"
         >
           <svg width="15" height="15" viewBox="0 0 20.68 20.68" fill="none" xmlns="http://www.w3.org/2000/svg">
             <g fill="currentColor" className="text-ink">
@@ -387,7 +387,7 @@ export default function App() {
                 setAddMenuOpen(false);
               }}
               disabled={activeProjects.length === 0}
-              className="font-display text-xs tracking-wider text-ink bg-button hover:bg-button-hover transition-colors px-3 py-1.5 rounded-md disabled:opacity-40 whitespace-nowrap"
+              className="font-display text-xs tracking-wider text-ink bg-button hover:bg-button-hover transition-colors px-3 py-1.5 disabled:opacity-40 whitespace-nowrap"
             >
               + Tarea
             </button>
@@ -396,7 +396,7 @@ export default function App() {
                 setProjectModal({ open: true, project: null });
                 setAddMenuOpen(false);
               }}
-              className="font-display text-xs tracking-wider text-ink bg-button hover:bg-button-hover transition-colors px-3 py-1.5 rounded-md whitespace-nowrap"
+              className="font-display text-xs tracking-wider text-ink bg-button hover:bg-button-hover transition-colors px-3 py-1.5 whitespace-nowrap"
             >
               + Proyecto
             </button>
@@ -404,7 +404,7 @@ export default function App() {
         )}
         <button
           onClick={() => setAddMenuOpen((open) => !open)}
-          className={`transition-colors px-3 py-1.5 rounded-md flex items-center justify-center ${
+          className={`transition-colors px-3 py-1.5 flex items-center justify-center ${
             addMenuOpen ? "bg-button-hover" : "bg-button hover:bg-button-hover"
           }`}
         >
@@ -441,7 +441,7 @@ export default function App() {
             </p>
             <button
               onClick={() => setProjectModal({ open: true, project: null })}
-              className="text-xs px-3 py-1.5 rounded-md bg-ink text-paper"
+              className="text-xs px-3 py-1.5 bg-ink text-paper"
             >
               Crear tu primer proyecto
             </button>
@@ -453,7 +453,7 @@ export default function App() {
             </p>
             <button
               onClick={() => setProjectsPanelOpen(true)}
-              className="text-xs px-3 py-1.5 rounded-md bg-ink text-paper"
+              className="text-xs px-3 py-1.5 bg-ink text-paper"
             >
               Ver proyectos
             </button>

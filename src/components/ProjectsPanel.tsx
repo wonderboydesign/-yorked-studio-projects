@@ -31,7 +31,7 @@ export default function ProjectsPanel({
       onClick={onClose}
     >
       <div
-        className="bg-surface rounded-lg w-full max-w-lg p-6 border border-line max-h-[80vh] overflow-y-auto"
+        className="bg-surface w-full max-w-lg p-6 border border-line max-h-[80vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
@@ -51,7 +51,7 @@ export default function ProjectsPanel({
           {active.map((p) => (
             <div
               key={p.id}
-              className="flex items-center justify-between border border-line rounded-md px-3 py-2 gap-2"
+              className="flex items-center justify-between border border-line px-3 py-2 gap-2"
             >
               <button
                 onClick={() => onEditProject(p)}
@@ -65,7 +65,7 @@ export default function ProjectsPanel({
               </button>
               <button
                 onClick={() => onToggleArchived(p.id, true)}
-                className="text-xs px-2.5 py-1 rounded-md border border-line shrink-0"
+                className="text-xs px-2.5 py-1 border border-line shrink-0"
               >
                 Archivar
               </button>
@@ -83,7 +83,7 @@ export default function ProjectsPanel({
           {archived.map((p) => (
             <div
               key={p.id}
-              className="flex items-center justify-between border border-line rounded-md px-3 py-2 gap-2 opacity-60"
+              className="flex items-center justify-between border border-line px-3 py-2 gap-2 opacity-60"
             >
               <button
                 onClick={() => onEditProject(p)}
@@ -97,7 +97,7 @@ export default function ProjectsPanel({
               </button>
               <button
                 onClick={() => onToggleArchived(p.id, false)}
-                className="text-xs px-2.5 py-1 rounded-md border border-line shrink-0"
+                className="text-xs px-2.5 py-1 border border-line shrink-0"
               >
                 Desarchivar
               </button>

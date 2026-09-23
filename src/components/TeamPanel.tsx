@@ -57,7 +57,7 @@ export default function TeamPanel({
       onClick={onClose}
     >
       <div
-        className="bg-surface rounded-lg w-full max-w-lg p-6 border border-line max-h-[80vh] overflow-y-auto"
+        className="bg-surface w-full max-w-lg p-6 border border-line max-h-[80vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
@@ -73,7 +73,7 @@ export default function TeamPanel({
             <button
               key={u.id}
               onClick={() => setUserModal({ open: true, user: u })}
-              className="w-full flex items-center justify-between border border-line rounded-md px-3 py-2 gap-2 text-left hover:bg-ink/[0.03]"
+              className="w-full flex items-center justify-between border border-line px-3 py-2 gap-2 text-left hover:bg-ink/[0.03]"
             >
               <div className="min-w-0">
                 <p className="text-xs truncate">
@@ -87,7 +87,7 @@ export default function TeamPanel({
 
         <button
           onClick={() => setUserModal({ open: true, user: null })}
-          className="text-xs px-3 py-1.5 rounded-md bg-ink text-paper"
+          className="text-xs px-3 py-1.5 bg-ink text-paper"
         >
           + Usuario
         </button>

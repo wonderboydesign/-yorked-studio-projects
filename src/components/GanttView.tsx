@@ -114,7 +114,7 @@ export default function GanttView({
         ))}
       </div>
 
-      <div ref={scrollRef} className="inline-block max-w-full border border-line rounded-lg overflow-x-auto">
+      <div ref={scrollRef} className="inline-block max-w-full border border-line overflow-x-auto">
         <div style={{ width: totalWidth + 180 }}>
           {/* Header */}
           <div className="flex sticky top-0 bg-surface z-10 border-b border-line">

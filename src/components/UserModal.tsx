@@ -39,7 +39,7 @@ export default function UserModal({
 
   return (
     <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50 px-4" onClick={onClose}>
-      <div className="bg-surface rounded-lg w-full max-w-md p-6 border border-line" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-surface w-full max-w-md p-6 border border-line" onClick={(e) => e.stopPropagation()}>
         <h2 className="font-mono text-xs uppercase tracking-wider text-ink mb-4">
           <span className="relative top-[1px] left-[-1px] inline-block">●</span>
           {user ? "Editar usuario" : "Nuevo usuario"}
@@ -51,7 +51,7 @@ export default function UserModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               autoFocus
-              className="w-full border border-line rounded-md px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
+              className="w-full border border-line px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
             />
           </div>
           <div>
@@ -60,7 +60,7 @@ export default function UserModal({
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-line rounded-md px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
+              className="w-full border border-line px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
             />
           </div>
           <div>
@@ -71,7 +71,7 @@ export default function UserModal({
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-line rounded-md px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
+              className="w-full border border-line px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
             />
           </div>
 
@@ -86,7 +86,7 @@ export default function UserModal({
                 <button
                   type="button"
                   onClick={() => setConfirmingDelete(false)}
-                  className="text-xs px-3 py-2 rounded-md border border-line"
+                  className="text-xs px-3 py-2 border border-line"
                 >
                   Cancelar
                 </button>
@@ -97,7 +97,7 @@ export default function UserModal({
                     const result = await onDelete(user.id);
                     if (result) setError(result);
                   }}
-                  className="text-xs px-3 py-2 rounded-md bg-red-600 text-paper"
+                  className="text-xs px-3 py-2 bg-red-600 text-paper"
                 >
                   Sí, eliminar
                 </button>
@@ -120,14 +120,14 @@ export default function UserModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="text-xs px-3 py-2 rounded-md border border-line"
+                  className="text-xs px-3 py-2 border border-line"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={saving || !name || !email}
-                  className="text-xs px-3 py-2 rounded-md bg-ink text-paper disabled:opacity-40"
+                  className="text-xs px-3 py-2 bg-ink text-paper disabled:opacity-40"
                 >
                   {saving ? "Guardando…" : "Guardar"}
                 </button>

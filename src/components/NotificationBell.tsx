@@ -72,7 +72,7 @@ export default function NotificationBell({
     <div ref={containerRef} className="relative">
       <button
         onClick={toggleOpen}
-        className="relative transition-colors px-3 py-1.5 rounded-md flex items-center justify-center bg-button hover:bg-button-hover"
+        className="relative transition-colors px-3 py-1.5 flex items-center justify-center bg-button hover:bg-button-hover"
         aria-label="Notificaciones"
       >
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -90,7 +90,7 @@ export default function NotificationBell({
       </button>
 
       {open && (
-        <div className="absolute right-0 bottom-full mb-2 w-80 max-h-96 overflow-y-auto bg-surface border border-line rounded-lg shadow-lg z-20 animate-fade-in-up">
+        <div className="absolute right-0 bottom-full mb-2 w-80 max-h-96 overflow-y-auto bg-surface border border-line shadow-lg z-20 animate-fade-in-up">
           <div className="px-4 py-3 border-b border-line">
             <h3 className="font-display text-xs tracking-wider">Notificaciones</h3>
           </div>

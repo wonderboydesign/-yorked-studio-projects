@@ -60,7 +60,7 @@ export default function ListView({
               <td className="px-4 py-2.5 text-[10px] text-muted">{t.assignee?.name || "—"}</td>
               <td className="px-4 py-2.5">
                 <span
-                  className="text-[11px] px-2.5 py-1 rounded-md"
+                  className="text-[11px] px-2.5 py-1"
                   style={{ backgroundColor: STATUS_COLORS[t.status], color: "#262626" }}
                 >
                   {STATUS_LABELS[t.status]}

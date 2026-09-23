@@ -92,19 +92,19 @@ export default function CalendarView({
           <div className="flex items-center gap-1">
             <button
               onClick={goPrev}
-              className="text-xs px-2 py-1 border border-line rounded-md text-muted hover:text-ink"
+              className="text-xs px-2 py-1 border border-line text-muted hover:text-ink"
             >
               ←
             </button>
             <button
               onClick={goToday}
-              className="font-display text-xs tracking-wider px-2 py-1 border border-line rounded-md text-muted hover:text-ink"
+              className="font-display text-xs tracking-wider px-2 py-1 border border-line text-muted hover:text-ink"
             >
               Hoy
             </button>
             <button
               onClick={goNext}
-              className="text-xs px-2 py-1 border border-line rounded-md text-muted hover:text-ink"
+              className="text-xs px-2 py-1 border border-line text-muted hover:text-ink"
             >
               →
             </button>

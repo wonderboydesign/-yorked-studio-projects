@@ -101,7 +101,7 @@ export default function DashboardView({
     return (
       <button
         onClick={() => onSelectTask(t)}
-        className="w-full flex items-start justify-between gap-3 py-2 text-left hover:bg-ink/[0.03] px-2 -mx-2 rounded-md"
+        className="w-full flex items-start justify-between gap-3 py-2 text-left hover:bg-ink/[0.03] px-2 -mx-2"
       >
         <div className="min-w-0 flex items-start gap-2">
           <span
@@ -120,7 +120,7 @@ export default function DashboardView({
             </span>
           )}
           <span
-            className="text-[10px] px-2 py-0.5 rounded-md whitespace-nowrap"
+            className="text-[10px] px-2 py-0.5 whitespace-nowrap"
             style={{ backgroundColor: STATUS_COLORS[t.status], color: "#262626" }}
           >
             {STATUS_LABELS[t.status]}
@@ -132,7 +132,7 @@ export default function DashboardView({
 
   function Card({ title, children }: { title: string; children: React.ReactNode }) {
     return (
-      <div className="border border-line rounded-lg p-6">
+      <div className="border border-line p-6">
         <h3 className="font-mono text-[11px] uppercase tracking-[0.15em] text-muted mb-4">{title}</h3>
         {children}
       </div>
@@ -152,7 +152,7 @@ export default function DashboardView({
             {thisWeek.length === 1 ? "tarea pendiente esta semana" : "tareas pendientes esta semana"}
           </p>
         </div>
-        <div className="border border-line rounded-lg p-6">
+        <div className="border border-line p-6">
           {thisWeek.length === 0 ? (
             <Empty text="No tienes tareas pendientes esta semana." />
           ) : (
@@ -202,7 +202,7 @@ export default function DashboardView({
               </p>
               <a
                 href="/api/auth/google"
-                className="inline-block font-display text-xs tracking-wider text-ink bg-button hover:bg-button-hover transition-colors px-3 py-1.5 rounded-md"
+                className="inline-block font-display text-xs tracking-wider text-ink bg-button hover:bg-button-hover transition-colors px-3 py-1.5"
               >
                 {calendarExpired ? "Reconectar Google Calendar" : "Conectar Google Calendar"}
               </a>
@@ -226,7 +226,7 @@ export default function DashboardView({
                     href={e.link || "#"}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block py-2 hover:bg-ink/[0.03] px-2 -mx-2 rounded-md"
+                    className="block py-2 hover:bg-ink/[0.03] px-2 -mx-2"
                   >
                     <p className="text-xs truncate">{e.title}</p>
                     <p className="text-[10px] text-muted">{formatEventTime(e)}</p>

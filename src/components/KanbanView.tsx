@@ -21,7 +21,7 @@ export default function KanbanView({
       {STATUS_ORDER.map((status) => {
         const columnTasks = tasks.filter((t) => t.status === status);
         return (
-          <div key={status} className="rounded-lg p-3 min-h-[200px]" style={{ backgroundColor: STATUS_COLORS[status] }}>
+          <div key={status} className="p-3 min-h-[200px]" style={{ backgroundColor: STATUS_COLORS[status] }}>
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-display text-xs tracking-wider" style={{ color: "#262626" }}>{STATUS_LABELS[status]}</h3>
               <span className="font-display text-xs" style={{ color: "#6b6b6b" }}>{columnTasks.length}</span>
@@ -33,7 +33,7 @@ export default function KanbanView({
                   <div
                     key={t.id}
                     onClick={() => onSelectTask(t)}
-                    className="bg-surface border border-line rounded-md p-3 cursor-pointer hover:border-ink/30"
+                    className="bg-surface border border-line p-3 cursor-pointer hover:border-ink/30"
                   >
                     <p className="text-xs mb-2">{t.name}</p>
                     <div className="flex items-center justify-between">
