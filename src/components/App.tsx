@@ -208,7 +208,7 @@ export default function App() {
                   view === v.key ? "text-ink" : "text-muted hover:text-ink"
                 }`}
               >
-                <span className="relative top-[1px] left-[-1px] inline-block">
+                <span className="relative top-[1px] left-[-1px] inline-block text-accent">
                   {view === v.key ? "●" : ""}
                 </span>
                 <span className="sm:hidden">{v.mobileLabel}</span>

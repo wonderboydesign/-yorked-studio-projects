@@ -17,14 +17,19 @@ export default function KanbanView({
   const projectMap = Object.fromEntries(projects.map((p) => [p.id, p]));
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
       {STATUS_ORDER.map((status) => {
         const columnTasks = tasks.filter((t) => t.status === status);
         return (
-          <div key={status} className="p-3 min-h-[200px]" style={{ backgroundColor: STATUS_COLORS[status] }}>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-display text-xs tracking-wider" style={{ color: "#262626" }}>{STATUS_LABELS[status]}</h3>
-              <span className="font-display text-xs" style={{ color: "#6b6b6b" }}>{columnTasks.length}</span>
+          <div key={status} className="min-h-[200px]">
+            <div
+              className="flex items-center justify-between px-3 py-2.5 mb-3"
+              style={{ backgroundColor: STATUS_COLORS[status] }}
+            >
+              <h3 className="font-mono text-[11px] uppercase tracking-[0.15em]" style={{ color: "#262626" }}>
+                {STATUS_LABELS[status]}
+              </h3>
+              <span className="font-mono text-[11px]" style={{ color: "#262626" }}>{columnTasks.length}</span>
             </div>
             <div className="space-y-2">
               {columnTasks.map((t) => {
@@ -33,18 +38,17 @@ export default function KanbanView({
                   <div
                     key={t.id}
                     onClick={() => onSelectTask(t)}
-                    className="bg-surface border border-line p-3 cursor-pointer hover:border-ink/30"
+                    className="bg-surface border border-line p-3 cursor-pointer hover:border-ink transition-colors"
                   >
-                    <p className="text-xs mb-2">{t.name}</p>
+                    <p className="text-sm mb-2.5">{t.name}</p>
                     <div className="flex items-center justify-between">
-                      <span className="inline-flex items-center gap-1.5 text-xs text-muted">
-                        <span
-                          className="w-1.5 h-1.5 rounded-full inline-block"
-                          style={{ backgroundColor: project?.color }}
-                        />
+                      <span
+                        className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wide"
+                        style={{ color: project?.color }}
+                      >
                         {project?.name}
                       </span>
-                      <span className="flex items-center gap-1.5 text-[10px] text-muted shrink-0">
+                      <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wide text-muted shrink-0">
                         <span className="truncate max-w-[80px]">{t.assignee?.name || "—"}</span>
                         <span>{capMonth(formatShort(parseDate(t.endDate)))}</span>
                       </span>
@@ -55,7 +59,7 @@ export default function KanbanView({
                       onChange={(e) =>
                         onChangeStatus(t.id, e.target.value as Status)
                       }
-                      className="mt-2 w-full text-xs border border-line rounded px-1.5 py-1 bg-surface"
+                      className="mt-2.5 w-full font-mono text-[10px] uppercase tracking-wide border border-line px-1.5 py-1.5 bg-surface"
                     >
                       {STATUS_ORDER.map((s) => (
                         <option key={s} value={s}>

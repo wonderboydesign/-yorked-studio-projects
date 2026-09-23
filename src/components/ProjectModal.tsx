@@ -70,7 +70,7 @@ export default function ProjectModal({
     <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50 px-4" onClick={attemptClose}>
       <div className="bg-surface w-full max-w-md p-6 border border-line" onClick={(e) => e.stopPropagation()}>
         <h2 className="font-mono text-xs uppercase tracking-wider text-ink mb-4">
-          <span className="relative top-[1px] left-[-1px] inline-block">●</span>
+          <span className="relative top-[1px] left-[-1px] inline-block text-accent">●</span>
           {project ? "Editar proyecto" : "Nuevo proyecto"}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -128,7 +128,7 @@ export default function ProjectModal({
                 />
               ))}
               <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(color) ? color : "#000000"} onChange={(e) => setColor(e.target.value)} className="w-7 h-7 rounded-full border border-line cursor-pointer p-0" aria-label="Color personalizado" />
-              <input type="text" value={color} onChange={(e) => setColor(e.target.value)} placeholder="#1E4FFF" className="text-xs border border-line rounded px-2 py-1.5 w-24 font-mono bg-surface text-ink" />
+              <input type="text" value={color} onChange={(e) => setColor(e.target.value)} placeholder="#1E4FFF" className="text-xs border border-line px-2 py-1.5 w-24 font-mono bg-surface text-ink" />
             </div>
           </div>
 

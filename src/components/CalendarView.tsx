@@ -86,9 +86,9 @@ export default function CalendarView({
           {title()}
         </h3>
         <div className="flex flex-wrap items-center justify-center gap-4">
-          <button onClick={() => { setView("day"); setCursor(localToday()); }} className={`font-display text-xs tracking-wider ${view === "day" ? "text-ink" : "text-muted hover:text-ink"}`}>{view === "day" ? "●" : ""}Día</button>
-          <button onClick={() => { setView("week"); setCursor(localToday()); }} className={`font-display text-xs tracking-wider ${view === "week" ? "text-ink" : "text-muted hover:text-ink"}`}>{view === "week" ? "●" : ""}Semana</button>
-          <button onClick={() => setView("month")} className={`font-display text-xs tracking-wider ${view === "month" ? "text-ink" : "text-muted hover:text-ink"}`}>{view === "month" ? "●" : ""}Mes</button>
+          <button onClick={() => { setView("day"); setCursor(localToday()); }} className={`font-display text-xs tracking-wider ${view === "day" ? "text-ink" : "text-muted hover:text-ink"}`}>{view === "day" ? <span className="text-accent">●</span> : ""}Día</button>
+          <button onClick={() => { setView("week"); setCursor(localToday()); }} className={`font-display text-xs tracking-wider ${view === "week" ? "text-ink" : "text-muted hover:text-ink"}`}>{view === "week" ? <span className="text-accent">●</span> : ""}Semana</button>
+          <button onClick={() => setView("month")} className={`font-display text-xs tracking-wider ${view === "month" ? "text-ink" : "text-muted hover:text-ink"}`}>{view === "month" ? <span className="text-accent">●</span> : ""}Mes</button>
           <div className="flex items-center gap-1">
             <button
               onClick={goPrev}

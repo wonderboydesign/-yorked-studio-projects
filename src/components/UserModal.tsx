@@ -41,7 +41,7 @@ export default function UserModal({
     <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50 px-4" onClick={onClose}>
       <div className="bg-surface w-full max-w-md p-6 border border-line" onClick={(e) => e.stopPropagation()}>
         <h2 className="font-mono text-xs uppercase tracking-wider text-ink mb-4">
-          <span className="relative top-[1px] left-[-1px] inline-block">●</span>
+          <span className="relative top-[1px] left-[-1px] inline-block text-accent">●</span>
           {user ? "Editar usuario" : "Nuevo usuario"}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">

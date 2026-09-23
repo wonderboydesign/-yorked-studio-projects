@@ -166,7 +166,7 @@ export default function TaskModal({
     <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50 px-4" onClick={attemptClose}>
       <div className="bg-surface w-full max-w-md p-6 border border-line max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <h2 className="font-mono text-xs uppercase tracking-wider text-ink mb-4">
-          <span className="relative top-[1px] left-[-1px] inline-block">●</span>
+          <span className="relative top-[1px] left-[-1px] inline-block text-accent">●</span>
           {task ? "Editar tarea" : "Nueva tarea"}
         </h2>
         {projects.length === 0 ? (

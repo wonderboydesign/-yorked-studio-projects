@@ -108,7 +108,7 @@ export default function GanttView({
               zoom === z ? "text-ink" : "text-muted hover:text-ink"
             }`}
           >
-            {zoom === z ? "●" : ""}
+            {zoom === z ? <span className="text-accent">●</span> : ""}
             {ZOOM_CONFIG[z].label}
           </button>
         ))}
