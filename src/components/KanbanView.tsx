@@ -23,13 +23,13 @@ export default function KanbanView({
         return (
           <div key={status} className="min-h-[200px]">
             <div
-              className="flex items-center justify-between px-3 py-2.5 mb-3"
-              style={{ backgroundColor: STATUS_COLORS[status] }}
+              className="flex items-center justify-between px-1 pb-2.5 mb-3 border-t-2"
+              style={{ borderTopColor: STATUS_COLORS[status] }}
             >
-              <h3 className="font-mono text-[11px] uppercase tracking-[0.15em]" style={{ color: "#262626" }}>
+              <h3 className="font-mono text-[11px] uppercase tracking-[0.15em] text-ink pt-2.5">
                 {STATUS_LABELS[status]}
               </h3>
-              <span className="font-mono text-[11px]" style={{ color: "#262626" }}>{columnTasks.length}</span>
+              <span className="font-mono text-[11px] text-muted pt-2.5">{columnTasks.length}</span>
             </div>
             <div className="space-y-2">
               {columnTasks.map((t) => {

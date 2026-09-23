@@ -59,10 +59,11 @@ export default function ListView({
               <td className="px-4 py-3.5 text-[10px] text-muted">{capMonth(formatLong(parseDate(t.endDate)))}</td>
               <td className="px-4 py-3.5 text-[10px] text-muted">{t.assignee?.name || "—"}</td>
               <td className="px-4 py-3.5">
-                <span
-                  className="font-mono text-[10px] uppercase tracking-wide px-2.5 py-1"
-                  style={{ backgroundColor: STATUS_COLORS[t.status], color: "#262626" }}
-                >
+                <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wide text-ink border border-line px-2 py-1">
+                  <span
+                    className="w-1.5 h-1.5 inline-block shrink-0"
+                    style={{ backgroundColor: STATUS_COLORS[t.status] }}
+                  />
                   {STATUS_LABELS[t.status]}
                 </span>
               </td>

@@ -238,8 +238,8 @@ export default function TaskModal({
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as Status)}
-                style={{ backgroundColor: STATUS_COLORS[status], color: "#262626" }}
-                className="w-full border border-line px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
+                style={{ borderLeftColor: STATUS_COLORS[status] }}
+                className="w-full border border-line border-l-[3px] px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
               >
                 {STATUS_ORDER.map((s) => (
                   <option key={s} value={s}>

@@ -119,10 +119,11 @@ export default function DashboardView({
               {capMonth(formatLong(parseDate(t.endDate)))}
             </span>
           )}
-          <span
-            className="text-[10px] px-2 py-0.5 whitespace-nowrap"
-            style={{ backgroundColor: STATUS_COLORS[t.status], color: "#262626" }}
-          >
+          <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wide text-ink border border-line px-2 py-1 whitespace-nowrap">
+            <span
+              className="w-1.5 h-1.5 inline-block shrink-0"
+              style={{ backgroundColor: STATUS_COLORS[t.status] }}
+            />
             {STATUS_LABELS[t.status]}
           </span>
         </div>
