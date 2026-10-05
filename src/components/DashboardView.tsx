@@ -110,16 +110,16 @@ export default function DashboardView({
           />
           <div className="min-w-0">
             <span className="text-xs block">{t.name}</span>
-            <span className="text-[10px] text-muted truncate hidden sm:block">{project?.name}</span>
+            <span className="text-[11px] text-muted truncate hidden sm:block">{project?.name}</span>
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {showDate && (
-            <span className="text-[10px] text-muted whitespace-nowrap">
+            <span className="text-[11px] text-muted whitespace-nowrap">
               {capMonth(formatLong(parseDate(t.endDate)))}
             </span>
           )}
-          <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wide text-ink border border-line px-2 py-1 whitespace-nowrap">
+          <span className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide text-ink border border-line px-2 py-1 whitespace-nowrap">
             <span
               className="w-1.5 h-1.5 inline-block shrink-0"
               style={{ backgroundColor: STATUS_COLORS[t.status] }}
@@ -134,14 +134,14 @@ export default function DashboardView({
   function Card({ title, children }: { title: string; children: React.ReactNode }) {
     return (
       <div className="border border-line p-6">
-        <h3 className="font-mono text-[11px] uppercase tracking-[0.15em] text-muted mb-4">{title}</h3>
+        <h3 className="font-mono text-[12px] uppercase tracking-[0.15em] text-muted mb-4">{title}</h3>
         {children}
       </div>
     );
   }
 
   function Empty({ text }: { text: string }) {
-    return <p className="text-[10px] text-muted py-2">{text}</p>;
+    return <p className="text-[11px] text-muted py-2">{text}</p>;
   }
 
   return (
@@ -196,7 +196,7 @@ export default function DashboardView({
             <Empty text="Cargando…" />
           ) : !calendarConnected ? (
             <div className="py-1">
-              <p className="text-[10px] text-muted mb-3">
+              <p className="text-[11px] text-muted mb-3">
                 {calendarExpired
                   ? "Tu conexión con Google Calendar expiró. Vuelve a conectarla para seguir viendo tus reuniones."
                   : "Conecta tu Google Calendar para ver tus próximas reuniones aquí."}
@@ -213,7 +213,7 @@ export default function DashboardView({
               <Empty text="No tienes reuniones en los próximos días." />
               <button
                 onClick={handleDisconnectCalendar}
-                className="font-display text-[10px] tracking-wider text-muted hover:text-ink"
+                className="font-display text-[11px] tracking-wider text-muted hover:text-ink"
               >
                 Desconectar
               </button>
@@ -230,13 +230,13 @@ export default function DashboardView({
                     className="block py-2 hover:bg-ink/[0.03] px-2 -mx-2"
                   >
                     <p className="text-xs truncate">{e.title}</p>
-                    <p className="text-[10px] text-muted">{formatEventTime(e)}</p>
+                    <p className="text-[11px] text-muted">{formatEventTime(e)}</p>
                   </a>
                 ))}
               </div>
               <button
                 onClick={handleDisconnectCalendar}
-                className="font-display text-[10px] tracking-wider text-muted hover:text-ink mt-3"
+                className="font-display text-[11px] tracking-wider text-muted hover:text-ink mt-3"
               >
                 Desconectar
               </button>

@@ -438,7 +438,7 @@ export default function App() {
           </div>
         ) : projects.length === 0 ? (
           <div className="text-center py-24">
-            <p className="text-[10px] text-muted mb-3">
+            <p className="text-[11px] text-muted mb-3">
               Todavía no tienes proyectos.
             </p>
             <button
@@ -450,7 +450,7 @@ export default function App() {
           </div>
         ) : activeProjects.length === 0 ? (
           <div className="text-center py-24">
-            <p className="text-[10px] text-muted mb-3">
+            <p className="text-[11px] text-muted mb-3">
               Todos tus proyectos están archivados.
             </p>
             <button

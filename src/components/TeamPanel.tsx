@@ -68,7 +68,7 @@ export default function TeamPanel({
         </div>
 
         <div className="space-y-1 mb-4">
-          {users.length === 0 && <p className="text-[10px] text-muted">No hay usuarios.</p>}
+          {users.length === 0 && <p className="text-[11px] text-muted">No hay usuarios.</p>}
           {users.map((u) => (
             <button
               key={u.id}
@@ -79,7 +79,7 @@ export default function TeamPanel({
                 <p className="text-xs truncate">
                   {u.name} {u.id === currentUserId && <span className="text-muted">(tú)</span>}
                 </p>
-                <p className="text-[10px] text-muted truncate">{u.email}</p>
+                <p className="text-[11px] text-muted truncate">{u.email}</p>
               </div>
             </button>
           ))}

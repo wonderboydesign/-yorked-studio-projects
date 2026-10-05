@@ -83,7 +83,7 @@ export default function NotificationBell({
           />
         </svg>
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-accent text-white text-[10px] leading-4 text-center">
+          <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-accent text-white text-[11px] leading-4 text-center">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
@@ -95,7 +95,7 @@ export default function NotificationBell({
             <h3 className="font-display text-xs tracking-wider">Notificaciones</h3>
           </div>
           {notifications.length === 0 ? (
-            <p className="text-[10px] text-muted px-4 py-6 text-center">
+            <p className="text-[11px] text-muted px-4 py-6 text-center">
               No tienes notificaciones todavía.
             </p>
           ) : (
@@ -112,7 +112,7 @@ export default function NotificationBell({
                   }`}
                 >
                   <p className="text-xs">{n.message}</p>
-                  <p className="text-[10px] text-muted mt-1">{timeAgo(n.createdAt)}</p>
+                  <p className="text-[11px] text-muted mt-1">{timeAgo(n.createdAt)}</p>
                 </button>
               ))}
             </div>

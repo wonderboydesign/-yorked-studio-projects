@@ -148,7 +148,7 @@ export default function CalendarView({
                     <button
                       key={t.id}
                       onClick={() => onSelectTask(t)}
-className={`w-full text-left text-[11px] leading-tight px-1.5 py-0.5 rounded ${
+className={`w-full text-left text-[12px] leading-tight px-1.5 py-0.5 rounded ${
   t.status === "DONE" ? "line-through" : ""
 }`}
                       style={

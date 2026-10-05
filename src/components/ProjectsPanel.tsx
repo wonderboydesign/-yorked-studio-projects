@@ -46,7 +46,7 @@ export default function ProjectsPanel({
         </h3>
         <div className="space-y-1 mb-6">
           {active.length === 0 && (
-            <p className="text-[10px] text-muted">No hay proyectos activos.</p>
+            <p className="text-[11px] text-muted">No hay proyectos activos.</p>
           )}
           {active.map((p) => (
             <div
@@ -78,7 +78,7 @@ export default function ProjectsPanel({
         </h3>
         <div className="space-y-1">
           {archived.length === 0 && (
-            <p className="text-[10px] text-muted">No hay proyectos archivados.</p>
+            <p className="text-[11px] text-muted">No hay proyectos archivados.</p>
           )}
           {archived.map((p) => (
             <div

@@ -28,7 +28,7 @@ export default function LiveClock() {
 
   return (
     <div className="hidden md:block border border-line px-3 py-1.5">
-      <span className="font-mono text-[10px] uppercase tracking-wider text-muted whitespace-nowrap">
+      <span className="font-mono text-[11px] uppercase tracking-wider text-muted whitespace-nowrap">
         {format(now)}
       </span>
     </div>

@@ -19,7 +19,7 @@ export default function ListView({
 
   if (sorted.length === 0) {
     return (
-      <div className="text-[10px] text-muted py-16 text-center">
+      <div className="text-[11px] text-muted py-16 text-center">
         Aún no hay tareas. Crea un proyecto y agrega tu primera tarea.
       </div>
     );
@@ -29,12 +29,12 @@ export default function ListView({
     <table className="w-full text-xs border-collapse">
       <thead>
         <tr className="text-left text-muted border-b-2 border-ink">
-          <th className="pl-0 pr-4 py-3 font-mono font-normal uppercase tracking-[0.12em] text-[10px]">Tarea</th>
-          <th className="px-4 py-3 font-mono font-normal uppercase tracking-[0.12em] text-[10px]">Proyecto</th>
-          <th className="px-4 py-3 font-mono font-normal uppercase tracking-[0.12em] text-[10px]">Inicio</th>
-          <th className="px-4 py-3 font-mono font-normal uppercase tracking-[0.12em] text-[10px]">Fin</th>
-          <th className="px-4 py-3 font-mono font-normal uppercase tracking-[0.12em] text-[10px]">Asignado</th>
-          <th className="px-4 py-3 font-mono font-normal uppercase tracking-[0.12em] text-[10px]">Estado</th>
+          <th className="pl-0 pr-4 py-3 font-mono font-normal uppercase tracking-[0.12em] text-[11px]">Tarea</th>
+          <th className="px-4 py-3 font-mono font-normal uppercase tracking-[0.12em] text-[11px]">Proyecto</th>
+          <th className="px-4 py-3 font-mono font-normal uppercase tracking-[0.12em] text-[11px]">Inicio</th>
+          <th className="px-4 py-3 font-mono font-normal uppercase tracking-[0.12em] text-[11px]">Fin</th>
+          <th className="px-4 py-3 font-mono font-normal uppercase tracking-[0.12em] text-[11px]">Asignado</th>
+          <th className="px-4 py-3 font-mono font-normal uppercase tracking-[0.12em] text-[11px]">Estado</th>
         </tr>
       </thead>
       <tbody>
@@ -49,17 +49,17 @@ export default function ListView({
               <td className="pl-0 pr-4 py-3.5 text-ink text-sm">{t.name}</td>
               <td className="px-4 py-3.5">
                 <span
-                  className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wide"
+                  className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide"
                   style={{ color: project?.color }}
                 >
                   {project?.name || "—"}
                 </span>
               </td>
-              <td className="px-4 py-3.5 text-[10px] text-muted">{capMonth(formatLong(parseDate(t.startDate)))}</td>
-              <td className="px-4 py-3.5 text-[10px] text-muted">{capMonth(formatLong(parseDate(t.endDate)))}</td>
-              <td className="px-4 py-3.5 text-[10px] text-muted">{t.assignee?.name || "—"}</td>
+              <td className="px-4 py-3.5 text-[11px] text-muted">{capMonth(formatLong(parseDate(t.startDate)))}</td>
+              <td className="px-4 py-3.5 text-[11px] text-muted">{capMonth(formatLong(parseDate(t.endDate)))}</td>
+              <td className="px-4 py-3.5 text-[11px] text-muted">{t.assignee?.name || "—"}</td>
               <td className="px-4 py-3.5">
-                <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wide text-ink border border-line px-2 py-1">
+                <span className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide text-ink border border-line px-2 py-1">
                   <span
                     className="w-1.5 h-1.5 inline-block shrink-0"
                     style={{ backgroundColor: STATUS_COLORS[t.status] }}

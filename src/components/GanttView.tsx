@@ -91,7 +91,7 @@ export default function GanttView({
 
   if (rows.length === 0) {
     return (
-      <div className="text-[10px] text-muted py-16 text-center">
+      <div className="text-[11px] text-muted py-16 text-center">
         Aún no hay tareas para mostrar en el Gantt.
       </div>
     );
@@ -179,7 +179,7 @@ className={`font-display text-xs text-muted text-center py-1 border-r border-lin
                       <button
                         key={t.id}
                         onClick={() => onSelectTask(t)}
-className={`absolute h-6 rounded text-[11px] text-white px-2 flex items-center truncate text-left ${t.status === "DONE" ? "line-through opacity-60" : ""}`}
+className={`absolute h-6 rounded text-[12px] text-white px-2 flex items-center truncate text-left ${t.status === "DONE" ? "line-through opacity-60" : ""}`}
                         style={{
                           left: offset * pxPerDay,
                           width: Math.max(duration * pxPerDay - 2, 8),

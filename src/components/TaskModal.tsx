@@ -264,7 +264,7 @@ export default function TaskModal({
               <button
                 type="button"
                 onClick={() => setNotesExpanded((v) => !v)}
-                className="text-[10px] text-muted hover:text-ink"
+                className="text-[11px] text-muted hover:text-ink"
               >
                 {notesExpanded ? "Contraer" : "Expandir"}
               </button>
@@ -285,7 +285,7 @@ export default function TaskModal({
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-1 max-w-[220px] text-[10px] text-accent border border-line px-2 py-1 hover:border-accent"
+                    className="inline-flex items-center gap-1 max-w-[220px] text-[11px] text-accent border border-line px-2 py-1 hover:border-accent"
                     title={url}
                   >
                     <span className="truncate">{url}</span>
@@ -298,7 +298,7 @@ export default function TaskModal({
             <div>
               <label className="block text-xs font-medium mb-1">Archivos</label>
               {!task ? (
-                <p className="text-[10px] text-muted">
+                <p className="text-[11px] text-muted">
                   Guarda la tarea primero para poder adjuntar archivos.
                 </p>
               ) : (
@@ -318,11 +318,11 @@ export default function TaskModal({
                           >
                             {a.filename}
                           </a>
-                          <span className="text-[10px] text-muted shrink-0">{formatBytes(a.size)}</span>
+                          <span className="text-[11px] text-muted shrink-0">{formatBytes(a.size)}</span>
                           <button
                             type="button"
                             onClick={() => handleDeleteAttachment(a.id)}
-                            className="text-[10px] text-red-600 shrink-0"
+                            className="text-[11px] text-red-600 shrink-0"
                           >
                             Eliminar
                           </button>
@@ -344,7 +344,7 @@ export default function TaskModal({
                       className="hidden"
                     />
                   </label>
-                  {uploadError && <p className="text-[10px] text-red-600">{uploadError}</p>}
+                  {uploadError && <p className="text-[11px] text-red-600">{uploadError}</p>}
                 </div>
               )}
             </div>
