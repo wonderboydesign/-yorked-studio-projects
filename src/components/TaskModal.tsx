@@ -57,6 +57,15 @@ export default function TaskModal({
   const [attachments, setAttachments] = useState<Attachment[]>(task?.attachments ?? []);
   const [uploadingCount, setUploadingCount] = useState(0);
   const [uploadError, setUploadError] = useState("");
+  const [notesExpanded, setNotesExpanded] = useState(false);
+
+  const notesLinks = Array.from(
+    new Set(
+      (notes.match(/https?:\/\/[^\s<>"']+/g) || []).map((url) =>
+        url.replace(/[.,;:)\]}"']+$/, "")
+      )
+    )
+  );
 
   const dirty =
     name !== initialName ||
@@ -250,14 +259,40 @@ export default function TaskModal({
             </div>
 
             <div>
-            <label className="block text-xs font-medium mb-1">Notas</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-medium">Notas</label>
+              <button
+                type="button"
+                onClick={() => setNotesExpanded((v) => !v)}
+                className="text-[10px] text-muted hover:text-ink"
+              >
+                {notesExpanded ? "Contraer" : "Expandir"}
+              </button>
+            </div>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              rows={3}
+              rows={notesExpanded ? 12 : 3}
               placeholder="URL, instrucciones o cualquier nota útil"
-              className="w-full border border-line px-3 py-2 text-xs focus:border-accent bg-surface text-ink"
+              className="w-full border border-line px-3 py-2 text-xs focus:border-accent bg-surface text-ink resize-y transition-[height]"
               />
+            {notesLinks.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {notesLinks.map((url) => (
+                  <a
+                    key={url}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex items-center gap-1 max-w-[220px] text-[10px] text-accent border border-line px-2 py-1 hover:border-accent"
+                    title={url}
+                  >
+                    <span className="truncate">{url}</span>
+                  </a>
+                ))}
+              </div>
+            )}
             </div>
 
             <div>
