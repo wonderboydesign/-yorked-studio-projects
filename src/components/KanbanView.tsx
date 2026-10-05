@@ -59,7 +59,7 @@ export default function KanbanView({
                       onChange={(e) =>
                         onChangeStatus(t.id, e.target.value as Status)
                       }
-                      className="mt-2.5 w-full font-mono text-[11px] uppercase tracking-wide border border-line px-1.5 py-1.5 bg-surface"
+                      className="mt-2.5 w-full appearance-none font-mono text-[11px] uppercase tracking-wide border border-line px-1.5 py-1.5 bg-surface"
                     >
                       {STATUS_ORDER.map((s) => (
                         <option key={s} value={s}>

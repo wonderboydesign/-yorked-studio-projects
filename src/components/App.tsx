@@ -141,18 +141,22 @@ export default function App() {
 
   async function saveTask(data: Partial<Task>) {
     if (taskModal.task) {
-      await fetch(`/api/tasks/${taskModal.task.id}`, {
+      // Edición con guardado automático: el panel se queda abierto
+      const res = await fetch(`/api/tasks/${taskModal.task.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-    } else {
-      await fetch("/api/tasks", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      if (!res.ok) throw new Error("No se pudo guardar la tarea.");
+      await load();
+      return;
     }
+    const res = await fetch("/api/tasks", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error("No se pudo crear la tarea.");
     setTaskModal({ open: false });
     await load();
   }
@@ -523,6 +527,7 @@ export default function App() {
       )}
       {taskModal.open && (
         <TaskModal
+          key={taskModal.task?.id ?? "new"}
           task={taskModal.task}
           projects={activeProjects}
           users={users}
