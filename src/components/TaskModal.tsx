@@ -11,7 +11,6 @@ const FIELD_CLASS =
   "bg-transparent text-ink text-sm outline-none rounded-lg px-2 py-1 -mx-2 hover:bg-ink/5 focus:bg-ink/5 transition-colors disabled:opacity-40";
 
 type EditableField = "name" | "projectId" | "status" | "startDate" | "endDate" | "notes" | "assigneeId";
-type SaveState = "idle" | "saving" | "saved" | "error";
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -75,13 +74,6 @@ function PropRow({ icon, label, children }: { icon: React.ReactNode; label: stri
   );
 }
 
-const SAVE_LABELS: Record<SaveState, string> = {
-  idle: "",
-  saving: "Guardando…",
-  saved: "Guardado",
-  error: "No se pudo guardar",
-};
-
 export default function TaskModal({
   task,
   projects,
@@ -92,6 +84,7 @@ export default function TaskModal({
   onSave,
   onDelete,
   onAttachmentsChanged,
+  onNotify,
 }: {
   task?: Task | null;
   projects: Project[];
@@ -102,6 +95,7 @@ export default function TaskModal({
   onSave: (data: Partial<Task>) => Promise<void>;
   onDelete?: (id: string) => Promise<void>;
   onAttachmentsChanged?: () => void;
+  onNotify?: (message: string, tone?: "ok" | "error") => void;
 }) {
   const isEdit = !!task;
   const today = toISODate(localToday());
@@ -128,7 +122,7 @@ export default function TaskModal({
   const [uploadingCount, setUploadingCount] = useState(0);
   const [uploadError, setUploadError] = useState("");
   const [notesExpanded, setNotesExpanded] = useState(false);
-  const [saveState, setSaveState] = useState<SaveState>("idle");
+  const formRef = useRef<HTMLFormElement>(null);
 
   // Último valor confirmado por el servidor, por campo (para no guardar de más)
   const savedRef = useRef<Record<EditableField, string>>({
@@ -167,7 +161,6 @@ export default function TaskModal({
     }
     const previous = savedRef.current[field];
     savedRef.current[field] = value;
-    setSaveState("saving");
     try {
       const payload: Partial<Task> =
         field === "notes"
@@ -176,10 +169,9 @@ export default function TaskModal({
           ? { assigneeId: value || null }
           : ({ [field]: field === "status" ? (value as Status) : value } as Partial<Task>);
       await onSave(payload);
-      setSaveState("saved");
     } catch {
       savedRef.current[field] = previous;
-      setSaveState("error");
+      onNotify?.("No se pudo guardar el cambio.", "error");
     }
   }
 
@@ -197,10 +189,16 @@ export default function TaskModal({
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") attemptClose();
+      // Cmd/Ctrl + Enter: guarda y cierra (edición) o crea (nueva)
+      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        if (isEdit) attemptClose();
+        else formRef.current?.requestSubmit();
+      }
     }
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [dirty, onClose, name, notes]);
+  }, [dirty, onClose, name, notes, isEdit]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -221,7 +219,7 @@ export default function TaskModal({
         assigneeId: assigneeId || null,
       });
     } catch {
-      setSaveState("error");
+      onNotify?.("No se pudo crear la tarea.", "error");
     }
     setSaving(false);
   }
@@ -258,6 +256,7 @@ export default function TaskModal({
           const created = await res.json();
           setAttachments((prev) => [...prev, created]);
           onAttachmentsChanged?.();
+          onNotify?.("Archivo adjuntado");
         } else {
           setUploadError(`No se pudo guardar "${file.name}".`);
         }
@@ -304,14 +303,6 @@ export default function TaskModal({
           {isEdit ? "Editar tarea" : "Nueva tarea"}
         </h2>
         <div className="flex items-center gap-4">
-          {isEdit && saveState !== "idle" && (
-            <span
-              className={`text-xs ${saveState === "error" ? "text-red-600" : "text-muted"}`}
-              aria-live="polite"
-            >
-              {SAVE_LABELS[saveState]}
-            </span>
-          )}
           <button
             type="button"
             onClick={attemptClose}
@@ -331,7 +322,7 @@ export default function TaskModal({
             Primero crea un proyecto para poder agregar tareas.
           </p>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form ref={formRef} onSubmit={handleSubmit} className="space-y-8">
             <input
               aria-label="Nombre"
               value={name}

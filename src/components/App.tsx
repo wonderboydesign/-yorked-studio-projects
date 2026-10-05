@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Project, Task, User, Status } from "@/lib/types";
-import { toISODate } from "@/lib/date";
+import { Project, Task, User, Status, STATUS_ORDER } from "@/lib/types";
+import { toISODate, parseDate } from "@/lib/date";
 import ProjectModal from "./ProjectModal";
 import TaskModal from "./TaskModal";
 import ListView from "./ListView";
@@ -15,6 +15,7 @@ import DashboardView from "./DashboardView";
 import TeamPanel from "./TeamPanel";
 import NotificationBell from "./NotificationBell";
 import LiveClock from "./LiveClock";
+import Toast from "./Toast";
 
 type View = "dashboard" | "gantt" | "list" | "kanban" | "calendar";
 
@@ -64,6 +65,12 @@ export default function App() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const [toast, setToast] = useState<{ id: number; message: string; tone: "ok" | "error" } | null>(null);
+  const notify = useCallback((message: string, tone: "ok" | "error" = "ok") => {
+    setToast({ id: Date.now(), message, tone });
+  }, []);
+  const dismissToast = useCallback(() => setToast(null), []);
 
   const [projectModal, setProjectModal] = useState<{ open: boolean; project?: Project | null }>({
     open: false,
@@ -158,12 +165,60 @@ export default function App() {
     });
     if (!res.ok) throw new Error("No se pudo crear la tarea.");
     setTaskModal({ open: false });
+    notify("Tarea creada");
     await load();
   }
 
   async function deleteTask(id: string) {
     await fetch(`/api/tasks/${id}`, { method: "DELETE" });
     setTaskModal({ open: false });
+    notify("Tarea eliminada");
+    await load();
+  }
+
+  async function quickToggleDone(task: Task) {
+    const status: Status = task.status === "DONE" ? "TODO" : "DONE";
+    setTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, status } : t)));
+    const res = await fetch(`/api/tasks/${task.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+    if (!res.ok) {
+      notify("No se pudo actualizar la tarea.", "error");
+      await load();
+      return;
+    }
+    notify(status === "DONE" ? "Tarea completada" : "Tarea reabierta");
+    await load();
+  }
+
+  async function quickAssign(taskId: string, userId: string | null) {
+    const user = users.find((u) => u.id === userId) ?? null;
+    setTasks((prev) =>
+      prev.map((t) => (t.id === taskId ? { ...t, assigneeId: userId, assignee: user } : t))
+    );
+    const res = await fetch(`/api/tasks/${taskId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ assigneeId: userId }),
+    });
+    if (!res.ok) {
+      notify("No se pudo asignar la tarea.", "error");
+      await load();
+      return;
+    }
+    notify(user ? `Asignada a ${user.name}` : "Tarea sin asignar");
+    await load();
+  }
+
+  async function quickDelete(id: string) {
+    const res = await fetch(`/api/tasks/${id}`, { method: "DELETE" });
+    if (!res.ok) {
+      notify("No se pudo eliminar la tarea.", "error");
+      return;
+    }
+    notify("Tarea eliminada");
     await load();
   }
 
@@ -174,7 +229,10 @@ export default function App() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name }),
     });
-    if (!res.ok) await load();
+    if (!res.ok) {
+      notify("No se pudo renombrar la tarea.", "error");
+      await load();
+    }
   }
 
   async function changeTaskStatus(taskId: string, status: Status) {
@@ -203,6 +261,49 @@ export default function App() {
     myTasksOnly && currentUser
       ? projectScopedTasks.filter((t) => t.assigneeId === currentUser.id)
       : projectScopedTasks;
+
+  // Mismo orden que la lista agrupada por estado, para que las flechas sigan lo que se ve
+  const navOrder = STATUS_ORDER.flatMap((status) =>
+    filteredTasks
+      .filter((t) => t.status === status)
+      .sort((a, b) => parseDate(a.startDate).getTime() - parseDate(b.startDate).getTime())
+  );
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const target = e.target as HTMLElement | null;
+      const inField = !!target?.closest?.("input, textarea, select, [contenteditable='true']");
+
+      if (taskModal.open) {
+        if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+        // En textarea y selects las flechas ya tienen uso propio
+        if (target?.closest?.("textarea, select")) return;
+        const index = navOrder.findIndex((t) => t.id === taskModal.task?.id);
+        const next = navOrder[index + (e.key === "ArrowDown" ? 1 : -1)];
+        if (!next) return;
+        e.preventDefault();
+        // Guardar lo pendiente del campo antes de cambiar de tarea
+        (document.activeElement as HTMLElement | null)?.blur();
+        setTaskModal({ open: true, task: next });
+        return;
+      }
+
+      if (inField) return;
+      if ((e.key === "n" || e.key === "N") && activeProjects.length > 0) {
+        e.preventDefault();
+        setTaskModal({ open: true, task: null });
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [taskModal, navOrder, activeProjects.length]);
+
+  const listEmptyMessage = myTasksOnly
+    ? "No tienes tareas asignadas. Cuando te asignen una, aparecerá aquí."
+    : projectFilter !== "all"
+    ? "Este proyecto aún no tiene tareas. Usa el botón + de abajo a la derecha para crear la primera."
+    : "Aún no hay tareas. Usa el botón + de abajo a la derecha para crear la primera.";
 
   return (
     <div className="min-h-screen">
@@ -502,8 +603,13 @@ export default function App() {
               <ListView
                 tasks={filteredTasks}
                 projects={projects}
+                users={users}
+                emptyMessage={listEmptyMessage}
                 onSelectTask={(t) => setTaskModal({ open: true, task: t })}
                 onRenameTask={renameTask}
+                onToggleDone={quickToggleDone}
+                onAssign={quickAssign}
+                onDelete={quickDelete}
               />
             )}
             {view === "kanban" && (
@@ -528,6 +634,7 @@ export default function App() {
         )}
       </main>
 
+      {toast && <Toast key={toast.id} message={toast.message} tone={toast.tone} onDone={dismissToast} />}
       {projectModal.open && (
         <ProjectModal
           project={projectModal.project}
@@ -548,6 +655,7 @@ export default function App() {
           onSave={saveTask}
           onDelete={deleteTask}
           onAttachmentsChanged={load}
+          onNotify={notify}
         />
       )}
       {projectsPanelOpen && (

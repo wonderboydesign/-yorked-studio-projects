@@ -3,6 +3,7 @@
 import { Task, Project, Status, STATUS_LABELS, STATUS_ORDER, STATUS_COLORS } from "@/lib/types";
 import { parseDate, formatShort, capMonth } from "@/lib/date";
 import { dueTone, DUE_TEXT_CLASS } from "@/lib/dueTone";
+import Avatar from "./Avatar";
 
 export default function KanbanView({
   tasks,
@@ -50,7 +51,7 @@ export default function KanbanView({
                         {project?.name}
                       </span>
                       <span className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide text-muted shrink-0">
-                        <span className="truncate max-w-[80px]">{t.assignee?.name || "—"}</span>
+                        {t.assignee ? <Avatar name={t.assignee.name} size={20} /> : <span>—</span>}
                         <span className={DUE_TEXT_CLASS[dueTone(t.endDate, t.status)]}>
                           {capMonth(formatShort(parseDate(t.endDate)))}
                         </span>
