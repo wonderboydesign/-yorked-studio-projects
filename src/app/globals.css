@@ -11,6 +11,7 @@
   --color-button: 224 224 224;
   --color-button-hover: 207 207 207;
   --color-surface: 255 255 255;
+  color-scheme: light;
 }
 
 .dark {
@@ -22,10 +23,14 @@
   --color-button: 51 51 51;
   --color-button-hover: 71 71 71;
   --color-surface: 34 34 34;
+  color-scheme: dark;
 }
 
 * {
   box-sizing: border-box;
+  /* Barras de desplazamiento con los colores del tema, no los nativos del sistema */
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--color-line)) transparent;
 }
 
 body {
