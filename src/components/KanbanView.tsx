@@ -40,7 +40,7 @@ export default function KanbanView({
                   <div
                     key={t.id}
                     onClick={() => onSelectTask(t)}
-                    className="bg-surface border border-line p-3 cursor-pointer hover:border-ink transition-colors"
+                    className="bg-surface border border-line p-3 cursor-pointer hover:border-ink transition-colors rounded-2xl"
                   >
                     <p className="text-sm mb-2.5">{t.name}</p>
                     <div className="flex items-center justify-between">
@@ -63,7 +63,7 @@ export default function KanbanView({
                       onChange={(e) =>
                         onChangeStatus(t.id, e.target.value as Status)
                       }
-                      className="mt-2.5 w-full appearance-none font-mono text-[11px] uppercase tracking-wide border border-line px-1.5 py-1.5 bg-surface"
+                      className="mt-2.5 w-full appearance-none font-mono text-[11px] uppercase tracking-wide border border-line px-1.5 py-1.5 bg-surface rounded-xl"
                     >
                       {STATUS_ORDER.map((s) => (
                         <option key={s} value={s}>

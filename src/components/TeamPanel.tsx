@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { User } from "@/lib/types";
 import UserModal from "./UserModal";
+import Avatar from "./Avatar";
 
 export default function TeamPanel({
   users,
@@ -57,12 +58,12 @@ export default function TeamPanel({
       onClick={onClose}
     >
       <div
-        className="bg-surface w-full max-w-lg p-6 border border-line max-h-[80vh] overflow-y-auto"
+        className="bg-surface w-full max-w-lg p-6 border border-line max-h-[80vh] overflow-y-auto rounded-3xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-mono text-xs uppercase tracking-wider">Equipo</h2>
-          <button onClick={onClose} className="text-xs text-muted">
+          <button onClick={onClose} className="text-xs text-muted rounded-full">
             Cerrar
           </button>
         </div>
@@ -73,9 +74,10 @@ export default function TeamPanel({
             <button
               key={u.id}
               onClick={() => setUserModal({ open: true, user: u })}
-              className="w-full flex items-center justify-between border border-line px-3 py-2 gap-2 text-left hover:bg-ink/[0.03]"
+              className="w-full flex items-center justify-between border border-line px-3 py-2 gap-3 text-left hover:bg-ink/[0.03] rounded-2xl"
             >
-              <div className="min-w-0">
+              <Avatar name={u.name} size={28} />
+              <div className="min-w-0 flex-1">
                 <p className="text-xs truncate">
                   {u.name} {u.id === currentUserId && <span className="text-muted">(tú)</span>}
                 </p>
@@ -87,7 +89,7 @@ export default function TeamPanel({
 
         <button
           onClick={() => setUserModal({ open: true, user: null })}
-          className="text-xs px-3 py-1.5 bg-ink text-paper"
+          className="text-xs px-3 py-1.5 bg-ink text-paper rounded-full"
         >
           + Usuario
         </button>

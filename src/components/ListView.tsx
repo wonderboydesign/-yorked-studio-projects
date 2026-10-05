@@ -152,7 +152,7 @@ export default function ListView({
                   )}
                 </td>
                 <td className="px-4 py-3.5">
-                  <span className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide text-ink border border-line px-2 py-1">
+                  <span className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide text-ink border border-line px-2 py-1 rounded-full">
                     <span className="w-1.5 h-1.5 inline-block shrink-0" style={{ backgroundColor: STATUS_COLORS[t.status] }} />
                     {STATUS_LABELS[t.status]}
                   </span>
@@ -167,11 +167,11 @@ export default function ListView({
                           setDeletingId(null);
                           onDelete(t.id);
                         }}
-                        className="text-red-600"
+                        className="text-red-600 rounded-full"
                       >
                         Sí
                       </button>
-                      <button type="button" onClick={() => setDeletingId(null)} className="text-muted hover:text-ink">
+                      <button type="button" onClick={() => setDeletingId(null)} className="text-muted hover:text-ink rounded-full">
                         No
                       </button>
                     </span>
@@ -227,8 +227,9 @@ export default function ListView({
                                 setAssigningId(null);
                                 onAssign(t.id, u.id);
                               }}
-                              className={`w-full rounded-xl px-3 py-2 text-left text-sm hover:bg-ink/5 ${t.assigneeId === u.id ? "font-semibold" : ""}`}
+                              className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm hover:bg-ink/5 ${t.assigneeId === u.id ? "font-semibold" : ""}`}
                             >
+                              <Avatar name={u.name} size={22} />
                               {u.name}
                             </button>
                           ))}

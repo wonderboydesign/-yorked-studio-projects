@@ -50,7 +50,7 @@ export default function LoginPage() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           autoFocus
-          className="w-full border border-line px-3 py-2.5 text-sm mb-4 bg-surface text-ink focus:border-accent"
+          className="w-full border border-line px-3 py-2.5 text-sm mb-4 bg-surface text-ink focus:border-accent rounded-xl"
         />
 
         <label htmlFor="password" className="block font-mono text-[12px] uppercase tracking-[0.15em] text-muted mb-2">
@@ -61,7 +61,7 @@ export default function LoginPage() {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full border border-line px-3 py-2.5 text-sm mb-4 bg-surface text-ink focus:border-accent"
+          className="w-full border border-line px-3 py-2.5 text-sm mb-4 bg-surface text-ink focus:border-accent rounded-xl"
         />
 
         {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
@@ -69,7 +69,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading || !email || !password}
-          className="w-full bg-ink text-paper py-3 text-sm font-medium tracking-wide disabled:opacity-40 hover:opacity-90 transition-opacity"
+          className="w-full bg-ink text-paper py-3 text-sm font-medium tracking-wide disabled:opacity-40 hover:opacity-90 transition-opacity rounded-full"
         >
           {loading ? "Entrando…" : "Entrar"}
         </button>

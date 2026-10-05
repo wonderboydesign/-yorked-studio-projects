@@ -101,7 +101,7 @@ export default function DashboardView({
     return (
       <button
         onClick={() => onSelectTask(t)}
-        className="w-full flex items-start justify-between gap-3 py-2 text-left hover:bg-ink/[0.03] px-2 -mx-2"
+        className="w-full flex items-start justify-between gap-3 py-2 text-left hover:bg-ink/[0.03] px-2 -mx-2 rounded-full"
       >
         <div className="min-w-0 flex items-start gap-2">
           <span
@@ -119,7 +119,7 @@ export default function DashboardView({
               {capMonth(formatLong(parseDate(t.endDate)))}
             </span>
           )}
-          <span className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide text-ink border border-line px-2 py-1 whitespace-nowrap">
+          <span className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide text-ink border border-line px-2 py-1 whitespace-nowrap rounded-full">
             <span
               className="w-1.5 h-1.5 inline-block shrink-0"
               style={{ backgroundColor: STATUS_COLORS[t.status] }}
@@ -133,7 +133,7 @@ export default function DashboardView({
 
   function Card({ title, children }: { title: string; children: React.ReactNode }) {
     return (
-      <div className="border border-line p-6">
+      <div className="border border-line p-6 rounded-2xl">
         <h3 className="font-mono text-[12px] uppercase tracking-[0.15em] text-muted mb-4">{title}</h3>
         {children}
       </div>
@@ -153,7 +153,7 @@ export default function DashboardView({
             {thisWeek.length === 1 ? "tarea pendiente esta semana" : "tareas pendientes esta semana"}
           </p>
         </div>
-        <div className="border border-line p-6">
+        <div className="border border-line p-6 rounded-2xl">
           {thisWeek.length === 0 ? (
             <Empty text="No tienes tareas pendientes esta semana." />
           ) : (
@@ -213,7 +213,7 @@ export default function DashboardView({
               <Empty text="No tienes reuniones en los próximos días." />
               <button
                 onClick={handleDisconnectCalendar}
-                className="font-display text-[11px] tracking-wider text-muted hover:text-ink"
+                className="font-display text-[11px] tracking-wider text-muted hover:text-ink rounded-full"
               >
                 Desconectar
               </button>
@@ -236,7 +236,7 @@ export default function DashboardView({
               </div>
               <button
                 onClick={handleDisconnectCalendar}
-                className="font-display text-[11px] tracking-wider text-muted hover:text-ink mt-3"
+                className="font-display text-[11px] tracking-wider text-muted hover:text-ink mt-3 rounded-full"
               >
                 Desconectar
               </button>
@@ -253,13 +253,13 @@ export default function DashboardView({
         )}
         <button
           onClick={onOpenProjects}
-          className="font-display text-xs tracking-wider text-muted hover:text-ink"
+          className="font-display text-xs tracking-wider text-muted hover:text-ink rounded-full"
         >
           Proyectos
         </button>
         <button
           onClick={onLogout}
-          className="font-display text-xs tracking-wider text-muted hover:text-ink"
+          className="font-display text-xs tracking-wider text-muted hover:text-ink rounded-full"
         >
           Salir
         </button>

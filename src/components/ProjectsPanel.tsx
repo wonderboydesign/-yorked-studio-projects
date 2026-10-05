@@ -31,12 +31,12 @@ export default function ProjectsPanel({
       onClick={onClose}
     >
       <div
-        className="bg-surface w-full max-w-lg p-6 border border-line max-h-[80vh] overflow-y-auto"
+        className="bg-surface w-full max-w-lg p-6 border border-line max-h-[80vh] overflow-y-auto rounded-3xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-mono text-xs uppercase tracking-wider">Proyectos</h2>
-          <button onClick={onClose} className="text-xs text-muted">
+          <button onClick={onClose} className="text-xs text-muted rounded-full">
             Cerrar
           </button>
         </div>
@@ -51,11 +51,11 @@ export default function ProjectsPanel({
           {active.map((p) => (
             <div
               key={p.id}
-              className="flex items-center justify-between border border-line px-3 py-2 gap-2"
+              className="flex items-center justify-between border border-line px-3 py-2 gap-2 rounded-2xl"
             >
               <button
                 onClick={() => onEditProject(p)}
-                className="flex items-center gap-2 min-w-0 text-left hover:underline"
+                className="flex items-center gap-2 min-w-0 text-left hover:underline rounded-full"
               >
                 <span
                   className="w-2.5 h-2.5 rounded-full shrink-0"
@@ -65,7 +65,7 @@ export default function ProjectsPanel({
               </button>
               <button
                 onClick={() => onToggleArchived(p.id, true)}
-                className="text-xs px-2.5 py-1 border border-line shrink-0"
+                className="text-xs px-2.5 py-1 border border-line shrink-0 rounded-full"
               >
                 Archivar
               </button>
@@ -83,11 +83,11 @@ export default function ProjectsPanel({
           {archived.map((p) => (
             <div
               key={p.id}
-              className="flex items-center justify-between border border-line px-3 py-2 gap-2 opacity-60"
+              className="flex items-center justify-between border border-line px-3 py-2 gap-2 opacity-60 rounded-2xl"
             >
               <button
                 onClick={() => onEditProject(p)}
-                className="flex items-center gap-2 min-w-0 text-left hover:underline"
+                className="flex items-center gap-2 min-w-0 text-left hover:underline rounded-full"
               >
                 <span
                   className="w-2.5 h-2.5 rounded-full shrink-0"
@@ -97,7 +97,7 @@ export default function ProjectsPanel({
               </button>
               <button
                 onClick={() => onToggleArchived(p.id, false)}
-                className="text-xs px-2.5 py-1 border border-line shrink-0"
+                className="text-xs px-2.5 py-1 border border-line shrink-0 rounded-full"
               >
                 Desarchivar
               </button>

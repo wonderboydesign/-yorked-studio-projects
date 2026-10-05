@@ -311,7 +311,7 @@ export default function App() {
         <div className="flex items-center gap-10 sm:-translate-y-[11px] w-full sm:w-auto justify-between sm:justify-start">
           <button
             onClick={() => setView("dashboard")}
-            className="font-sans text-lg font-bold tracking-tight text-ink hover:opacity-70 transition-opacity"
+            className="font-sans text-lg font-bold tracking-tight text-ink hover:opacity-70 transition-opacity rounded-full"
           >
            <img src="/logo-header.png" alt="Logo" className="h-8 w-auto" />
           </button>
@@ -349,15 +349,15 @@ export default function App() {
             </button>
             <button
               onClick={() => setTeamPanelOpen(true)}
-              className="font-display text-xs tracking-wider px-3 py-1.5 border border-line text-muted hover:text-ink"
+              className="font-display text-xs tracking-wider px-3 py-1.5 border border-line text-muted hover:text-ink rounded-full"
             >
               Equipo
             </button>
-            <div className="relative group border border-line px-3 py-1.5">
+            <div className="relative group border border-line px-3 py-1.5 rounded-2xl">
               <select
                 value={projectFilter}
                 onChange={(e) => setProjectFilter(e.target.value)}
-                className="appearance-none bg-transparent border-none font-display text-xs tracking-wider text-muted group-hover:text-ink pr-4 cursor-pointer focus:outline-none"
+                className="appearance-none bg-transparent border-none font-display text-xs tracking-wider text-muted group-hover:text-ink pr-4 cursor-pointer focus:outline-none rounded-xl"
               >
                 <option value="all">Todos los proyectos</option>
                 {activeProjects.map((p) => (
@@ -399,7 +399,7 @@ export default function App() {
       <div className="fixed bottom-[26px] sm:bottom-4 left-6 flex items-center gap-5 z-10 bg-paper px-3 py-2 shadow-sm">
         <button
           onClick={() => window.open("https://meet.google.com/new", "_blank", "noopener,noreferrer")}
-          className="font-display text-xs tracking-wider text-muted hover:text-ink"
+          className="font-display text-xs tracking-wider text-muted hover:text-ink rounded-full"
         >
           Iniciar Meet
         </button>
@@ -418,13 +418,13 @@ export default function App() {
               "noopener,noreferrer"
             );
           }}
-          className="font-display text-xs tracking-wider text-muted hover:text-ink"
+          className="font-display text-xs tracking-wider text-muted hover:text-ink rounded-full"
         >
           Programar Meet
         </button>
         <button
           onClick={() => window.open("https://wonderboy.mx/dashboard/", "_blank", "noopener,noreferrer")}
-          className="font-display text-xs tracking-wider text-muted hover:text-ink"
+          className="font-display text-xs tracking-wider text-muted hover:text-ink rounded-full"
         >
           Finanzas
         </button>
@@ -440,7 +440,7 @@ export default function App() {
         />
         <button
           onClick={toggleDarkMode}
-          className="transition-colors px-3 py-1.5 flex items-center justify-center bg-button hover:bg-button-hover"
+          className="transition-colors px-3 py-1.5 flex items-center justify-center bg-button hover:bg-button-hover rounded-full"
         >
           <svg width="15" height="15" viewBox="0 0 20.68 20.68" fill="none" xmlns="http://www.w3.org/2000/svg">
             <g fill="currentColor" className="text-ink">
@@ -504,7 +504,7 @@ export default function App() {
                 setAddMenuOpen(false);
               }}
               disabled={activeProjects.length === 0}
-              className="font-display text-xs tracking-wider text-ink bg-button hover:bg-button-hover transition-colors px-3 py-1.5 disabled:opacity-40 whitespace-nowrap"
+              className="font-display text-xs tracking-wider text-ink bg-button hover:bg-button-hover transition-colors px-3 py-1.5 disabled:opacity-40 whitespace-nowrap rounded-full"
             >
               + Tarea
             </button>
@@ -513,7 +513,7 @@ export default function App() {
                 setProjectModal({ open: true, project: null });
                 setAddMenuOpen(false);
               }}
-              className="font-display text-xs tracking-wider text-ink bg-button hover:bg-button-hover transition-colors px-3 py-1.5 whitespace-nowrap"
+              className="font-display text-xs tracking-wider text-ink bg-button hover:bg-button-hover transition-colors px-3 py-1.5 whitespace-nowrap rounded-full"
             >
               + Proyecto
             </button>
@@ -558,7 +558,7 @@ export default function App() {
             </p>
             <button
               onClick={() => setProjectModal({ open: true, project: null })}
-              className="text-xs px-3 py-1.5 bg-ink text-paper"
+              className="text-xs px-3 py-1.5 bg-ink text-paper rounded-full"
             >
               Crear tu primer proyecto
             </button>
@@ -570,7 +570,7 @@ export default function App() {
             </p>
             <button
               onClick={() => setProjectsPanelOpen(true)}
-              className="text-xs px-3 py-1.5 bg-ink text-paper"
+              className="text-xs px-3 py-1.5 bg-ink text-paper rounded-full"
             >
               Ver proyectos
             </button>

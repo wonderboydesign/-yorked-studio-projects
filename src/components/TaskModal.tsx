@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { upload } from "@vercel/blob/client";
 import { Project, Task, User, Attachment, Status, STATUS_LABELS, STATUS_ORDER, STATUS_COLORS } from "@/lib/types";
 import { toISODate, localToday } from "@/lib/date";
+import Avatar from "./Avatar";
 
 const ALLOWED_EXTENSIONS = ["ai", "svg", "pdf", "jpg", "jpeg", "png", "webp"];
 
@@ -59,6 +60,81 @@ function Select({ children, ...props }: React.SelectHTMLAttributes<HTMLSelectEle
         <path d="M3 4.5 6 7.5 9 4.5" />
       </svg>
     </span>
+  );
+}
+
+// Selector de asignado con avatar (un <select> nativo no puede mostrar avatares)
+function AssigneePicker({
+  users,
+  value,
+  onChange,
+}: {
+  users: User[];
+  value: string;
+  onChange: (id: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const current = users.find((u) => u.id === value);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
+  return (
+    <div ref={wrapRef} className="relative min-w-0">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className="flex max-w-full items-center gap-2 rounded-full px-2 py-1 -mx-2 hover:bg-ink/5"
+      >
+        {current ? (
+          <>
+            <Avatar name={current.name} size={22} />
+            <span className="truncate text-sm text-ink">{current.name}</span>
+          </>
+        ) : (
+          <>
+            <span className="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full border border-dashed border-muted" aria-hidden="true" />
+            <span className="text-sm text-muted">Sin asignar</span>
+          </>
+        )}
+        <svg className="shrink-0 text-muted" width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M3 4.5 6 7.5 9 4.5" />
+        </svg>
+      </button>
+      {open && (
+        <div role="listbox" className="absolute right-0 top-full z-20 mt-1 w-56 rounded-2xl border border-line bg-surface p-1.5 shadow-xl">
+          {[{ id: "", name: "Sin asignar" }, ...users].map((u) => (
+            <button
+              key={u.id || "none"}
+              type="button"
+              role="option"
+              aria-selected={u.id === value}
+              onClick={() => {
+                onChange(u.id);
+                setOpen(false);
+              }}
+              className={`flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left text-sm text-ink hover:bg-ink/5 ${u.id === value ? "font-semibold" : ""}`}
+            >
+              {u.id ? (
+                <Avatar name={u.name} size={22} />
+              ) : (
+                <span className="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full border border-dashed border-muted" aria-hidden="true" />
+              )}
+              <span className="truncate">{u.name}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -293,7 +369,7 @@ export default function TaskModal({
 
   return (
     <aside
-      className="fixed inset-y-0 right-0 z-50 flex w-full max-w-[560px] flex-col border-l border-line bg-surface shadow-2xl"
+      className="fixed inset-y-0 right-0 z-50 flex w-full max-w-[560px] flex-col border-l border-line bg-surface shadow-2xl rounded-3xl"
       role="dialog"
       aria-label={isEdit ? "Editar tarea" : "Nueva tarea"}
     >
@@ -333,7 +409,7 @@ export default function TaskModal({
               }}
               placeholder="Escribe el nombre de la tarea"
               autoFocus={!isEdit}
-              className="w-full bg-transparent text-ink text-2xl font-semibold tracking-tight placeholder:text-muted outline-none"
+              className="w-full bg-transparent text-ink text-2xl font-semibold tracking-tight placeholder:text-muted outline-none rounded-xl"
             />
 
             <div className="divide-y divide-line/60 overflow-hidden rounded-2xl bg-ink/[0.04]">
@@ -369,22 +445,14 @@ export default function TaskModal({
                 }
                 label="Asignado a"
               >
-                <Select
+                <AssigneePicker
+                  users={users}
                   value={assigneeId}
-                  onChange={(e) => {
-                    setAssigneeId(e.target.value);
-                    commit("assigneeId", e.target.value);
+                  onChange={(id) => {
+                    setAssigneeId(id);
+                    commit("assigneeId", id);
                   }}
-                >
-                  <option value="" className="bg-surface">
-                    Sin asignar
-                  </option>
-                  {users.map((u) => (
-                    <option key={u.id} value={u.id} className="bg-surface">
-                      {u.name}
-                    </option>
-                  ))}
-                </Select>
+                />
               </PropRow>
 
               <PropRow
@@ -464,7 +532,7 @@ export default function TaskModal({
                 <button
                   type="button"
                   onClick={() => setNotesExpanded((v) => !v)}
-                  className="text-xs text-muted hover:text-ink"
+                  className="text-xs text-muted hover:text-ink rounded-full"
                 >
                   {notesExpanded ? "Contraer" : "Expandir"}
                 </button>
@@ -516,7 +584,7 @@ export default function TaskModal({
                         e.target.value = "";
                       }}
                       disabled={uploadingCount > 0}
-                      className="hidden"
+                      className="hidden rounded-xl"
                     />
                   </label>
                 )}
@@ -545,7 +613,7 @@ export default function TaskModal({
                           <button
                             type="button"
                             onClick={() => handleDeleteAttachment(a.id)}
-                            className="text-xs text-red-600 shrink-0"
+                            className="text-xs text-red-600 shrink-0 rounded-full"
                           >
                             Eliminar
                           </button>
@@ -609,7 +677,7 @@ export default function TaskModal({
                     <button
                       type="button"
                       onClick={() => setConfirmingDelete(true)}
-                      className="text-sm text-red-600"
+                      className="text-sm text-red-600 rounded-full"
                     >
                       Eliminar tarea
                     </button>
