@@ -392,6 +392,28 @@ export default function TaskModal({
         </div>
       </div>
 
+      {confirmingDiscard && (
+        <div className="mx-8 mb-4 flex items-center justify-between gap-3 rounded-2xl bg-ink/[0.06] px-4 py-3">
+          <p className="text-sm text-ink">Tienes cambios sin guardar.</p>
+          <div className="flex shrink-0 gap-2">
+            <button
+              type="button"
+              onClick={() => setConfirmingDiscard(false)}
+              className="rounded-full bg-surface px-3 py-1.5 text-sm text-ink hover:bg-ink/10"
+            >
+              Seguir editando
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-full bg-red-600 px-3 py-1.5 text-sm text-white hover:bg-red-700"
+            >
+              Salir sin guardar
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex-1 overflow-y-auto px-8 pb-8">
         {projects.length === 0 ? (
           <p className="text-sm text-muted">
@@ -648,28 +670,6 @@ export default function TaskModal({
                   </button>
                 </div>
               </div>
-            ) : confirmingDiscard ? (
-              <div className="pt-2 space-y-3">
-                <p className="text-sm">
-                  Tienes cambios sin guardar. Si sales ahora, se perderán.
-                </p>
-                <div className="flex justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setConfirmingDiscard(false)}
-                    className="rounded-full bg-ink/[0.06] px-4 py-2 text-sm text-ink hover:bg-ink/10"
-                  >
-                    Seguir editando
-                  </button>
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    className="rounded-full bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
-                  >
-                    Salir sin guardar
-                  </button>
-                </div>
-              </div>
             ) : (
               <div className="flex items-center justify-between pt-2">
                 <div>
@@ -684,7 +684,8 @@ export default function TaskModal({
                   )}
                 </div>
                 {!isEdit && (
-                  <div className="flex gap-2">
+                  <div className="flex items-center gap-3">
+                    {!name && <span className="text-xs text-muted">Escribe un nombre para crear la tarea</span>}
                     <button
                       type="button"
                       onClick={attemptClose}
