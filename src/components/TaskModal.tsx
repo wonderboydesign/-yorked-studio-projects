@@ -199,6 +199,7 @@ export default function TaskModal({
   const [uploadError, setUploadError] = useState("");
   const [notesExpanded, setNotesExpanded] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
 
   // Último valor confirmado por el servidor, por campo (para no guardar de más)
   const savedRef = useRef<Record<EditableField, string>>({
@@ -282,7 +283,11 @@ export default function TaskModal({
       commit("name", name);
       return;
     }
-    if (!name || !projectId || !startDate || !endDate) return;
+    if (!name) {
+      nameRef.current?.focus();
+      return;
+    }
+    if (!projectId || !startDate || !endDate) return;
     setSaving(true);
     try {
       await onSave({
@@ -414,6 +419,25 @@ export default function TaskModal({
         </div>
       )}
 
+      {/* El nombre queda fijo arriba: no se pierde al hacer scroll */}
+      <div className="px-8 pb-4">
+        <input
+          ref={nameRef}
+          aria-label="Nombre"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onBlur={() => commit("name", name)}
+          onKeyDown={(e) => {
+            if (e.key !== "Enter") return;
+            if (isEdit) e.currentTarget.blur();
+            else formRef.current?.requestSubmit();
+          }}
+          placeholder="Escribe el nombre de la tarea"
+          autoFocus={!isEdit}
+          className="w-full bg-transparent text-ink text-2xl font-semibold tracking-tight placeholder:text-muted outline-none rounded-xl"
+        />
+      </div>
+
       <div className="flex-1 overflow-y-auto px-8 pb-8">
         {projects.length === 0 ? (
           <p className="text-sm text-muted">
@@ -421,19 +445,6 @@ export default function TaskModal({
           </p>
         ) : (
           <form ref={formRef} onSubmit={handleSubmit} className="space-y-8">
-            <input
-              aria-label="Nombre"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              onBlur={() => commit("name", name)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") e.currentTarget.blur();
-              }}
-              placeholder="Escribe el nombre de la tarea"
-              autoFocus={!isEdit}
-              className="w-full bg-transparent text-ink text-2xl font-semibold tracking-tight placeholder:text-muted outline-none rounded-xl"
-            />
-
             <div className="divide-y divide-line/60 overflow-hidden rounded-2xl bg-ink/[0.04]">
               <PropRow
                 icon={
@@ -685,7 +696,6 @@ export default function TaskModal({
                 </div>
                 {!isEdit && (
                   <div className="flex items-center gap-3">
-                    {!name && <span className="text-xs text-muted">Escribe un nombre para crear la tarea</span>}
                     <button
                       type="button"
                       onClick={attemptClose}
@@ -695,7 +705,7 @@ export default function TaskModal({
                     </button>
                     <button
                       type="submit"
-                      disabled={saving || !name}
+                      disabled={saving}
                       className="rounded-full bg-ink px-5 py-2 text-sm text-paper hover:opacity-90 disabled:opacity-40"
                     >
                       {saving ? "Creando…" : "Crear tarea"}
