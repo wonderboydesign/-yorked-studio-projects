@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { Project } from "@/lib/types";
 import { toISODate, localToday } from "@/lib/date";
 
+// Paleta contemporánea (tonos tipo Apple) para distinguir proyectos
 const COLOR_OPTIONS = [
-  "#1E4FFF", "#111013", "#8A877F", "#B23A48", "#1F7A5C", "#B8860B",
+  "#0071E3", "#5E5CE6", "#30B0C7", "#34C759", "#FF9F0A", "#FF375F", "#AF52DE", "#8E8E93",
 ];
 
 export default function ProjectModal({

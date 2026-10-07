@@ -7,8 +7,29 @@ import {
   addDays,
   daysBetween,
   localToday,
+  toISODate,
   MONTH_NAMES,
 } from "@/lib/date";
+
+type DragMode = "move" | "start" | "end";
+interface DragState {
+  taskId: string;
+  mode: DragMode;
+  originX: number;
+  moved: boolean;
+}
+
+// Texto negro sobre colores claros y blanco sobre oscuros
+function readableText(hex: string): string {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex);
+  if (!m) return "#ffffff";
+  const n = parseInt(m[1], 16);
+  const r = (n >> 16) & 255;
+  const g = (n >> 8) & 255;
+  const b = n & 255;
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.6 ? "#1d1d1f" : "#ffffff";
+}
 
 type Zoom = "day" | "wide" | "wide2" | "wide3";
 
@@ -30,13 +51,17 @@ export default function GanttView({
   projects,
   onSelectTask,
   onSelectProject,
+  onUpdateDates,
 }: {
   tasks: Task[];
   projects: Project[];
   onSelectTask: (t: Task) => void;
   onSelectProject: (p: Project) => void;
+  onUpdateDates: (taskId: string, startDate: string, endDate: string) => void;
 }) {
   const [zoom, setZoom] = useState<Zoom>("day");
+  const [drag, setDrag] = useState<DragState | null>(null);
+  const [delta, setDelta] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const projectMap = Object.fromEntries(projects.map((p) => [p.id, p]));
 
@@ -88,6 +113,47 @@ export default function GanttView({
     const visibleChartWidth = el.clientWidth - 180;
     el.scrollLeft = Math.max(0, todayOffset - visibleChartWidth / 2);
   }, [zoom, todayOffset]);
+
+  function beginDrag(ev: React.PointerEvent<HTMLElement>, t: Task, mode: DragMode) {
+    ev.stopPropagation();
+    ev.currentTarget.setPointerCapture(ev.pointerId);
+    setDrag({ taskId: t.id, mode, originX: ev.clientX, moved: false });
+    setDelta(0);
+  }
+
+  function moveDrag(ev: React.PointerEvent<HTMLElement>) {
+    if (!drag) return;
+    const dx = ev.clientX - drag.originX;
+    if (!drag.moved && Math.abs(dx) > 3) setDrag({ ...drag, moved: true });
+    const days = Math.round(dx / pxPerDay);
+    if (days !== delta) setDelta(days);
+  }
+
+  function endDrag(t: Task) {
+    if (!drag || drag.taskId !== t.id) return;
+    const { mode, moved } = drag;
+    setDrag(null);
+    setDelta(0);
+    // Sin movimiento se trata como clic: abre la tarea
+    if (!moved) {
+      onSelectTask(t);
+      return;
+    }
+    if (delta === 0) return;
+    const s0 = daysBetween(rangeStart, parseDate(t.startDate));
+    const e0 = daysBetween(rangeStart, parseDate(t.endDate));
+    let s = s0;
+    let e = e0;
+    if (mode === "move") {
+      s = s0 + delta;
+      e = e0 + delta;
+    } else if (mode === "start") {
+      s = Math.min(s0 + delta, e0);
+    } else {
+      e = Math.max(e0 + delta, s0);
+    }
+    onUpdateDates(t.id, toISODate(addDays(rangeStart, s)), toISODate(addDays(rangeStart, e)));
+  }
 
   if (rows.length === 0) {
     return (
@@ -156,10 +222,10 @@ className={`font-display text-xs text-muted text-center py-1 border-r border-lin
             />
             {rows.map(({ project, tasks: projectTasks }) => (
               <div key={project.id} className="flex border-b border-line">
-                <div className="w-[180px] shrink-0 border-r border-line px-3 py-2 sticky left-0 bg-surface z-20">
-                  <span className="inline-flex items-center gap-1.5 text-xs font-medium">
+                <div className="w-[180px] shrink-0 border-r border-line px-4 py-3 sticky left-0 bg-surface z-20">
+                  <span className="inline-flex items-center gap-2 text-sm font-medium text-ink">
                     <span
-                      className="w-2 h-2 rounded-full inline-block shrink-0"
+                      className="h-2.5 w-2.5 rounded-full shrink-0"
                       style={{ backgroundColor: project.color }}
                     />
                     <span className="truncate">{project.name}</span>
@@ -170,26 +236,63 @@ className={`font-display text-xs text-muted text-center py-1 border-r border-lin
                   style={{ width: totalWidth, minHeight: projectTasks.length * 34 + 8 }}
                 >
                   {projectTasks.map((t, i) => {
-                    const offset = daysBetween(rangeStart, parseDate(t.startDate));
-                    const duration = Math.max(
-                      daysBetween(parseDate(t.startDate), parseDate(t.endDate)) + 1,
-                      1
-                    );
+                    const s0 = daysBetween(rangeStart, parseDate(t.startDate));
+                    const e0 = daysBetween(rangeStart, parseDate(t.endDate));
+                    let s = s0;
+                    let e = e0;
+                    const dragging = drag?.taskId === t.id && drag.moved;
+                    if (dragging && drag) {
+                      if (drag.mode === "move") {
+                        s = s0 + delta;
+                        e = e0 + delta;
+                      } else if (drag.mode === "start") {
+                        s = Math.min(s0 + delta, e0);
+                      } else {
+                        e = Math.max(e0 + delta, s0);
+                      }
+                    }
+                    const width = Math.max((e - s + 1) * pxPerDay - 4, 10);
+                    const textColor = readableText(project.color);
                     return (
-                      <button
+                      <div
                         key={t.id}
-                        onClick={() => onSelectTask(t)}
-className={`absolute h-6 rounded text-[12px] text-white px-2 flex items-center truncate text-left ${t.status === "DONE" ? "line-through opacity-60" : ""}`}
+                        role="button"
+                        tabIndex={0}
+                        title={t.name}
+                        onKeyDown={(ev) => {
+                          if (ev.key === "Enter") onSelectTask(t);
+                        }}
+                        onPointerDown={(ev) => beginDrag(ev, t, "move")}
+                        onPointerMove={moveDrag}
+                        onPointerUp={() => endDrag(t)}
+                        onPointerCancel={() => setDrag(null)}
+                        className={`group absolute top-[4px] flex h-7 touch-none select-none items-center rounded-full px-3 text-xs font-medium cursor-grab active:cursor-grabbing transition-[filter] hover:brightness-95 ${
+                          t.status === "DONE" ? "line-through opacity-60" : ""
+                        }`}
                         style={{
-                          left: offset * pxPerDay,
-                          width: Math.max(duration * pxPerDay - 2, 8),
+                          left: s * pxPerDay + 2,
+                          width,
                           top: 4 + i * 30,
                           backgroundColor: project.color,
+                          color: textColor,
                         }}
-                        title={t.name}
                       >
-                        {duration * pxPerDay > 40 ? t.name : ""}
-                      </button>
+                        {/* Asa izquierda: cambia la fecha de inicio */}
+                        <span
+                          onPointerDown={(ev) => beginDrag(ev, t, "start")}
+                          className="absolute left-0 top-0 h-full w-3 cursor-ew-resize rounded-l-full"
+                          aria-hidden="true"
+                        />
+                        {/* Asa derecha: cambia la fecha de fin */}
+                        <span
+                          onPointerDown={(ev) => beginDrag(ev, t, "end")}
+                          className="absolute right-0 top-0 h-full w-3 cursor-ew-resize rounded-r-full"
+                          aria-hidden="true"
+                        />
+                        <span className="truncate pointer-events-none">
+                          {width > 60 ? t.name : ""}
+                        </span>
+                      </div>
                     );
                   })}
                 </div>

@@ -235,6 +235,21 @@ export default function App() {
     }
   }
 
+  async function updateTaskDates(taskId: string, startDate: string, endDate: string) {
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === taskId ? { ...t, startDate: `${startDate}T00:00:00.000Z`, endDate: `${endDate}T00:00:00.000Z` } : t
+      )
+    );
+    const res = await fetch(`/api/tasks/${taskId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ startDate, endDate }),
+    });
+    if (!res.ok) notify("No se pudieron cambiar las fechas.", "error");
+    await load();
+  }
+
   async function changeTaskStatus(taskId: string, status: Status) {
     setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, status } : t)));
     await fetch(`/api/tasks/${taskId}`, {
@@ -599,6 +614,7 @@ export default function App() {
                 projects={projects}
                 onSelectTask={(t) => setTaskModal({ open: true, task: t })}
                 onSelectProject={(p) => setProjectModal({ open: true, project: p })}
+                onUpdateDates={updateTaskDates}
               />
             )}
             {view === "list" && (
