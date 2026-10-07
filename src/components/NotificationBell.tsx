@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Notification } from "@/lib/types";
+import { Notification, STATUS_LABELS } from "@/lib/types";
 
 const POLL_INTERVAL_MS = 30000;
 
@@ -100,21 +100,31 @@ export default function NotificationBell({
             </p>
           ) : (
             <div className="divide-y divide-line">
-              {notifications.map((n) => (
-                <button
-                  key={n.id}
-                  onClick={() => {
-                    setOpen(false);
-                    onOpenTask(n.taskId);
-                  }}
-                  className={`w-full text-left px-4 py-3 hover:bg-ink/[0.03] ${
-                    !n.read ? "bg-ink/[0.02]" : ""
-                  }`}
-                >
-                  <p className="text-xs">{n.message}</p>
-                  <p className="text-[11px] text-muted mt-1">{timeAgo(n.createdAt)}</p>
-                </button>
-              ))}
+              {notifications.map((n) => {
+                const done = n.task.status === "DONE";
+                return (
+                  <button
+                    key={n.id}
+                    onClick={() => {
+                      setOpen(false);
+                      onOpenTask(n.taskId);
+                    }}
+                    className={`w-full text-left px-4 py-3 hover:bg-ink/[0.03] ${
+                      !n.read ? "bg-ink/[0.02]" : ""
+                    } ${done ? "opacity-60" : ""}`}
+                  >
+                    <p className="text-xs">{n.message}</p>
+                    <div className="mt-1 flex items-center gap-2">
+                      <p className="text-[11px] text-muted">{timeAgo(n.createdAt)}</p>
+                      {done && (
+                        <span className="rounded-full bg-ink/[0.08] px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted">
+                          {STATUS_LABELS.DONE}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>

@@ -41,6 +41,45 @@ function sameIds(a: string[], b: string[]): boolean {
   return sortedA.every((id, i) => id === sortedB[i]);
 }
 
+// Convierte las URLs de un comentario en vínculos, igual que en Notas,
+// pero intercaladas en el texto en vez de mostrarse aparte
+function renderCommentText(text: string): React.ReactNode[] {
+  const regex = /https?:\/\/[^\s<>"']+/g;
+  const nodes: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  let key = 0;
+  while ((match = regex.exec(text))) {
+    const rawUrl = match[0];
+    const trimmed = rawUrl.replace(/[.,;:)\]}"']+$/, "");
+    const trailing = rawUrl.slice(trimmed.length);
+    if (match.index > lastIndex) nodes.push(<span key={key++}>{text.slice(lastIndex, match.index)}</span>);
+    nodes.push(
+      <a
+        key={key++}
+        href={trimmed}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={(e) => e.stopPropagation()}
+        className="text-accent underline break-all"
+      >
+        {trimmed}
+      </a>
+    );
+    if (trailing) nodes.push(<span key={key++}>{trailing}</span>);
+    lastIndex = match.index + rawUrl.length;
+  }
+  if (lastIndex < text.length) nodes.push(<span key={key++}>{text.slice(lastIndex)}</span>);
+  return nodes;
+}
+
+// La casilla de comentario crece con el texto, hasta un máximo, en vez
+// de desbordarse
+function autoGrowComment(el: HTMLTextAreaElement) {
+  el.style.height = "auto";
+  el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
+}
+
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
@@ -238,6 +277,7 @@ export default function TaskModal({
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [commentDraft, setCommentDraft] = useState("");
   const [postingComment, setPostingComment] = useState(false);
+  const commentInputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (!task) return;
@@ -266,6 +306,7 @@ export default function TaskModal({
         const created = await res.json();
         setComments((prev) => [...prev, created]);
         setCommentDraft("");
+        if (commentInputRef.current) commentInputRef.current.style.height = "auto";
       } else {
         onNotify?.("No se pudo publicar el comentario.", "error");
       }
@@ -772,7 +813,7 @@ export default function TaskModal({
                                 </button>
                               </div>
                             </div>
-                            <p className="mt-0.5 whitespace-pre-wrap text-sm text-ink">{c.text}</p>
+                            <p className="mt-0.5 whitespace-pre-wrap break-words text-sm text-ink">{renderCommentText(c.text)}</p>
                           </div>
                         </li>
                       ))}
@@ -780,8 +821,12 @@ export default function TaskModal({
                   )}
                   <div className="flex items-end gap-2">
                     <textarea
+                      ref={commentInputRef}
                       value={commentDraft}
-                      onChange={(e) => setCommentDraft(e.target.value)}
+                      onChange={(e) => {
+                        setCommentDraft(e.target.value);
+                        autoGrowComment(e.target);
+                      }}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && !e.shiftKey) {
                           e.preventDefault();
@@ -790,7 +835,8 @@ export default function TaskModal({
                       }}
                       rows={1}
                       placeholder="Agrega un comentario…"
-                      className="min-w-0 flex-1 resize-none rounded-2xl bg-ink/[0.04] px-4 py-2.5 text-sm text-ink placeholder:text-muted outline-none focus:ring-2 focus:ring-accent/30"
+                      className="min-w-0 flex-1 resize-none overflow-y-auto break-words rounded-2xl bg-ink/[0.04] px-4 py-2.5 text-sm text-ink placeholder:text-muted outline-none focus:ring-2 focus:ring-accent/30"
+                      style={{ maxHeight: 160 }}
                     />
                     <button
                       type="button"

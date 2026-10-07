@@ -13,7 +13,7 @@ export async function GET() {
       where: { userId: user.id },
       orderBy: { createdAt: "desc" },
       take: 30,
-      include: { task: { select: { id: true, name: true } } },
+      include: { task: { select: { id: true, name: true, status: true } } },
     }),
     prisma.notification.count({ where: { userId: user.id, read: false } }),
   ]);
