@@ -48,6 +48,16 @@ SEED_NAME="Tu nombre" SEED_EMAIL="tu@correo.com" SEED_PASSWORD="algo-largo-y-seg
 
 A partir de ahí, cualquier persona ya logueada puede crear/editar/eliminar cuentas de compañeros desde el panel "Equipo" dentro de la app — no hace falta volver a correr el script.
 
+### Si vienes de una versión anterior: responsables y comentarios
+
+Las tareas ahora pueden tener más de un responsable, y se le pueden agregar comentarios. Después de correr `npx prisma db push` (o de desplegar, que lo corre automático), hay un paso extra que solo se necesita **una vez**, para no perder los responsables que ya tenías asignados con el sistema anterior:
+
+```bash
+npm run db:migrate-assignees
+```
+
+Es seguro correrlo más de una vez: no duplica nada. Si es una instalación nueva, puedes saltarte este paso.
+
 ## 4. Correos de "te asignaron una tarea" (opcional)
 
 Cuando asignas una tarea a alguien, la app le manda un correo avisándole (si no configuras esto, simplemente no se envía nada, todo lo demás sigue funcionando igual).

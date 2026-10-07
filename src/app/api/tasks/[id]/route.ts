@@ -17,43 +17,55 @@ export async function PATCH(
   if (body.endDate !== undefined) data.endDate = new Date(body.endDate);
   if (body.status !== undefined) data.status = body.status;
   if (body.notes !== undefined) data.notes = body.notes;
-  if (body.assigneeId !== undefined) data.assigneeId = body.assigneeId || null;
 
-  const previousAssigneeId =
-    data.assigneeId !== undefined
-      ? (await prisma.task.findUnique({ where: { id: params.id }, select: { assigneeId: true } }))
-          ?.assigneeId
-      : undefined;
+  const nextAssigneeIds: string[] | undefined = Array.isArray(body.assigneeIds)
+    ? body.assigneeIds.filter(Boolean)
+    : undefined;
+
+  let previousAssigneeIds: string[] = [];
+  if (nextAssigneeIds !== undefined) {
+    const current = await prisma.task.findUnique({
+      where: { id: params.id },
+      select: { assignees: { select: { id: true } } },
+    });
+    previousAssigneeIds = current?.assignees.map((a) => a.id) ?? [];
+    data.assignees = { set: nextAssigneeIds.map((id) => ({ id })) };
+  }
 
   const task = await prisma.task.update({
     where: { id: params.id },
     data,
     include: {
       project: true,
-      assignee: { select: { id: true, name: true, email: true } },
+      assignees: { select: { id: true, name: true, email: true } },
     },
   });
 
-  const assigneeChanged =
-    data.assigneeId !== undefined && data.assigneeId !== previousAssigneeId;
+  // Solo se notifica a quienes se agregaron, no a quienes ya estaban
+  const addedAssignees =
+    nextAssigneeIds !== undefined
+      ? task.assignees.filter((a) => !previousAssigneeIds.includes(a.id))
+      : [];
 
-  if (assigneeChanged && task.assignee) {
+  if (addedAssignees.length > 0) {
     const currentUser = await getCurrentUser();
-    await notifyTaskAssigned({
-      userId: task.assignee.id,
-      taskId: task.id,
-      taskName: task.name,
-      assignedByName: currentUser?.name,
-    });
-    await sendTaskAssignedEmail({
-      to: task.assignee.email,
-      taskName: task.name,
-      projectName: task.project.name,
-      startDate: task.startDate,
-      endDate: task.endDate,
-      assignedByName: currentUser?.name,
-      appUrl: request.nextUrl.origin,
-    });
+    for (const assignee of addedAssignees) {
+      await notifyTaskAssigned({
+        userId: assignee.id,
+        taskId: task.id,
+        taskName: task.name,
+        assignedByName: currentUser?.name,
+      });
+      await sendTaskAssignedEmail({
+        to: assignee.email,
+        taskName: task.name,
+        projectName: task.project.name,
+        startDate: task.startDate,
+        endDate: task.endDate,
+        assignedByName: currentUser?.name,
+        appUrl: request.nextUrl.origin,
+      });
+    }
   }
 
   return NextResponse.json(task);

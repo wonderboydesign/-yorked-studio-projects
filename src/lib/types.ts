@@ -27,6 +27,14 @@ export interface Attachment {
   createdAt: string;
 }
 
+export interface Comment {
+  id: string;
+  text: string;
+  createdAt: string;
+  authorId: string | null;
+  author?: { id: string; name: string } | null;
+}
+
 export interface Task {
   id: string;
   name: string;
@@ -37,10 +45,16 @@ export interface Task {
     notes: string | null;
   updatedAt: string;
   project?: Project;
-  assigneeId: string | null;
-  assignee?: User | null;
+  assignees: User[];
   attachments?: Attachment[];
+  comments?: Comment[];
 }
+
+// Lo que se envía al guardar una tarea: no son campos de Task tal cual
+// (assigneeId/assignees se reemplazan por una lista de ids)
+export type TaskInput = Partial<
+  Omit<Task, "id" | "project" | "assignees" | "attachments" | "comments" | "updatedAt">
+> & { assigneeIds?: string[] };
 
 export interface Notification {
   id: string;

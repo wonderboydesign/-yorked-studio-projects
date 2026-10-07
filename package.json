@@ -10,6 +10,7 @@
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "db:seed": "node prisma/seed.js",
+    "db:migrate-assignees": "node prisma/migrate-assignees.js",
     "db:reset-password": "node prisma/reset-password.js"
   },
   "dependencies": {

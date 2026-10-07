@@ -40,8 +40,14 @@ model User {
   passwordHash  String
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
-  assignedTasks Task[]
+  // Responsable único (en desuso): se reemplazó por la relación de abajo,
+  // que permite varios responsables por tarea. Se deja sin usar en el
+  // código para no perder los datos existentes; se puede quitar más
+  // adelante con otro `prisma db push`.
+  assignedTasks Task[]         @relation("TaskAssignee")
+  assignees     Task[]         @relation("TaskAssignees")
   notifications Notification[]
+  comments      Comment[]
 }
 
 model Task {
@@ -55,10 +61,23 @@ model Task {
   updatedAt     DateTime       @updatedAt
   project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId     String
-  assignee      User?          @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
+  // En desuso, ver nota en User.assignedTasks
+  assignee      User?          @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
   assigneeId    String?
+  assignees     User[]         @relation("TaskAssignees")
   notifications Notification[]
   attachments   Attachment[]
+  comments      Comment[]
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  text      String
+  createdAt DateTime @default(now())
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskId    String
+  author    User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorId  String?
 }
 
 model Attachment {

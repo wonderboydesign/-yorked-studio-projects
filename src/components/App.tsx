@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Project, Task, User, Status, STATUS_ORDER } from "@/lib/types";
+import { Project, Task, User, Status, STATUS_ORDER, TaskInput } from "@/lib/types";
 import { toISODate, parseDate } from "@/lib/date";
 import ProjectModal from "./ProjectModal";
 import TaskModal from "./TaskModal";
@@ -146,7 +146,7 @@ export default function App() {
     await load();
   }
 
-  async function saveTask(data: Partial<Task>) {
+  async function saveTask(data: TaskInput) {
     if (taskModal.task) {
       // Edición con guardado automático: el panel se queda abierto
       const res = await fetch(`/api/tasks/${taskModal.task.id}`, {
@@ -193,22 +193,27 @@ export default function App() {
     await load();
   }
 
-  async function quickAssign(taskId: string, userId: string | null) {
-    const user = users.find((u) => u.id === userId) ?? null;
+  async function toggleAssignee(task: Task, userId: string) {
+    const isAssigned = task.assignees.some((a) => a.id === userId);
+    const nextIds = isAssigned
+      ? task.assignees.filter((a) => a.id !== userId).map((a) => a.id)
+      : [...task.assignees.map((a) => a.id), userId];
+    const nextAssignees = users.filter((u) => nextIds.includes(u.id));
     setTasks((prev) =>
-      prev.map((t) => (t.id === taskId ? { ...t, assigneeId: userId, assignee: user } : t))
+      prev.map((t) => (t.id === task.id ? { ...t, assignees: nextAssignees } : t))
     );
-    const res = await fetch(`/api/tasks/${taskId}`, {
+    const res = await fetch(`/api/tasks/${task.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ assigneeId: userId }),
+      body: JSON.stringify({ assigneeIds: nextIds }),
     });
     if (!res.ok) {
-      notify("No se pudo asignar la tarea.", "error");
+      notify("No se pudo actualizar la asignación.", "error");
       await load();
       return;
     }
-    notify(user ? `Asignada a ${user.name}` : "Tarea sin asignar");
+    const user = users.find((u) => u.id === userId);
+    notify(isAssigned ? `${user?.name ?? "Persona"} ya no está asignado/a` : `Asignada a ${user?.name}`);
     await load();
   }
 
@@ -274,7 +279,7 @@ export default function App() {
       : visibleTasks.filter((t) => t.projectId === projectFilter);
   const filteredTasks =
     myTasksOnly && currentUser
-      ? projectScopedTasks.filter((t) => t.assigneeId === currentUser.id)
+      ? projectScopedTasks.filter((t) => t.assignees.some((a) => a.id === currentUser.id))
       : projectScopedTasks;
 
   // Mismo orden que la lista agrupada por estado, para que las flechas sigan lo que se ve
@@ -626,7 +631,7 @@ export default function App() {
                 onSelectTask={(t) => setTaskModal({ open: true, task: t })}
                 onRenameTask={renameTask}
                 onToggleDone={quickToggleDone}
-                onAssign={quickAssign}
+                onToggleAssignee={toggleAssignee}
                 onDelete={quickDelete}
               />
             )}

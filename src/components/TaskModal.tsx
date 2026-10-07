@@ -2,16 +2,44 @@
 
 import { useEffect, useRef, useState } from "react";
 import { upload } from "@vercel/blob/client";
-import { Project, Task, User, Attachment, Status, STATUS_LABELS, STATUS_ORDER, STATUS_COLORS } from "@/lib/types";
+import {
+  Project,
+  Task,
+  User,
+  Attachment,
+  Comment,
+  Status,
+  TaskInput,
+  STATUS_LABELS,
+  STATUS_ORDER,
+  STATUS_COLORS,
+} from "@/lib/types";
 import { toISODate, localToday } from "@/lib/date";
 import Avatar from "./Avatar";
+import AvatarStack from "./AvatarStack";
 
 const ALLOWED_EXTENSIONS = ["ai", "svg", "pdf", "jpg", "jpeg", "png", "webp"];
 
 const FIELD_CLASS =
   "bg-transparent text-ink text-sm outline-none rounded-lg px-2 py-1 -mx-2 hover:bg-ink/5 focus:bg-ink/5 transition-colors disabled:opacity-40";
 
-type EditableField = "name" | "projectId" | "status" | "startDate" | "endDate" | "notes" | "assigneeId";
+type EditableField = "name" | "projectId" | "status" | "startDate" | "endDate" | "notes";
+
+function formatCommentDate(iso: string): string {
+  return new Date(iso).toLocaleString("es-MX", {
+    day: "numeric",
+    month: "short",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function sameIds(a: string[], b: string[]): boolean {
+  if (a.length !== b.length) return false;
+  const sortedA = [...a].sort();
+  const sortedB = [...b].sort();
+  return sortedA.every((id, i) => id === sortedB[i]);
+}
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -63,19 +91,20 @@ function Select({ children, ...props }: React.SelectHTMLAttributes<HTMLSelectEle
   );
 }
 
-// Selector de asignado con avatar (un <select> nativo no puede mostrar avatares)
-function AssigneePicker({
+// Selector de responsables con avatar: permite elegir más de una persona
+// (un <select> nativo no puede mostrar avatares ni selección múltiple así)
+function AssigneesPicker({
   users,
   value,
-  onChange,
+  onToggle,
 }: {
   users: User[];
-  value: string;
-  onChange: (id: string) => void;
+  value: string[];
+  onToggle: (id: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
-  const current = users.find((u) => u.id === value);
+  const selected = users.filter((u) => value.includes(u.id));
 
   useEffect(() => {
     if (!open) return;
@@ -95,10 +124,12 @@ function AssigneePicker({
         aria-expanded={open}
         className="flex max-w-full items-center gap-2 rounded-full px-2 py-1 -mx-2 hover:bg-ink/5"
       >
-        {current ? (
+        {selected.length > 0 ? (
           <>
-            <Avatar name={current.name} size={22} />
-            <span className="truncate text-sm text-ink">{current.name}</span>
+            <AvatarStack users={selected} size={22} />
+            <span className="truncate text-sm text-ink">
+              {selected.length === 1 ? selected[0].name : `${selected.length} personas`}
+            </span>
           </>
         ) : (
           <>
@@ -111,27 +142,29 @@ function AssigneePicker({
         </svg>
       </button>
       {open && (
-        <div role="listbox" className="absolute right-0 top-full z-20 mt-1 w-56 rounded-2xl border border-line bg-surface p-1.5 shadow-xl">
-          {[{ id: "", name: "Sin asignar" }, ...users].map((u) => (
-            <button
-              key={u.id || "none"}
-              type="button"
-              role="option"
-              aria-selected={u.id === value}
-              onClick={() => {
-                onChange(u.id);
-                setOpen(false);
-              }}
-              className={`flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left text-sm text-ink hover:bg-ink/5 ${u.id === value ? "font-semibold" : ""}`}
-            >
-              {u.id ? (
+        <div role="listbox" aria-multiselectable="true" className="absolute right-0 top-full z-20 mt-1 w-56 rounded-2xl border border-line bg-surface p-1.5 shadow-xl">
+          {users.length === 0 && <p className="px-2.5 py-2 text-xs text-muted">No hay personas en el equipo.</p>}
+          {users.map((u) => {
+            const checked = value.includes(u.id);
+            return (
+              <button
+                key={u.id}
+                type="button"
+                role="option"
+                aria-selected={checked}
+                onClick={() => onToggle(u.id)}
+                className={`flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left text-sm text-ink hover:bg-ink/5 ${checked ? "font-semibold" : ""}`}
+              >
                 <Avatar name={u.name} size={22} />
-              ) : (
-                <span className="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full border border-dashed border-muted" aria-hidden="true" />
-              )}
-              <span className="truncate">{u.name}</span>
-            </button>
-          ))}
+                <span className="flex-1 truncate">{u.name}</span>
+                {checked && (
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-accent" aria-hidden="true">
+                    <path d="M2 6.5 4.5 9 10 3" />
+                  </svg>
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
@@ -168,7 +201,7 @@ export default function TaskModal({
   defaultProjectId?: string;
   defaultStartDate?: string;
   onClose: () => void;
-  onSave: (data: Partial<Task>) => Promise<void>;
+  onSave: (data: TaskInput) => Promise<void>;
   onDelete?: (id: string) => Promise<void>;
   onAttachmentsChanged?: () => void;
   onNotify?: (message: string, tone?: "ok" | "error") => void;
@@ -181,7 +214,7 @@ export default function TaskModal({
   const initialStartDate = task ? task.startDate.slice(0, 10) : defaultStartDate || today;
   const initialEndDate = task ? task.endDate.slice(0, 10) : defaultStartDate || today;
   const initialNotes = task?.notes || "";
-  const initialAssigneeId = task?.assigneeId || "";
+  const initialAssigneeIds = task?.assignees?.map((a) => a.id) ?? [];
 
   const [name, setName] = useState(initialName);
   const [projectId, setProjectId] = useState(initialProjectId);
@@ -189,7 +222,7 @@ export default function TaskModal({
   const [startDate, setStartDate] = useState(initialStartDate);
   const [endDate, setEndDate] = useState(initialEndDate);
   const [notes, setNotes] = useState(initialNotes);
-  const [assigneeId, setAssigneeId] = useState(initialAssigneeId);
+  const [assigneeIds, setAssigneeIds] = useState<string[]>(initialAssigneeIds);
   const [saving, setSaving] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [confirmingDiscard, setConfirmingDiscard] = useState(false);
@@ -201,6 +234,52 @@ export default function TaskModal({
   const formRef = useRef<HTMLFormElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
 
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [commentDraft, setCommentDraft] = useState("");
+  const [postingComment, setPostingComment] = useState(false);
+
+  useEffect(() => {
+    if (!task) return;
+    setCommentsLoading(true);
+    fetch(`/api/tasks/${task.id}/comments`)
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setComments(data))
+      .catch(() => setComments([]))
+      .finally(() => setCommentsLoading(false));
+    // El panel se vuelve a montar por cada tarea (ver `key` en App), así
+    // que esto corre una sola vez por tarea abierta.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function handleAddComment() {
+    const text = commentDraft.trim();
+    if (!text || !task) return;
+    setPostingComment(true);
+    try {
+      const res = await fetch(`/api/tasks/${task.id}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      if (res.ok) {
+        const created = await res.json();
+        setComments((prev) => [...prev, created]);
+        setCommentDraft("");
+      } else {
+        onNotify?.("No se pudo publicar el comentario.", "error");
+      }
+    } catch {
+      onNotify?.("No se pudo publicar el comentario.", "error");
+    }
+    setPostingComment(false);
+  }
+
+  async function handleDeleteComment(id: string) {
+    setComments((prev) => prev.filter((c) => c.id !== id));
+    await fetch(`/api/comments/${id}`, { method: "DELETE" });
+  }
+
   // Último valor confirmado por el servidor, por campo (para no guardar de más)
   const savedRef = useRef<Record<EditableField, string>>({
     name: initialName,
@@ -209,8 +288,23 @@ export default function TaskModal({
     startDate: initialStartDate,
     endDate: initialEndDate,
     notes: initialNotes,
-    assigneeId: initialAssigneeId,
   });
+  const savedAssigneeIds = useRef<string[]>(initialAssigneeIds);
+
+  async function toggleAssignee(id: string) {
+    const next = assigneeIds.includes(id) ? assigneeIds.filter((x) => x !== id) : [...assigneeIds, id];
+    setAssigneeIds(next);
+    if (!isEdit) return;
+    const previous = savedAssigneeIds.current;
+    savedAssigneeIds.current = next;
+    try {
+      await onSave({ assigneeIds: next });
+    } catch {
+      savedAssigneeIds.current = previous;
+      setAssigneeIds(previous);
+      onNotify?.("No se pudo actualizar la asignación.", "error");
+    }
+  }
 
   const notesLinks = Array.from(
     new Set(
@@ -227,7 +321,7 @@ export default function TaskModal({
     startDate !== initialStartDate ||
     endDate !== initialEndDate ||
     notes !== initialNotes ||
-    assigneeId !== initialAssigneeId;
+    !sameIds(assigneeIds, initialAssigneeIds);
 
   // Guarda un solo campo si cambió respecto a lo último guardado
   async function commit(field: EditableField, value: string) {
@@ -239,12 +333,10 @@ export default function TaskModal({
     const previous = savedRef.current[field];
     savedRef.current[field] = value;
     try {
-      const payload: Partial<Task> =
+      const payload: TaskInput =
         field === "notes"
           ? { notes: value || null }
-          : field === "assigneeId"
-          ? { assigneeId: value || null }
-          : ({ [field]: field === "status" ? (value as Status) : value } as Partial<Task>);
+          : ({ [field]: field === "status" ? (value as Status) : value } as TaskInput);
       await onSave(payload);
     } catch {
       savedRef.current[field] = previous;
@@ -297,7 +389,7 @@ export default function TaskModal({
         startDate,
         endDate,
         notes: notes || null,
-        assigneeId: assigneeId || null,
+        assigneeIds,
       });
     } catch {
       onNotify?.("No se pudo crear la tarea.", "error");
@@ -478,14 +570,7 @@ export default function TaskModal({
                 }
                 label="Asignado a"
               >
-                <AssigneePicker
-                  users={users}
-                  value={assigneeId}
-                  onChange={(id) => {
-                    setAssigneeId(id);
-                    commit("assigneeId", id);
-                  }}
-                />
+                <AssigneesPicker users={users} value={assigneeIds} onToggle={toggleAssignee} />
               </PropRow>
 
               <PropRow
@@ -655,6 +740,70 @@ export default function TaskModal({
                     </ul>
                   )}
                   {uploadError && <p className="text-xs text-red-600">{uploadError}</p>}
+                </div>
+              )}
+            </section>
+
+            <section>
+              <h3 className="text-sm font-semibold text-ink mb-2">Comentarios</h3>
+              {!task ? (
+                <p className="text-xs text-muted">Guarda la tarea primero para poder comentar.</p>
+              ) : (
+                <div className="space-y-3">
+                  {commentsLoading && <p className="text-xs text-muted">Cargando…</p>}
+                  {comments.length > 0 && (
+                    <ul className="space-y-2.5">
+                      {comments.map((c) => (
+                        <li key={c.id} className="flex items-start gap-2.5">
+                          <Avatar name={c.author?.name ?? "?"} size={22} />
+                          <div className="min-w-0 flex-1 rounded-2xl bg-ink/[0.04] px-3 py-2">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="truncate text-xs font-medium text-ink">
+                                {c.author?.name ?? "Alguien del equipo"}
+                              </span>
+                              <div className="flex shrink-0 items-center gap-2">
+                                <span className="text-[11px] text-muted">{formatCommentDate(c.createdAt)}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteComment(c.id)}
+                                  className="text-[11px] text-muted hover:text-red-600"
+                                >
+                                  Eliminar
+                                </button>
+                              </div>
+                            </div>
+                            <p className="mt-0.5 whitespace-pre-wrap text-sm text-ink">{c.text}</p>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <div className="flex items-end gap-2">
+                    <textarea
+                      value={commentDraft}
+                      onChange={(e) => setCommentDraft(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          handleAddComment();
+                        }
+                      }}
+                      rows={1}
+                      placeholder="Agrega un comentario…"
+                      className="min-w-0 flex-1 resize-none rounded-2xl bg-ink/[0.04] px-4 py-2.5 text-sm text-ink placeholder:text-muted outline-none focus:ring-2 focus:ring-accent/30"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddComment}
+                      disabled={!commentDraft.trim() || postingComment}
+                      aria-label="Comentar"
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-white hover:opacity-90 disabled:opacity-40"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M8 13V3M3.5 7.5 8 3l4.5 4.5" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               )}
             </section>

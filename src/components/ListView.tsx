@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Task, Project, User, STATUS_LABELS, STATUS_COLORS, STATUS_ORDER } from "@/lib/types";
 import { parseDate, formatLong, capMonth } from "@/lib/date";
 import { dueTone, DUE_TEXT_CLASS, DUE_DOT_CLASS } from "@/lib/dueTone";
 import Avatar from "./Avatar";
+import AvatarStack from "./AvatarStack";
 
 export default function ListView({
   tasks,
@@ -14,7 +15,7 @@ export default function ListView({
   onSelectTask,
   onRenameTask,
   onToggleDone,
-  onAssign,
+  onToggleAssignee,
   onDelete,
 }: {
   tasks: Task[];
@@ -24,7 +25,7 @@ export default function ListView({
   onSelectTask: (t: Task) => void;
   onRenameTask: (id: string, name: string) => void;
   onToggleDone: (t: Task) => void;
-  onAssign: (taskId: string, userId: string | null) => void;
+  onToggleAssignee: (t: Task, userId: string) => void;
   onDelete: (id: string) => void;
 }) {
   const projectMap = Object.fromEntries(projects.map((p) => [p.id, p]));
@@ -34,6 +35,16 @@ export default function ListView({
   const cancelRef = useRef(false);
   const [assigningId, setAssigningId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const assignMenuRef = useRef<HTMLSpanElement | null>(null);
+
+  useEffect(() => {
+    if (!assigningId) return;
+    function handleClick(e: MouseEvent) {
+      if (!assignMenuRef.current?.contains(e.target as Node)) setAssigningId(null);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [assigningId]);
 
   function startEdit(t: Task) {
     cancelRef.current = false;
@@ -142,14 +153,7 @@ export default function ListView({
                   </span>
                 </td>
                 <td className="px-4 py-3.5 text-[11px] text-muted">
-                  {t.assignee ? (
-                    <span className="inline-flex items-center gap-2">
-                      <Avatar name={t.assignee.name} size={20} />
-                      {t.assignee.name}
-                    </span>
-                  ) : (
-                    "—"
-                  )}
+                  <AvatarStack users={t.assignees} size={20} />
                 </td>
                 <td className="px-4 py-3.5">
                   <span className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide text-ink border border-line px-2 py-1 rounded-full">
@@ -176,7 +180,12 @@ export default function ListView({
                       </button>
                     </span>
                   ) : (
-                    <span className="relative inline-flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+                    <span
+                      ref={(el) => {
+                        if (assigningId === t.id) assignMenuRef.current = el;
+                      }}
+                      className="relative inline-flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100"
+                    >
                       <button
                         type="button"
                         title={t.status === "DONE" ? "Reabrir" : "Completar"}
@@ -208,31 +217,29 @@ export default function ListView({
                       </button>
 
                       {assigningId === t.id && (
-                        <div className="absolute right-0 top-full z-20 mt-1 w-48 rounded-2xl border border-line bg-surface p-1.5 text-left shadow-xl">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setAssigningId(null);
-                              onAssign(t.id, null);
-                            }}
-                            className={`w-full rounded-xl px-3 py-2 text-left text-sm hover:bg-ink/5 ${!t.assigneeId ? "font-semibold" : ""}`}
-                          >
-                            Sin asignar
-                          </button>
-                          {users.map((u) => (
-                            <button
-                              key={u.id}
-                              type="button"
-                              onClick={() => {
-                                setAssigningId(null);
-                                onAssign(t.id, u.id);
-                              }}
-                              className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm hover:bg-ink/5 ${t.assigneeId === u.id ? "font-semibold" : ""}`}
-                            >
-                              <Avatar name={u.name} size={22} />
-                              {u.name}
-                            </button>
-                          ))}
+                        <div role="listbox" aria-multiselectable="true" className="absolute right-0 top-full z-20 mt-1 w-48 rounded-2xl border border-line bg-surface p-1.5 text-left shadow-xl">
+                          {users.length === 0 && <p className="px-3 py-2 text-xs text-muted">No hay personas en el equipo.</p>}
+                          {users.map((u) => {
+                            const checked = t.assignees.some((a) => a.id === u.id);
+                            return (
+                              <button
+                                key={u.id}
+                                type="button"
+                                role="option"
+                                aria-selected={checked}
+                                onClick={() => onToggleAssignee(t, u.id)}
+                                className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm hover:bg-ink/5 ${checked ? "font-semibold" : ""}`}
+                              >
+                                <Avatar name={u.name} size={22} />
+                                <span className="flex-1 truncate">{u.name}</span>
+                                {checked && (
+                                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-accent" aria-hidden="true">
+                                    <path d="M2 6.5 4.5 9 10 3" />
+                                  </svg>
+                                )}
+                              </button>
+                            );
+                          })}
                         </div>
                       )}
                     </span>
