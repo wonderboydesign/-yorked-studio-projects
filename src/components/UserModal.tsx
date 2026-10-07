@@ -127,7 +127,7 @@ export default function UserModal({
                 <button
                   type="submit"
                   disabled={saving || !name || !email}
-                  className="text-xs px-3 py-2 bg-ink text-paper disabled:opacity-40 rounded-full"
+                  className="text-xs px-3 py-2 bg-accent text-white disabled:opacity-40 rounded-full"
                 >
                   {saving ? "Guardando…" : "Guardar"}
                 </button>

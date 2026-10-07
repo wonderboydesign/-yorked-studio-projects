@@ -560,7 +560,7 @@ export default function App() {
             </p>
             <button
               onClick={() => setProjectModal({ open: true, project: null })}
-              className="text-xs px-3 py-1.5 bg-ink text-paper rounded-full"
+              className="text-xs px-3 py-1.5 bg-accent text-white rounded-full"
             >
               Crear tu primer proyecto
             </button>
@@ -572,7 +572,7 @@ export default function App() {
             </p>
             <button
               onClick={() => setProjectsPanelOpen(true)}
-              className="text-xs px-3 py-1.5 bg-ink text-paper rounded-full"
+              className="text-xs px-3 py-1.5 bg-accent text-white rounded-full"
             >
               Ver proyectos
             </button>

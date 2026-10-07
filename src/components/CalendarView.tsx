@@ -136,7 +136,7 @@ export default function CalendarView({
               <span
                 onClick={() => onCreateTask(day)}
                 className={`font-display text-xs inline-flex items-center justify-center w-5 h-5 rounded-full cursor-pointer hover:bg-ink/[0.08] ${
-                  isToday ? "bg-ink text-paper" : inMonth ? "" : "text-muted"
+                  isToday ? "bg-accent text-white" : inMonth ? "" : "text-muted"
                 }`}
 >
                 {day.getUTCDate()}

@@ -89,7 +89,7 @@ export default function TeamPanel({
 
         <button
           onClick={() => setUserModal({ open: true, user: null })}
-          className="text-xs px-3 py-1.5 bg-ink text-paper rounded-full"
+          className="text-xs px-3 py-1.5 bg-accent text-white rounded-full"
         >
           + Usuario
         </button>

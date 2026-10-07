@@ -3,26 +3,26 @@
 @tailwind utilities;
 
 :root {
-  --color-ink: 38 38 38;
-  --color-paper: 246 246 246;
-  --color-line: 224 224 224;
-  --color-muted: 137 135 128;
-  --color-accent: 30 79 255;
-  --color-button: 224 224 224;
-  --color-button-hover: 207 207 207;
+  --color-ink: 29 29 31;
+  --color-paper: 245 245 247;
+  --color-line: 210 210 215;
+  --color-muted: 134 134 139;
+  --color-accent: 0 113 227;
+  --color-button: 232 232 237;
+  --color-button-hover: 210 210 215;
   --color-surface: 255 255 255;
   color-scheme: light;
 }
 
 .dark {
-  --color-ink: 237 237 237;
-  --color-paper: 24 24 24;
-  --color-line: 58 58 58;
-  --color-muted: 158 158 158;
-  --color-accent: 90 138 255;
-  --color-button: 51 51 51;
-  --color-button-hover: 71 71 71;
-  --color-surface: 34 34 34;
+  --color-ink: 245 245 247;
+  --color-paper: 0 0 0;
+  --color-line: 56 56 58;
+  --color-muted: 152 152 157;
+  --color-accent: 41 151 255;
+  --color-button: 44 44 46;
+  --color-button-hover: 58 58 60;
+  --color-surface: 28 28 30;
   color-scheme: dark;
 }
 
