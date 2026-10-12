@@ -13,10 +13,10 @@ export function SectionTitle({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="flex items-end justify-between gap-4 mb-3">
+    <div className="flex items-end justify-between gap-4 mb-5">
       <div className="min-w-0">
-        <h3 className="font-mono text-xs uppercase tracking-[0.15em] text-ink">{title}</h3>
-        {hint && <p className="text-xs text-muted mt-0.5">{hint}</p>}
+        <h3 className="text-lg text-ink">{title}</h3>
+        {hint && <p className="text-sm text-muted mt-1 max-w-2xl">{hint}</p>}
       </div>
       {action && <div className="shrink-0 flex items-center gap-2">{action}</div>}
     </div>
@@ -24,7 +24,7 @@ export function SectionTitle({
 }
 
 export function Panel({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <section className={`border border-line bg-surface rounded-3xl p-5 ${className}`}>{children}</section>;
+  return <section className={`glass rounded-3xl p-6 sm:p-8 ${className}`}>{children}</section>;
 }
 
 export function Button({
@@ -44,7 +44,7 @@ export function Button({
 }) {
   const tones = {
     default: "bg-button hover:bg-button-hover text-ink",
-    primary: "bg-accent text-white hover:opacity-90",
+    primary: "bg-accent text-accent-fg hover:opacity-90",
     ghost: "text-muted hover:text-ink",
     danger: "text-muted hover:text-red-600",
   };
@@ -54,7 +54,7 @@ export function Button({
       onClick={onClick}
       disabled={disabled}
       title={title}
-      className={`text-xs px-3 py-1.5 rounded-full transition-colors whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed ${tones[tone]}`}
+      className={`text-sm px-4 py-2 rounded-xl transition-colors whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed ${tones[tone]}`}
     >
       {children}
     </button>
@@ -122,9 +122,9 @@ export function AutoText({
           timer.current = setTimeout(() => flush(next), 1200);
         }}
         onBlur={() => flush()}
-        className={`w-full resize-y bg-paper border border-line rounded-2xl px-4 py-3 text-sm leading-relaxed placeholder:text-muted focus:outline-none focus:border-ink/40 ${className}`}
+        className={`w-full resize-y field rounded-2xl px-4 py-3 text-sm leading-relaxed placeholder:text-muted focus:outline-none focus:border-ink/40 ${className}`}
       />
-      <span className="absolute right-3 bottom-3 text-[11px] text-muted pointer-events-none">
+      <span className="absolute right-3 bottom-3 text-xs text-muted pointer-events-none">
         {state === "dirty" ? "Editando…" : state === "saved" ? "Guardado" : ""}
       </span>
     </div>
@@ -221,7 +221,7 @@ export function DropZone({
       tabIndex={0}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && input.current?.click()}
       className={`border border-dashed rounded-2xl text-center cursor-pointer transition-colors ${
-        over ? "border-accent bg-accent/5" : "border-line hover:border-ink/40"
+        over ? "border-ink bg-ink/5" : "border-ink/15 hover:border-ink/40"
       } ${compact ? "px-3 py-3" : "px-4 py-8"}`}
     >
       <p className="text-xs text-muted">{busy ? "Subiendo…" : label}</p>
@@ -255,7 +255,7 @@ export function Pills<T extends string>({
         <button
           key={o.key}
           onClick={() => onChange(o.key)}
-          className={`text-[11px] px-2 py-0.5 rounded-full border transition-colors ${
+          className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
             value === o.key ? "border-ink bg-ink text-paper" : "border-line text-muted hover:text-ink"
           }`}
         >
@@ -277,7 +277,7 @@ export function DeleteButton({ onConfirm, label = "Eliminar", confirmText }: {
         e.stopPropagation();
         if (!confirmText || window.confirm(confirmText)) onConfirm();
       }}
-      className="text-[11px] text-muted hover:text-red-600 rounded-full"
+      className="text-xs text-muted hover:text-red-600 rounded-full"
     >
       {label}
     </button>
@@ -328,7 +328,7 @@ export function AddTextForm({
   }
 
   return (
-    <form onSubmit={submit} className="border border-line rounded-2xl p-3 space-y-2 bg-paper">
+    <form onSubmit={submit} className="field rounded-2xl p-4 space-y-2">
       {withTitle && (
         <input
           value={title}

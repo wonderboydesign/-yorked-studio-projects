@@ -193,7 +193,7 @@ function Editor({
                 >
                   <SlideView slide={s} data={data} project={project} className="pointer-events-none" />
                 </button>
-                <div className="flex items-center justify-between text-[11px] text-muted px-1 mt-0.5">
+                <div className="flex items-center justify-between text-xs text-muted px-1 mt-0.5">
                   <span>
                     {i + 1}. {SLIDE_TYPES.find((t) => t.key === s.type)?.label}
                   </span>
@@ -218,12 +218,12 @@ function Editor({
               <p className="text-xs text-muted text-center py-24">Sin láminas. Agrega una a la derecha.</p>
             )}
             <div className="flex flex-wrap items-center gap-1 mt-3">
-              <span className="text-[11px] text-muted mr-1">Agregar después de esta:</span>
+              <span className="text-xs text-muted mr-1">Agregar después de esta:</span>
               {SLIDE_TYPES.map((t) => (
                 <button
                   key={t.key}
                   onClick={() => addSlide(t.key)}
-                  className="text-[11px] px-2 py-0.5 rounded-full border border-line text-muted hover:text-ink"
+                  className="text-xs px-2 py-0.5 rounded-full border border-line text-muted hover:text-ink"
                 >
                   + {t.label}
                 </button>
@@ -297,7 +297,7 @@ function SlideEditor({
         <select
           value={slide.type}
           onChange={(e) => onChange({ type: e.target.value as BrandSlideType })}
-          className="w-full bg-paper border border-line rounded-full px-3 py-1.5 text-xs"
+          className="w-full field rounded-full px-3 py-1.5 text-xs"
         >
           {SLIDE_TYPES.map((t) => (
             <option key={t.key} value={t.key}>
@@ -312,7 +312,7 @@ function SlideEditor({
           <select
             value={selected[0] ?? ""}
             onChange={(e) => onChange({ itemIds: e.target.value ? [e.target.value] : [] })}
-            className="w-full bg-paper border border-line rounded-full px-3 py-1.5 text-xs"
+            className="w-full field rounded-full px-3 py-1.5 text-xs"
           >
             <option value="">Elige un concepto</option>
             {concepts.map((c) => (
@@ -329,7 +329,7 @@ function SlideEditor({
           <select
             value={slide.boardId ?? ""}
             onChange={(e) => onChange({ boardId: e.target.value || undefined })}
-            className="w-full bg-paper border border-line rounded-full px-3 py-1.5 text-xs"
+            className="w-full field rounded-full px-3 py-1.5 text-xs"
           >
             <option value="">Elige un moodboard</option>
             {data.moodboards.map((b) => (
@@ -351,7 +351,7 @@ function SlideEditor({
       {slide.type === "image" && (
         <Field label={`Piezas (hasta 4) · ${selected.length} elegida(s)`}>
           {pickable.length === 0 ? (
-            <p className="text-[11px] text-muted">Sube piezas en Desarrollo.</p>
+            <p className="text-xs text-muted">Sube piezas en Desarrollo.</p>
           ) : (
             <div className="grid grid-cols-3 gap-1.5 max-h-72 overflow-y-auto">
               {pickable.map((i) => (
@@ -366,7 +366,7 @@ function SlideEditor({
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={i.url!} alt="" className="w-full aspect-square object-cover" />
                   {selected.includes(i.id) && (
-                    <span className="absolute top-1 right-1 text-[10px] bg-accent text-white rounded-full w-4 h-4 flex items-center justify-center">
+                    <span className="absolute top-1 right-1 text-[10px] bg-accent text-accent-fg rounded-full w-4 h-4 flex items-center justify-center">
                       {selected.indexOf(i.id) + 1}
                     </span>
                   )}
@@ -383,7 +383,7 @@ function SlideEditor({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block space-y-1">
-      <span className="text-[11px] text-muted">{label}</span>
+      <span className="text-xs text-muted">{label}</span>
       {children}
     </label>
   );
@@ -397,7 +397,7 @@ function DraftInput({ value, onCommit, multiline }: { value: string; onCommit: (
     value: text,
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setText(e.target.value),
     onBlur: () => text !== value && onCommit(text),
-    className: "w-full bg-paper border border-line rounded-2xl px-3 py-2 text-xs focus:outline-none focus:border-ink/40",
+    className: "w-full field rounded-2xl px-3 py-2 text-xs focus:outline-none focus:border-ink/40",
   };
   return multiline ? <textarea rows={6} {...props} /> : <input {...props} />;
 }
@@ -450,7 +450,7 @@ function Player({
       <div className="w-full max-w-[calc(100vh*16/9)]">
         <SlideView slide={slides[i]} data={data} project={project} />
       </div>
-      <span className="absolute bottom-3 right-4 text-[11px] text-white/50">
+      <span className="absolute bottom-3 right-4 text-xs text-white/50">
         {i + 1} / {slides.length} · Esc para salir
       </span>
     </div>

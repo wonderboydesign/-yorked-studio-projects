@@ -110,16 +110,16 @@ export default function DashboardView({
           />
           <div className="min-w-0">
             <span className="text-xs block">{t.name}</span>
-            <span className="text-[11px] text-muted truncate hidden sm:block">{project?.name}</span>
+            <span className="text-xs text-muted truncate hidden sm:block">{project?.name}</span>
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {showDate && (
-            <span className="text-[11px] text-muted whitespace-nowrap">
+            <span className="text-xs text-muted whitespace-nowrap">
               {capMonth(formatLong(parseDate(t.endDate)))}
             </span>
           )}
-          <span className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide text-ink border border-line px-2 py-1 whitespace-nowrap rounded-full">
+          <span className="inline-flex items-center gap-1.5 font-mono text-xs text-ink border border-line px-2 py-1 whitespace-nowrap rounded-full">
             <span
               className="w-1.5 h-1.5 inline-block shrink-0"
               style={{ backgroundColor: STATUS_COLORS[t.status] }}
@@ -133,27 +133,27 @@ export default function DashboardView({
 
   function Card({ title, children }: { title: string; children: React.ReactNode }) {
     return (
-      <div className="border border-line p-6 rounded-2xl">
-        <h3 className="font-mono text-[12px] uppercase tracking-[0.15em] text-muted mb-4">{title}</h3>
+      <div className="glass p-6 sm:p-8 rounded-3xl">
+        <h3 className="text-lg text-ink mb-5">{title}</h3>
         {children}
       </div>
     );
   }
 
   function Empty({ text }: { text: string }) {
-    return <p className="text-[11px] text-muted py-2">{text}</p>;
+    return <p className="text-xs text-muted py-2">{text}</p>;
   }
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-4">
       <div>
-        <div className="flex items-baseline gap-4 mb-6">
-          <h2 className="text-5xl font-semibold tracking-tight leading-none">{thisWeek.length}</h2>
-          <p className="text-sm text-muted">
+        <div className="flex items-baseline gap-4 mb-8 mt-4">
+          <h2 className="text-6xl leading-none">{thisWeek.length}</h2>
+          <p className="text-lg text-muted">
             {thisWeek.length === 1 ? "tarea pendiente esta semana" : "tareas pendientes esta semana"}
           </p>
         </div>
-        <div className="border border-line p-6 rounded-2xl">
+        <div className="glass p-6 sm:p-8 rounded-3xl">
           {thisWeek.length === 0 ? (
             <Empty text="No tienes tareas pendientes esta semana." />
           ) : (
@@ -166,7 +166,7 @@ export default function DashboardView({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card title="Tareas atrasadas">
           {overdue.length === 0 ? (
             <Empty text="No tienes tareas atrasadas." />
@@ -196,14 +196,14 @@ export default function DashboardView({
             <Empty text="Cargando…" />
           ) : !calendarConnected ? (
             <div className="py-1">
-              <p className="text-[11px] text-muted mb-3">
+              <p className="text-xs text-muted mb-3">
                 {calendarExpired
                   ? "Tu conexión con Google Calendar expiró. Vuelve a conectarla para seguir viendo tus reuniones."
                   : "Conecta tu Google Calendar para ver tus próximas reuniones aquí."}
               </p>
               <a
                 href="/api/auth/google"
-                className="inline-block font-display text-xs tracking-wider text-ink bg-button hover:bg-button-hover transition-colors px-3 py-1.5"
+                className="inline-block text-sm text-accent-fg bg-accent hover:opacity-90 transition-opacity px-4 py-2 rounded-xl"
               >
                 {calendarExpired ? "Reconectar Google Calendar" : "Conectar Google Calendar"}
               </a>
@@ -213,7 +213,7 @@ export default function DashboardView({
               <Empty text="No tienes reuniones en los próximos días." />
               <button
                 onClick={handleDisconnectCalendar}
-                className="font-display text-[11px] tracking-wider text-muted hover:text-ink rounded-full"
+                className="font-display text-xs text-muted hover:text-ink rounded-full"
               >
                 Desconectar
               </button>
@@ -230,13 +230,13 @@ export default function DashboardView({
                     className="block py-2 hover:bg-ink/[0.03] px-2 -mx-2"
                   >
                     <p className="text-xs truncate">{e.title}</p>
-                    <p className="text-[11px] text-muted">{formatEventTime(e)}</p>
+                    <p className="text-xs text-muted">{formatEventTime(e)}</p>
                   </a>
                 ))}
               </div>
               <button
                 onClick={handleDisconnectCalendar}
-                className="font-display text-[11px] tracking-wider text-muted hover:text-ink mt-3 rounded-full"
+                className="font-display text-xs text-muted hover:text-ink mt-3 rounded-full"
               >
                 Desconectar
               </button>
@@ -247,19 +247,19 @@ export default function DashboardView({
 
       <div className="flex items-center justify-end gap-5 pt-2">
         {currentUserName && (
-          <span className="font-display text-xs tracking-wider text-muted">
+          <span className="font-display text-xs text-muted">
             Hola, {currentUserName}
           </span>
         )}
         <button
           onClick={onOpenProjects}
-          className="font-display text-xs tracking-wider text-muted hover:text-ink rounded-full"
+          className="font-display text-xs text-muted hover:text-ink rounded-full"
         >
           Proyectos
         </button>
         <button
           onClick={onLogout}
-          className="font-display text-xs tracking-wider text-muted hover:text-ink rounded-full"
+          className="font-display text-xs text-muted hover:text-ink rounded-full"
         >
           Salir
         </button>

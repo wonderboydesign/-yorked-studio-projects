@@ -29,7 +29,7 @@ export default function DevelopmentStage() {
             onFiles={(f) => uploadItems(f, { section: "development", kind: "piece", status: uploadStatus })}
           />
           <div className="space-y-1">
-            <p className="text-[11px] text-muted">Entran como</p>
+            <p className="text-xs text-muted">Entran como</p>
             <Pills options={PIECE_STATUSES} value={uploadStatus} onChange={setUploadStatus} />
           </div>
         </div>
@@ -67,8 +67,8 @@ export default function DevelopmentStage() {
           {visible.map((p) => (
             <article
               key={p.id}
-              className={`border rounded-2xl overflow-hidden bg-surface flex flex-col ${
-                p.status === "present" || p.status === "final" ? "border-accent" : "border-line"
+              className={`glass rounded-3xl overflow-hidden flex flex-col ${
+                p.status === "present" || p.status === "final" ? "ring-2 ring-ink" : ""
               }`}
             >
               <a href={p.url ?? "#"} target="_blank" rel="noreferrer" className="block bg-paper">
@@ -93,7 +93,7 @@ export default function DevelopmentStage() {
                     value={(p.status as PieceStatus) ?? "sketch"}
                     onChange={(status) => updateItem(p.id, { status })}
                   />
-                  <div className="flex justify-between text-[11px] text-muted">
+                  <div className="flex justify-between text-xs text-muted">
                     <span>{p.author?.name}</span>
                     <DeleteButton onConfirm={() => deleteItem(p.id)} confirmText={`¿Eliminar "${p.title}"?`} />
                   </div>

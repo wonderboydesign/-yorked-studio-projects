@@ -38,9 +38,9 @@ export default function UserModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50 px-4" onClick={onClose}>
-      <div className="bg-surface w-full max-w-md p-6 border border-line rounded-3xl" onClick={(e) => e.stopPropagation()}>
-        <h2 className="font-mono text-xs uppercase tracking-wider text-ink mb-4">
+    <div className="fixed inset-0 bg-black/20 backdrop-blur-[2px] flex items-center justify-center z-50 px-4" onClick={onClose}>
+      <div className="glass-overlay w-full max-w-md p-8 rounded-3xl" onClick={(e) => e.stopPropagation()}>
+        <h2 className="font-mono text-xs text-ink mb-4">
           <span className="relative top-[1px] left-[-1px] inline-block text-accent">●</span>
           {user ? "Editar usuario" : "Nuevo usuario"}
         </h2>
@@ -51,7 +51,7 @@ export default function UserModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               autoFocus
-              className="w-full border border-line px-3 py-2 text-xs focus:border-accent bg-surface text-ink rounded-xl"
+              className="w-full field px-3 py-2 text-xs rounded-xl"
             />
           </div>
           <div>
@@ -60,7 +60,7 @@ export default function UserModal({
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-line px-3 py-2 text-xs focus:border-accent bg-surface text-ink rounded-xl"
+              className="w-full field px-3 py-2 text-xs rounded-xl"
             />
           </div>
           <div>
@@ -71,7 +71,7 @@ export default function UserModal({
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-line px-3 py-2 text-xs focus:border-accent bg-surface text-ink rounded-xl"
+              className="w-full field px-3 py-2 text-xs rounded-xl"
             />
           </div>
 
@@ -127,7 +127,7 @@ export default function UserModal({
                 <button
                   type="submit"
                   disabled={saving || !name || !email}
-                  className="text-xs px-3 py-2 bg-accent text-white disabled:opacity-40 rounded-full"
+                  className="text-xs px-3 py-2 bg-accent text-accent-fg disabled:opacity-40 rounded-full"
                 >
                   {saving ? "Guardando…" : "Guardar"}
                 </button>

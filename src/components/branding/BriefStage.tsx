@@ -52,7 +52,7 @@ export default function BriefStage() {
               <li key={c.id} className="border-l-2 border-line pl-3">
                 <p className="text-sm whitespace-pre-wrap break-words">{c.body}</p>
                 <div className="flex items-center gap-3 mt-1">
-                  <span className="text-[11px] text-muted">
+                  <span className="text-xs text-muted">
                     {c.author?.name ?? "Alguien"} · {formatDate(c.createdAt)}
                   </span>
                   <DeleteButton onConfirm={() => deleteItem(c.id)} confirmText="¿Eliminar este comentario?" />

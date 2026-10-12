@@ -71,7 +71,7 @@ export default function ListView({
       .sort((a, b) => parseDate(a.startDate).getTime() - parseDate(b.startDate).getTime()),
   })).filter((g) => g.items.length > 0);
 
-  const headCell = "px-4 py-3 font-mono font-normal uppercase tracking-[0.12em] text-[11px]";
+  const headCell = "px-4 py-3 font-mono font-normal text-xs";
 
   return (
     <table className="w-full text-xs border-collapse">
@@ -90,7 +90,7 @@ export default function ListView({
         <tbody key={status}>
           <tr>
             <td colSpan={7} className="pt-6 pb-2">
-              <span className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.12em] text-ink">
+              <span className="inline-flex items-center gap-2 font-mono text-xs text-ink">
                 <span className="h-2 w-2 rounded-full" style={{ backgroundColor: STATUS_COLORS[status] }} aria-hidden="true" />
                 {STATUS_LABELS[status]}
                 <span className="text-muted">{items.length}</span>
@@ -139,31 +139,31 @@ export default function ListView({
                 </td>
                 <td className="px-4 py-3.5">
                   <span
-                    className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide"
+                    className="inline-flex items-center gap-1.5 font-mono text-xs"
                     style={{ color: project?.color }}
                   >
                     {project?.name || "—"}
                   </span>
                 </td>
-                <td className="px-4 py-3.5 text-[11px] text-muted">{capMonth(formatLong(parseDate(t.startDate)))}</td>
-                <td className="px-4 py-3.5 text-[11px]">
+                <td className="px-4 py-3.5 text-xs text-muted">{capMonth(formatLong(parseDate(t.startDate)))}</td>
+                <td className="px-4 py-3.5 text-xs">
                   <span className={`inline-flex items-center gap-1.5 ${DUE_TEXT_CLASS[tone]} ${tone === "overdue" || tone === "today" ? "font-medium" : ""}`}>
                     {dot && <span className={`h-1.5 w-1.5 rounded-full ${dot}`} aria-hidden="true" />}
                     {capMonth(formatLong(parseDate(t.endDate)))}
                   </span>
                 </td>
-                <td className="px-4 py-3.5 text-[11px] text-muted">
+                <td className="px-4 py-3.5 text-xs text-muted">
                   <AvatarStack users={t.assignees} size={20} />
                 </td>
                 <td className="px-4 py-3.5">
-                  <span className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide text-ink border border-line px-2 py-1 rounded-full">
+                  <span className="inline-flex items-center gap-1.5 font-mono text-xs text-ink border border-line px-2 py-1 rounded-full">
                     <span className="w-1.5 h-1.5 inline-block shrink-0" style={{ backgroundColor: STATUS_COLORS[t.status] }} />
                     {STATUS_LABELS[t.status]}
                   </span>
                 </td>
                 <td className="px-2 py-3.5 text-right" onClick={(e) => e.stopPropagation()}>
                   {deletingId === t.id ? (
-                    <span className="inline-flex items-center gap-2 text-[11px]">
+                    <span className="inline-flex items-center gap-2 text-xs">
                       <span className="text-muted">¿Eliminar?</span>
                       <button
                         type="button"
@@ -200,7 +200,7 @@ export default function ListView({
                       <button
                         type="button"
                         onClick={() => setAssigningId(assigningId === t.id ? null : t.id)}
-                        className="rounded-full px-2.5 py-1 text-[11px] text-muted hover:bg-ink/10 hover:text-ink"
+                        className="rounded-full px-2.5 py-1 text-xs text-muted hover:bg-ink/10 hover:text-ink"
                       >
                         Asignar
                       </button>
@@ -217,7 +217,7 @@ export default function ListView({
                       </button>
 
                       {assigningId === t.id && (
-                        <div role="listbox" aria-multiselectable="true" className="absolute right-0 top-full z-20 mt-1 w-48 rounded-2xl border border-line bg-surface p-1.5 text-left shadow-xl">
+                        <div role="listbox" aria-multiselectable="true" className="absolute right-0 top-full z-20 mt-1 w-48 rounded-2xl glass-overlay p-1.5 text-left">
                           {users.length === 0 && <p className="px-3 py-2 text-xs text-muted">No hay personas en el equipo.</p>}
                           {users.map((u) => {
                             const checked = t.assignees.some((a) => a.id === u.id);
@@ -228,7 +228,7 @@ export default function ListView({
                                 role="option"
                                 aria-selected={checked}
                                 onClick={() => onToggleAssignee(t, u.id)}
-                                className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm hover:bg-ink/5 ${checked ? "font-semibold" : ""}`}
+                                className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm hover:bg-ink/5 ${checked ? "font-medium" : ""}`}
                               >
                                 <Avatar name={u.name} size={22} />
                                 <span className="flex-1 truncate">{u.name}</span>

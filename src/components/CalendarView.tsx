@@ -82,13 +82,13 @@ export default function CalendarView({
   return (
     <div>
       <div className="flex flex-col items-center gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
-        <h3 className="text-xs text-ink text-center sm:text-left uppercase">
+        <h3 className="text-xs text-ink text-center sm:text-left">
           {title()}
         </h3>
         <div className="flex flex-wrap items-center justify-center gap-4">
-          <button onClick={() => { setView("day"); setCursor(localToday()); }} className={`font-display text-xs tracking-wider ${view === "day" ? "text-ink" : "text-muted hover:text-ink"}`}>{view === "day" ? <span className="text-accent">●</span> : ""}Día</button>
-          <button onClick={() => { setView("week"); setCursor(localToday()); }} className={`font-display text-xs tracking-wider ${view === "week" ? "text-ink" : "text-muted hover:text-ink"}`}>{view === "week" ? <span className="text-accent">●</span> : ""}Semana</button>
-          <button onClick={() => setView("month")} className={`font-display text-xs tracking-wider ${view === "month" ? "text-ink" : "text-muted hover:text-ink"}`}>{view === "month" ? <span className="text-accent">●</span> : ""}Mes</button>
+          <button onClick={() => { setView("day"); setCursor(localToday()); }} className={`font-display text-xs ${view === "day" ? "text-ink" : "text-muted hover:text-ink"}`}>{view === "day" ? <span className="text-accent">●</span> : ""}Día</button>
+          <button onClick={() => { setView("week"); setCursor(localToday()); }} className={`font-display text-xs ${view === "week" ? "text-ink" : "text-muted hover:text-ink"}`}>{view === "week" ? <span className="text-accent">●</span> : ""}Semana</button>
+          <button onClick={() => setView("month")} className={`font-display text-xs ${view === "month" ? "text-ink" : "text-muted hover:text-ink"}`}>{view === "month" ? <span className="text-accent">●</span> : ""}Mes</button>
           <div className="flex items-center gap-1">
             <button
               onClick={goPrev}
@@ -98,7 +98,7 @@ export default function CalendarView({
             </button>
             <button
               onClick={goToday}
-              className="font-display text-xs tracking-wider px-2 py-1 border border-line text-muted hover:text-ink rounded-full"
+              className="font-display text-xs px-2 py-1 border border-line text-muted hover:text-ink rounded-full"
             >
               Hoy
             </button>
@@ -136,7 +136,7 @@ export default function CalendarView({
               <span
                 onClick={() => onCreateTask(day)}
                 className={`font-display text-xs inline-flex items-center justify-center w-5 h-5 rounded-full cursor-pointer hover:bg-ink/[0.08] ${
-                  isToday ? "bg-accent text-white" : inMonth ? "" : "text-muted"
+                  isToday ? "bg-accent text-accent-fg" : inMonth ? "" : "text-muted"
                 }`}
 >
                 {day.getUTCDate()}
@@ -148,7 +148,7 @@ export default function CalendarView({
                     <button
                       key={t.id}
                       onClick={() => onSelectTask(t)}
-className={`w-full text-left text-[12px] leading-tight px-1.5 py-0.5 rounded ${
+className={`w-full text-left text-xs leading-tight px-1.5 py-0.5 rounded ${
   t.status === "DONE" ? "line-through" : ""
 }`}
                       style={

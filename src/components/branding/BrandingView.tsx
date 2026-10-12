@@ -54,38 +54,40 @@ function ProjectPicker({
     <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl tracking-tight">Branding</h1>
-          <p className="text-sm text-muted mt-1 max-w-xl">
+          <h1 className="text-6xl">Branding</h1>
+          <p className="text-lg text-muted mt-3 max-w-xl">
             Elige un proyecto para trabajar su proceso de marca, de brief a presentación.
           </p>
         </div>
         <Button onClick={onOpenLibrary}>Biblioteca de referencias</Button>
       </div>
 
-      <ol className="grid gap-px bg-line border border-line rounded-3xl overflow-hidden sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {BRAND_STAGES.map((s) => (
-          <li key={s.key} className="bg-surface p-4">
-            <span className="font-mono text-xs text-accent">{s.number}</span>
-            <h3 className="text-sm font-medium mt-1">{s.label}</h3>
-            <p className="text-xs text-muted mt-1">{s.goal}</p>
-            <p className="text-[11px] mt-2">
-              <span className="text-muted">Sale: </span>
-              {s.output}
-            </p>
+          <li key={s.key} className="glass rounded-3xl p-6 flex flex-col min-h-[220px]">
+            <span className="text-sm text-muted">{s.number}</span>
+            <div className="mt-auto pt-8">
+              <h3 className="text-xl">{s.label}</h3>
+              <p className="text-sm text-muted mt-2">{s.goal}</p>
+              <p className="text-xs mt-3">
+                <span className="text-muted">Sale: </span>
+                {s.output}
+              </p>
+            </div>
           </li>
         ))}
       </ol>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {projects.map((p) => (
           <button
             key={p.id}
             onClick={() => onSelect(p.id)}
-            className="text-left border border-line bg-surface hover:border-ink/40 rounded-3xl p-5 transition-colors"
+            className="text-left glass glass-hover rounded-3xl p-8 min-h-[200px] flex flex-col"
           >
             <span className="inline-block w-2.5 h-2.5 rounded-full mb-3" style={{ background: p.color }} />
-            <h3 className="text-base font-medium">{p.name}</h3>
-            {p.client && <p className="text-xs text-muted">{p.client}</p>}
+            <h3 className="text-xl mt-auto">{p.name}</h3>
+            {p.client && <p className="text-sm text-muted mt-1">{p.client}</p>}
           </button>
         ))}
       </div>
@@ -131,12 +133,12 @@ function Workspace({ onOpenLibrary }: { onOpenLibrary: () => void }) {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-xs text-muted">{project.client ?? "Branding"}</p>
-          <h1 className="text-3xl tracking-tight">{project.name}</h1>
+          <h1 className="text-5xl">{project.name}</h1>
         </div>
         <Button onClick={onOpenLibrary}>Biblioteca de referencias</Button>
       </div>
 
-      <nav className="grid grid-cols-3 sm:grid-cols-6 gap-1 border border-line rounded-3xl p-1 bg-surface">
+      <nav className="grid grid-cols-3 sm:grid-cols-6 gap-1 glass rounded-3xl p-1.5">
         {BRAND_STAGES.map((s) => {
           const active = s.key === view;
           const isCurrent = s.key === data.workspace.stage;
@@ -144,15 +146,15 @@ function Workspace({ onOpenLibrary }: { onOpenLibrary: () => void }) {
             <button
               key={s.key}
               onClick={() => setView(s.key)}
-              className={`text-left rounded-[20px] px-3 py-2 transition-colors ${
-                active ? "bg-ink text-paper" : "hover:bg-button"
+              className={`text-left min-w-0 rounded-[26px] px-3 sm:px-4 py-3 transition-colors ${
+                active ? "bg-ink text-paper" : "hover:bg-ink/5"
               }`}
             >
-              <span className={`font-mono text-[11px] ${active ? "text-paper/60" : "text-muted"}`}>
+              <span className={`font-mono text-xs ${active ? "text-paper/60" : "text-muted"}`}>
                 {s.number}
                 {progress[s.key] && <span className={active ? "text-paper" : "text-accent"}> ✓</span>}
               </span>
-              <span className="block text-sm">
+              <span className="block text-sm sm:text-base truncate">
                 {s.label}
                 {isCurrent && <span className={`ml-1 ${active ? "text-paper" : "text-accent"}`}>●</span>}
               </span>

@@ -37,7 +37,7 @@ export default function ResearchStage() {
     <div className="space-y-5">
       {chosen.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-mono text-[11px] uppercase tracking-[0.15em] text-muted">Conceptos elegidos</span>
+          <span className="font-mono text-xs text-muted">Conceptos elegidos</span>
           {chosen.map((c) => (
             <span key={c.id} className="text-xs border border-accent text-ink rounded-full px-3 py-1" title={c.body ?? ""}>
               {c.title}
@@ -55,13 +55,13 @@ export default function ResearchStage() {
           {IDEA_STATUSES.map((col) => {
             const list = ideas.filter((i) => (i.status ?? "explore") === col.key);
             return (
-              <div key={col.key} className="bg-paper rounded-2xl p-3 min-w-0">
-                <h4 className="font-mono text-[11px] uppercase tracking-[0.15em] text-muted mb-3">
+              <div key={col.key} className="bg-ink/[0.03] rounded-3xl p-3 min-w-0">
+                <h4 className="font-mono text-xs text-muted mb-3">
                   {col.label} · {list.length}
                 </h4>
                 <div className="space-y-2">
                   {list.map((idea) => (
-                    <article key={idea.id} className="bg-surface border border-line rounded-2xl p-3 space-y-2">
+                    <article key={idea.id} className="glass rounded-2xl p-4 space-y-2">
                       <InlineInput
                         value={idea.title}
                         onSave={(title) => updateItem(idea.id, { title })}
@@ -80,7 +80,7 @@ export default function ResearchStage() {
                             <button
                               key={s.key}
                               onClick={() => updateItem(idea.id, { status: s.key })}
-                              className="text-[11px] text-muted hover:text-ink border border-line rounded-full px-2 py-0.5"
+                              className="text-xs text-muted hover:text-ink border border-line rounded-full px-2 py-0.5"
                             >
                               → {s.label}
                             </button>

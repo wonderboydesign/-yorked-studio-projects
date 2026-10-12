@@ -2,27 +2,41 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Paleta monocroma tomada del template de referencia (vexoo.framer.website):
+   fondo gris claro con textura, tarjetas de vidrio con 5% de negro y
+   desenfoque, y el negro como color de acento. */
 :root {
-  --color-ink: 29 29 31;
-  --color-paper: 245 245 247;
-  --color-line: 210 210 215;
-  --color-muted: 134 134 139;
-  --color-accent: 0 113 227;
-  --color-button: 232 232 237;
-  --color-button-hover: 210 210 215;
-  --color-surface: 255 255 255;
+  --color-ink: 10 10 10;
+  --color-paper: 240 240 240;
+  --color-line: 222 222 222;
+  --color-muted: 133 133 133;
+  --color-accent: 10 10 10;
+  --color-accent-fg: 255 255 255;
+  --color-button: 224 224 224;
+  --color-button-hover: 212 212 212;
+  /* Tono opaco equivalente a una tarjeta de vidrio sobre el fondo */
+  --color-surface: 228 228 228;
+  --glass-tint: 0 0 0;
+  --glass-alpha: 0.05;
+  --glass-alpha-hover: 0.03;
+  --overlay-bg: 244 244 244;
   color-scheme: light;
 }
 
 .dark {
-  --color-ink: 245 245 247;
-  --color-paper: 0 0 0;
-  --color-line: 56 56 58;
-  --color-muted: 152 152 157;
-  --color-accent: 41 151 255;
-  --color-button: 44 44 46;
-  --color-button-hover: 58 58 60;
-  --color-surface: 28 28 30;
+  --color-ink: 242 242 242;
+  --color-paper: 12 12 12;
+  --color-line: 40 40 40;
+  --color-muted: 140 140 140;
+  --color-accent: 242 242 242;
+  --color-accent-fg: 12 12 12;
+  --color-button: 38 38 38;
+  --color-button-hover: 52 52 52;
+  --color-surface: 27 27 27;
+  --glass-tint: 255 255 255;
+  --glass-alpha: 0.06;
+  --glass-alpha-hover: 0.09;
+  --overlay-bg: 24 24 24;
   color-scheme: dark;
 }
 
@@ -35,19 +49,78 @@
 
 body {
   margin: 0;
+  font-weight: 500;
+  letter-spacing: -0.02em;
   transition: background-color 150ms ease, color 150ms ease;
 }
 
+/* Textura de grano sobre el fondo, como en el template */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.35;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0.18 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
 ::selection {
-  background: #1e4fff;
-  color: #fafaf8;
+  background: rgb(var(--color-ink));
+  color: rgb(var(--color-paper));
+}
+
+/* Tarjeta de vidrio: 5% de tinta + desenfoque de 10px */
+.glass {
+  background-color: rgb(var(--glass-tint) / var(--glass-alpha));
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 0 1px rgb(var(--glass-tint) / 0.02);
+}
+.glass-hover {
+  transition: background-color 200ms ease;
+}
+.glass-hover:hover {
+  background-color: rgb(var(--glass-tint) / var(--glass-alpha-hover));
+}
+
+/* Paneles flotantes (modales, menús): vidrio más denso para que se lea */
+.glass-overlay {
+  background-color: rgb(var(--overlay-bg) / 0.82);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  backdrop-filter: blur(24px) saturate(1.3);
+  box-shadow: inset 0 1px 0 1px rgb(var(--glass-tint) / 0.03), 0 24px 64px -24px rgb(0 0 0 / 0.28);
+}
+
+/* Campos de formulario sin borde, rellenos del tono del vidrio */
+.field {
+  background-color: rgb(var(--glass-tint) / 0.05);
+  border: 1px solid transparent;
+  color: rgb(var(--color-ink));
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+.field::placeholder {
+  color: rgb(var(--color-muted));
+}
+.field:focus {
+  outline: none;
+  border-color: rgb(var(--glass-tint) / 0.18);
+  background-color: rgb(var(--glass-tint) / 0.03);
+}
+
+/* Botones e inputs: rectángulos redondeados en lugar de píldoras */
+button.rounded-full:not(.aspect-square):not(.w-2):not(.w-2\.5):not(.w-3),
+a.rounded-full,
+input.rounded-full,
+select.rounded-full {
+  border-radius: 12px;
 }
 
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 [tabindex]:focus-visible {
-  outline: 2px solid #1e4fff;
+  outline: 2px solid rgb(var(--color-ink) / 0.6);
   outline-offset: 2px;
 }
 
@@ -58,9 +131,6 @@ select:focus-visible,
   }
 }
 
-.font-display {
-  font-weight: 800;
-}
 
 @keyframes loadingDot {
   0%, 80%, 100% {

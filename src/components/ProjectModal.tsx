@@ -68,9 +68,9 @@ export default function ProjectModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50 px-4" onClick={attemptClose}>
-      <div className="bg-surface w-full max-w-md p-6 border border-line rounded-3xl" onClick={(e) => e.stopPropagation()}>
-        <h2 className="font-mono text-xs uppercase tracking-wider text-ink mb-4">
+    <div className="fixed inset-0 bg-black/20 backdrop-blur-[2px] flex items-center justify-center z-50 px-4" onClick={attemptClose}>
+      <div className="glass-overlay w-full max-w-md p-8 rounded-3xl" onClick={(e) => e.stopPropagation()}>
+        <h2 className="font-mono text-xs text-ink mb-4">
           <span className="relative top-[1px] left-[-1px] inline-block text-accent">●</span>
           {project ? "Editar proyecto" : "Nuevo proyecto"}
         </h2>
@@ -81,7 +81,7 @@ export default function ProjectModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               autoFocus
-              className="w-full border border-line px-3 py-2 text-xs focus:border-accent bg-surface text-ink rounded-xl"
+              className="w-full field px-3 py-2 text-xs rounded-xl"
             />
           </div>
           <div>
@@ -89,7 +89,7 @@ export default function ProjectModal({
             <input
               value={client}
               onChange={(e) => setClient(e.target.value)}
-              className="w-full border border-line px-3 py-2 text-xs focus:border-accent bg-surface text-ink rounded-xl"
+              className="w-full field px-3 py-2 text-xs rounded-xl"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -99,7 +99,7 @@ export default function ProjectModal({
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full border border-line px-3 py-2 text-xs focus:border-accent bg-surface text-ink rounded-xl"
+                className="w-full field px-3 py-2 text-xs rounded-xl"
               />
             </div>
             <div>
@@ -108,7 +108,7 @@ export default function ProjectModal({
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full border border-line px-3 py-2 text-xs focus:border-accent bg-surface text-ink rounded-xl"
+                className="w-full field px-3 py-2 text-xs rounded-xl"
               />
             </div>
           </div>
@@ -140,7 +140,7 @@ export default function ProjectModal({
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
             placeholder="URL, instrucciones o cualquier nota útil"
-            className="w-full border border-line px-3 py-2 text-xs focus:border-accent bg-surface text-ink rounded-xl"
+            className="w-full field px-3 py-2 text-xs rounded-xl"
             />
           </div>
 
@@ -212,7 +212,7 @@ export default function ProjectModal({
               <button
                 type="submit"
                 disabled={saving || !name}
-                className="text-xs px-3 py-2 bg-accent text-white disabled:opacity-40 rounded-full"
+                className="text-xs px-3 py-2 bg-accent text-accent-fg disabled:opacity-40 rounded-full"
               >
                 {saving ? "Guardando…" : "Guardar"}
               </button>

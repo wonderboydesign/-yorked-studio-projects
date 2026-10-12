@@ -30,18 +30,18 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center px-6">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm">
-        <div className="mb-14">
-          <span className="block font-mono text-[12px] uppercase tracking-[0.2em] text-muted mb-4">
+      <form onSubmit={handleSubmit} className="w-full max-w-md glass-overlay rounded-3xl p-8 sm:p-10">
+        <div className="mb-10">
+          <span className="block text-base text-muted mb-6">
             Yorked Studio
           </span>
-          <h1 className="text-5xl font-semibold tracking-tight leading-none mb-3">
+          <h1 className="text-5xl mb-2">
             Bienvenido.
           </h1>
-          <p className="text-muted text-sm">Gestión interna de proyectos</p>
+          <p className="text-muted text-lg">Gestión interna de proyectos</p>
         </div>
 
-        <label htmlFor="email" className="block font-mono text-[12px] uppercase tracking-[0.15em] text-muted mb-2">
+        <label htmlFor="email" className="block text-sm text-ink mb-2">
           Correo
         </label>
         <input
@@ -50,10 +50,10 @@ export default function LoginPage() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           autoFocus
-          className="w-full border border-line px-3 py-2.5 text-sm mb-4 bg-surface text-ink focus:border-accent rounded-xl"
+          className="w-full field px-3 py-2.5 text-sm mb-4 rounded-xl"
         />
 
-        <label htmlFor="password" className="block font-mono text-[12px] uppercase tracking-[0.15em] text-muted mb-2">
+        <label htmlFor="password" className="block text-sm text-ink mb-2">
           Contraseña
         </label>
         <input
@@ -61,7 +61,7 @@ export default function LoginPage() {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full border border-line px-3 py-2.5 text-sm mb-4 bg-surface text-ink focus:border-accent rounded-xl"
+          className="w-full field px-3 py-2.5 text-sm mb-4 rounded-xl"
         />
 
         {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
@@ -69,7 +69,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading || !email || !password}
-          className="w-full bg-accent text-white py-3 text-sm font-medium tracking-wide disabled:opacity-40 hover:opacity-90 transition-opacity rounded-full"
+          className="w-full bg-accent text-accent-fg py-3 text-base disabled:opacity-40 hover:opacity-90 transition-opacity rounded-xl mt-2"
         >
           {loading ? "Entrando…" : "Entrar"}
         </button>

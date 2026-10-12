@@ -3,17 +3,18 @@ module.exports = {
   darkMode: "class",
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
+    // Escala tomada del template de referencia: tracking -0.02em en todo
     fontSize: {
-      xs: ["13px", { lineHeight: "18px" }],
-      sm: ["15px", { lineHeight: "21px" }],
-      base: ["16px", { lineHeight: "24px" }],
-      lg: ["18px", { lineHeight: "28px" }],
-      xl: ["20px", { lineHeight: "28px" }],
-      "2xl": ["24px", { lineHeight: "32px" }],
-      "3xl": ["30px", { lineHeight: "36px" }],
-      "4xl": ["40px", { lineHeight: "44px", letterSpacing: "-0.02em" }],
-      "5xl": ["56px", { lineHeight: "58px", letterSpacing: "-0.02em" }],
-      "6xl": ["72px", { lineHeight: "72px", letterSpacing: "-0.03em" }],
+      xs: ["13px", { lineHeight: "18px", letterSpacing: "-0.01em" }],
+      sm: ["14px", { lineHeight: "19.6px", letterSpacing: "-0.02em" }],
+      base: ["16px", { lineHeight: "22.4px", letterSpacing: "-0.02em" }],
+      lg: ["18px", { lineHeight: "21.6px", letterSpacing: "-0.02em" }],
+      xl: ["20px", { lineHeight: "24px", letterSpacing: "-0.02em" }],
+      "2xl": ["26px", { lineHeight: "31.2px", letterSpacing: "-0.02em" }],
+      "3xl": ["32px", { lineHeight: "38.4px", letterSpacing: "-0.02em" }],
+      "4xl": ["40px", { lineHeight: "52px", letterSpacing: "-0.02em" }],
+      "5xl": ["48px", { lineHeight: "57.6px", letterSpacing: "-0.02em" }],
+      "6xl": ["72px", { lineHeight: "72px", letterSpacing: "-0.04em" }],
     },
     extend: {
       colors: {
@@ -25,10 +26,16 @@ module.exports = {
         button: "rgb(var(--color-button) / <alpha-value>)",
         "button-hover": "rgb(var(--color-button-hover) / <alpha-value>)",
         surface: "rgb(var(--color-surface) / <alpha-value>)",
+        "accent-fg": "rgb(var(--color-accent-fg) / <alpha-value>)",
+      },
+      borderRadius: {
+        "3xl": "32px",
       },
       fontFamily: {
-        display: ["var(--font-doto)", "sans-serif"],
-        mono: ["var(--font-helvetica-now)", "Helvetica Neue", "Arial", "sans-serif"],
+        sans: ['"Open Sauce Sans"', "Helvetica Neue", "Arial", "sans-serif"],
+        // Antes eran Doto y Helvetica Now; ahora todo usa la misma familia
+        display: ['"Open Sauce Sans"', "Helvetica Neue", "Arial", "sans-serif"],
+        mono: ['"Open Sauce Sans"', "Helvetica Neue", "Arial", "sans-serif"],
       },
     },
   },
