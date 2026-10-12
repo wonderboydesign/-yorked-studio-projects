@@ -54,22 +54,22 @@ export default function TeamPanel({
 
   return (
     <div
-      className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50 px-4"
+      className="fixed inset-0 bg-black/20 backdrop-blur-[2px] flex items-center justify-center z-50 px-4"
       onClick={onClose}
     >
       <div
-        className="bg-surface w-full max-w-lg p-6 border border-line max-h-[80vh] overflow-y-auto rounded-3xl"
+        className="glass-overlay w-full max-w-lg p-8 max-h-[80vh] overflow-y-auto rounded-3xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-mono text-xs uppercase tracking-wider">Equipo</h2>
+          <h2 className="font-mono text-xs">Equipo</h2>
           <button onClick={onClose} className="text-xs text-muted rounded-full">
             Cerrar
           </button>
         </div>
 
         <div className="space-y-1 mb-4">
-          {users.length === 0 && <p className="text-[11px] text-muted">No hay usuarios.</p>}
+          {users.length === 0 && <p className="text-xs text-muted">No hay usuarios.</p>}
           {users.map((u) => (
             <button
               key={u.id}
@@ -81,7 +81,7 @@ export default function TeamPanel({
                 <p className="text-xs truncate">
                   {u.name} {u.id === currentUserId && <span className="text-muted">(tú)</span>}
                 </p>
-                <p className="text-[11px] text-muted truncate">{u.email}</p>
+                <p className="text-xs text-muted truncate">{u.email}</p>
               </div>
             </button>
           ))}
@@ -89,7 +89,7 @@ export default function TeamPanel({
 
         <button
           onClick={() => setUserModal({ open: true, user: null })}
-          className="text-xs px-3 py-1.5 bg-accent text-white rounded-full"
+          className="text-xs px-3 py-1.5 bg-accent text-accent-fg rounded-full"
         >
           + Usuario
         </button>

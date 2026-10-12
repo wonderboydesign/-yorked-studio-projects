@@ -72,7 +72,7 @@ export default function NotificationBell({
     <div ref={containerRef} className="relative">
       <button
         onClick={toggleOpen}
-        className="relative transition-colors px-3 py-1.5 flex items-center justify-center bg-button hover:bg-button-hover rounded-full"
+        className="relative transition-colors px-3 py-2 flex items-center justify-center glass-overlay hover:bg-button-hover rounded-xl"
         aria-label="Notificaciones"
       >
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -83,19 +83,19 @@ export default function NotificationBell({
           />
         </svg>
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-accent text-white text-[11px] leading-4 text-center">
+          <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-accent text-accent-fg text-xs leading-4 text-center">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 bottom-full mb-2 w-80 max-h-96 overflow-y-auto bg-surface border border-line shadow-lg z-20 animate-fade-in-up rounded-3xl">
+        <div className="absolute right-0 bottom-full mb-2 w-80 max-h-96 overflow-y-auto glass-overlay z-20 animate-fade-in-up rounded-3xl">
           <div className="px-4 py-3 border-b border-line">
-            <h3 className="font-display text-xs tracking-wider">Notificaciones</h3>
+            <h3 className="font-display text-xs">Notificaciones</h3>
           </div>
           {notifications.length === 0 ? (
-            <p className="text-[11px] text-muted px-4 py-6 text-center">
+            <p className="text-xs text-muted px-4 py-6 text-center">
               No tienes notificaciones todavía.
             </p>
           ) : (
@@ -115,9 +115,9 @@ export default function NotificationBell({
                   >
                     <p className="text-xs">{n.message}</p>
                     <div className="mt-1 flex items-center gap-2">
-                      <p className="text-[11px] text-muted">{timeAgo(n.createdAt)}</p>
+                      <p className="text-xs text-muted">{timeAgo(n.createdAt)}</p>
                       {done && (
-                        <span className="rounded-full bg-ink/[0.08] px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted">
+                        <span className="rounded-full bg-ink/[0.08] px-2 py-0.5 text-[10px] text-muted">
                           {STATUS_LABELS.DONE}
                         </span>
                       )}

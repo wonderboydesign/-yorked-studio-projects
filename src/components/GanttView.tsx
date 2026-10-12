@@ -157,7 +157,7 @@ export default function GanttView({
 
   if (rows.length === 0) {
     return (
-      <div className="text-[11px] text-muted py-16 text-center">
+      <div className="text-xs text-muted py-16 text-center">
         Aún no hay tareas para mostrar en el Gantt.
       </div>
     );
@@ -170,7 +170,7 @@ export default function GanttView({
           <button
             key={z}
             onClick={() => setZoom(z)}
-            className={`font-display text-xs uppercase tracking-wider ${
+            className={`font-display text-xs ${
               zoom === z ? "text-ink" : "text-muted hover:text-ink"
             }`}
           >
@@ -180,7 +180,7 @@ export default function GanttView({
         ))}
       </div>
 
-      <div ref={scrollRef} className="inline-block max-w-full border border-line overflow-x-auto">
+      <div ref={scrollRef} className="inline-block max-w-full glass rounded-3xl overflow-x-auto">
         <div style={{ width: totalWidth + 180 }}>
           {/* Header */}
           <div className="flex sticky top-0 bg-surface z-10 border-b border-line">
@@ -190,7 +190,7 @@ export default function GanttView({
                 {topRow.map((c, i) => (
                   <div
                     key={i}
-                    className="text-xs text-muted px-2 py-1 border-r border-line truncate uppercase"
+                    className="text-xs text-muted px-2 py-1 border-r border-line truncate"
                     style={{ width: c.days * pxPerDay }}
                   >
                     {c.label}

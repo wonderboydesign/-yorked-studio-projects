@@ -133,4 +133,8 @@ Nota: el script `build` corre `prisma db push` automáticamente antes de compila
 
 ## Personalización visual
 
-Los colores y la tipografía están centralizados en `tailwind.config.js` (colores: `ink`, `paper`, `accent`, `muted`, `line`) y en `src/app/layout.tsx` (tipografía Inter). Puedes ajustar el color de acento (`accent`, actualmente `#1E4FFF`) ahí mismo.
+El estilo sigue un sistema monocromo con tarjetas de vidrio (fondo gris claro con textura de grano, tarjetas con 5% de negro y desenfoque de 10px, radios de 32px y tipografía Open Sauce Sans con tracking de -0.02em).
+
+- Colores y modo oscuro: variables en `src/app/globals.css` (`--color-ink`, `--color-paper`, `--color-accent`, etc.), usadas desde `tailwind.config.js`.
+- Vidrio y campos: utilidades `.glass`, `.glass-hover`, `.glass-overlay` y `.field` en `src/app/globals.css`.
+- Escala tipográfica y radios: `tailwind.config.js`.

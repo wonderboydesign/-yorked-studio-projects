@@ -331,11 +331,11 @@ export default function App() {
 
   return (
     <div className="min-h-screen">
-      <header className="px-8 py-6 flex items-center justify-between gap-4 flex-wrap">
+      <header className="px-4 sm:px-6 py-5 flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-10 sm:-translate-y-[11px] w-full sm:w-auto justify-between sm:justify-start">
           <button
             onClick={() => setView("dashboard")}
-            className="font-sans text-lg font-bold tracking-tight text-ink hover:opacity-70 transition-opacity rounded-full"
+            className="font-sans text-lg font-medium tracking-tight text-ink hover:opacity-70 transition-opacity rounded-full"
           >
            <img src="/logo-header.png" alt="Logo" className="h-8 w-auto" />
           </button>
@@ -344,11 +344,11 @@ export default function App() {
               <button
                 key={v.key}
                 onClick={() => setView(v.key)}
-                className={`font-mono text-xs uppercase tracking-[0.15em] ${
+                className={`text-sm sm:text-base whitespace-nowrap transition-colors ${
                   view === v.key ? "text-ink" : "text-muted hover:text-ink"
                 }`}
               >
-                <span className="relative top-[1px] left-[-1px] inline-block text-accent">
+                <span className="relative -top-[1px] mr-1 inline-block text-[10px] text-ink">
                   {view === v.key ? "●" : ""}
                 </span>
                 <span className="sm:hidden">{v.mobileLabel}</span>
@@ -358,30 +358,30 @@ export default function App() {
           </nav>
         </div>
         <div className="flex flex-col items-end gap-1 w-full sm:w-auto">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-4">
             <LiveClock />
             <button
               onClick={() => setMyTasksOnly((v) => !v)}
               disabled={!currentUser}
-              className={`font-display text-xs tracking-wider px-3 py-1.5 border transition-colors disabled:opacity-40 ${
+              className={`text-sm px-4 py-2 rounded-xl whitespace-nowrap transition-colors disabled:opacity-40 ${
                 myTasksOnly
-                  ? "border-ink text-ink bg-button"
-                  : "border-line text-muted hover:text-ink"
+                  ? "bg-accent text-accent-fg"
+                  : "glass glass-hover text-ink"
               }`}
             >
               Mis tareas
             </button>
             <button
               onClick={() => setTeamPanelOpen(true)}
-              className="font-display text-xs tracking-wider px-3 py-1.5 border border-line text-muted hover:text-ink rounded-full"
+              className="text-sm px-4 py-2 glass glass-hover text-ink rounded-xl"
             >
               Equipo
             </button>
-            <div className="relative group border border-line px-3 py-1.5 rounded-2xl">
+            <div className="relative group glass glass-hover px-4 py-2 rounded-xl">
               <select
                 value={projectFilter}
                 onChange={(e) => setProjectFilter(e.target.value)}
-                className="appearance-none bg-transparent border-none font-display text-xs tracking-wider text-muted group-hover:text-ink pr-4 cursor-pointer focus:outline-none rounded-xl"
+                className="appearance-none bg-transparent border-none text-sm text-ink pr-5 cursor-pointer focus:outline-none"
               >
                 <option value="all">Todos los proyectos</option>
                 {activeProjects.map((p) => (
@@ -391,7 +391,7 @@ export default function App() {
                 ))}
               </select>
               <svg
-                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-[11px] h-auto text-muted group-hover:text-ink"
+                className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-[10px] h-auto text-ink"
                 viewBox="0 0 15.62 8.75"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -411,7 +411,7 @@ export default function App() {
                 project: projects.find((p) => p.id === projectFilter) || null,
               })
             }
-            className={`font-display text-xs tracking-wider text-muted hover:text-ink ${
+            className={`text-sm text-muted hover:text-ink ${
               projectFilter === "all" ? "invisible" : ""
             }`}
           >
@@ -420,10 +420,10 @@ export default function App() {
         </div>
       </header>
 
-      <div className="fixed bottom-[26px] sm:bottom-4 left-6 flex items-center gap-5 z-10 bg-paper px-3 py-2 shadow-sm">
+      <div className="fixed bottom-[26px] sm:bottom-4 left-4 sm:left-6 hidden sm:flex items-center gap-5 z-10 glass-overlay px-4 py-2.5 rounded-2xl">
         <button
           onClick={() => window.open("https://meet.google.com/new", "_blank", "noopener,noreferrer")}
-          className="font-display text-xs tracking-wider text-muted hover:text-ink rounded-full"
+          className="text-sm text-muted hover:text-ink"
         >
           Iniciar Meet
         </button>
@@ -442,13 +442,13 @@ export default function App() {
               "noopener,noreferrer"
             );
           }}
-          className="font-display text-xs tracking-wider text-muted hover:text-ink rounded-full"
+          className="text-sm text-muted hover:text-ink"
         >
           Programar Meet
         </button>
         <button
           onClick={() => window.open("https://wonderboy.mx/dashboard/", "_blank", "noopener,noreferrer")}
-          className="font-display text-xs tracking-wider text-muted hover:text-ink rounded-full"
+          className="text-sm text-muted hover:text-ink"
         >
           Finanzas
         </button>
@@ -464,7 +464,7 @@ export default function App() {
         />
         <button
           onClick={toggleDarkMode}
-          className="transition-colors px-3 py-1.5 flex items-center justify-center bg-button hover:bg-button-hover rounded-full"
+          className="transition-colors px-3 py-2 flex items-center justify-center glass-overlay hover:bg-button-hover rounded-xl"
         >
           <svg width="15" height="15" viewBox="0 0 20.68 20.68" fill="none" xmlns="http://www.w3.org/2000/svg">
             <g fill="currentColor" className="text-ink">
@@ -528,7 +528,7 @@ export default function App() {
                 setAddMenuOpen(false);
               }}
               disabled={activeProjects.length === 0}
-              className="font-display text-xs tracking-wider text-ink bg-button hover:bg-button-hover transition-colors px-3 py-1.5 disabled:opacity-40 whitespace-nowrap rounded-full"
+              className="text-sm text-ink glass-overlay hover:bg-button-hover transition-colors px-4 py-2 disabled:opacity-40 whitespace-nowrap rounded-xl"
             >
               + Tarea
             </button>
@@ -537,7 +537,7 @@ export default function App() {
                 setProjectModal({ open: true, project: null });
                 setAddMenuOpen(false);
               }}
-              className="font-display text-xs tracking-wider text-ink bg-button hover:bg-button-hover transition-colors px-3 py-1.5 whitespace-nowrap rounded-full"
+              className="text-sm text-ink glass-overlay hover:bg-button-hover transition-colors px-4 py-2 whitespace-nowrap rounded-xl"
             >
               + Proyecto
             </button>
@@ -545,8 +545,8 @@ export default function App() {
         )}
         <button
           onClick={() => setAddMenuOpen((open) => !open)}
-          className={`transition-colors px-3 py-1.5 flex items-center justify-center ${
-            addMenuOpen ? "bg-button-hover" : "bg-button hover:bg-button-hover"
+          className={`transition-colors px-3 py-2 rounded-xl flex items-center justify-center ${
+            addMenuOpen ? "bg-button-hover" : "glass-overlay hover:bg-button-hover"
           }`}
         >
           <svg width="15" height="15" viewBox="0 0 20.68 20.68" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -565,7 +565,7 @@ export default function App() {
       </div>
       </div>
 
-      <main className="px-8 pb-24 pt-2">
+      <main className="px-4 sm:px-6 pb-24 pt-2">
         {loading ? (
           <div className="fixed inset-0 flex items-center justify-center">
             <p className="text-sm text-muted flex items-baseline">
@@ -577,24 +577,24 @@ export default function App() {
           </div>
         ) : projects.length === 0 ? (
           <div className="text-center py-24">
-            <p className="text-[11px] text-muted mb-3">
+            <p className="text-base text-muted mb-4">
               Todavía no tienes proyectos.
             </p>
             <button
               onClick={() => setProjectModal({ open: true, project: null })}
-              className="text-xs px-3 py-1.5 bg-accent text-white rounded-full"
+              className="text-sm px-4 py-2 bg-accent text-accent-fg rounded-xl"
             >
               Crear tu primer proyecto
             </button>
           </div>
         ) : activeProjects.length === 0 ? (
           <div className="text-center py-24">
-            <p className="text-[11px] text-muted mb-3">
+            <p className="text-base text-muted mb-4">
               Todos tus proyectos están archivados.
             </p>
             <button
               onClick={() => setProjectsPanelOpen(true)}
-              className="text-xs px-3 py-1.5 bg-accent text-white rounded-full"
+              className="text-sm px-4 py-2 bg-accent text-accent-fg rounded-xl"
             >
               Ver proyectos
             </button>
@@ -611,6 +611,10 @@ export default function App() {
                 }
                 onSelectTask={(t) => setTaskModal({ open: true, task: t })}
                 onOpenProjects={() => setProjectsPanelOpen(true)}
+                onOpenProject={(id) => {
+                  setProjectFilter(id);
+                  setView("branding");
+                }}
                 currentUserName={currentUser?.name}
                 onLogout={handleLogout}
               />

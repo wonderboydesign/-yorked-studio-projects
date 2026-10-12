@@ -27,26 +27,26 @@ export default function ProjectsPanel({
 
   return (
     <div
-      className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50 px-4"
+      className="fixed inset-0 bg-black/20 backdrop-blur-[2px] flex items-center justify-center z-50 px-4"
       onClick={onClose}
     >
       <div
-        className="bg-surface w-full max-w-lg p-6 border border-line max-h-[80vh] overflow-y-auto rounded-3xl"
+        className="glass-overlay w-full max-w-lg p-8 max-h-[80vh] overflow-y-auto rounded-3xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-mono text-xs uppercase tracking-wider">Proyectos</h2>
+          <h2 className="font-mono text-xs">Proyectos</h2>
           <button onClick={onClose} className="text-xs text-muted rounded-full">
             Cerrar
           </button>
         </div>
 
-        <h3 className="font-display text-xs font-medium text-muted mb-2 uppercase tracking-wide">
+        <h3 className="font-display text-xs font-medium text-muted mb-2">
           Activos ({active.length})
         </h3>
         <div className="space-y-1 mb-6">
           {active.length === 0 && (
-            <p className="text-[11px] text-muted">No hay proyectos activos.</p>
+            <p className="text-xs text-muted">No hay proyectos activos.</p>
           )}
           {active.map((p) => (
             <div
@@ -73,12 +73,12 @@ export default function ProjectsPanel({
           ))}
         </div>
 
-        <h3 className="font-display text-xs font-medium text-muted mb-2 uppercase tracking-wide">
+        <h3 className="font-display text-xs font-medium text-muted mb-2">
           Archivados ({archived.length})
         </h3>
         <div className="space-y-1">
           {archived.length === 0 && (
-            <p className="text-[11px] text-muted">No hay proyectos archivados.</p>
+            <p className="text-xs text-muted">No hay proyectos archivados.</p>
           )}
           {archived.map((p) => (
             <div

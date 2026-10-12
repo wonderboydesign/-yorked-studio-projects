@@ -95,7 +95,7 @@ export default function ConceptStage() {
               value={linkUrl}
               onChange={(e) => setLinkUrl(e.target.value)}
               placeholder="Pega una liga (Pinterest, Behance, web…)"
-              className="flex-1 min-w-0 bg-paper border border-line rounded-full px-3 py-1.5 text-xs focus:outline-none"
+              className="flex-1 min-w-0 field rounded-full px-3 py-1.5 text-xs focus:outline-none"
             />
             <Button type="submit" disabled={!linkUrl.trim()}>
               Agregar
@@ -121,11 +121,11 @@ export default function ConceptStage() {
                     value={r.body}
                     onSave={(body) => updateItem(r.id, { body })}
                     placeholder="Qué nos gusta de esta…"
-                    className="text-[11px]"
+                    className="text-xs"
                   />
                   <div className="flex items-center justify-between">
                     {r.linkUrl ? (
-                      <a href={r.linkUrl} target="_blank" rel="noreferrer" className="text-[11px] text-muted hover:text-ink">
+                      <a href={r.linkUrl} target="_blank" rel="noreferrer" className="text-xs text-muted hover:text-ink">
                         Abrir
                       </a>
                     ) : (
@@ -148,13 +148,13 @@ export default function ConceptStage() {
 
         <div className="border border-line rounded-2xl p-4 bg-paper mb-5">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="font-mono text-xs uppercase tracking-[0.15em]">Generar con Claude</span>
+            <span className="font-mono text-xs">Generar con Claude</span>
             <div className="flex items-center gap-1">
               {[2, 3, 4].map((n) => (
                 <button
                   key={n}
                   onClick={() => setCount(n)}
-                  className={`text-[11px] w-7 h-7 rounded-full border ${
+                  className={`text-xs w-7 h-7 rounded-full border ${
                     count === n ? "border-ink bg-ink text-paper" : "border-line text-muted hover:text-ink"
                   }`}
                 >
@@ -166,15 +166,15 @@ export default function ConceptStage() {
               value={direction}
               onChange={(e) => setDirection(e.target.value)}
               placeholder="Opcional: “más atrevidos”, “que partan del origen del fundador”…"
-              className="flex-1 min-w-[200px] bg-surface border border-line rounded-full px-3 py-1.5 text-xs focus:outline-none"
+              className="flex-1 min-w-[200px] field rounded-full px-3 py-1.5 text-xs focus:outline-none"
             />
             <Button tone="primary" onClick={generate} disabled={!hasBrief || generating}>
               {generating ? "Pensando…" : "Generar conceptos"}
             </Button>
           </div>
-          {!hasBrief && <p className="text-[11px] text-muted mt-2">Escribe primero el brief principal (etapa 01).</p>}
+          {!hasBrief && <p className="text-xs text-muted mt-2">Escribe primero el brief principal (etapa 01).</p>}
           {generating && (
-            <p className="text-[11px] text-muted mt-2">
+            <p className="text-xs text-muted mt-2">
               Claude está leyendo el brief, el contexto, los comentarios y las referencias. Tarda alrededor de un minuto.
             </p>
           )}
@@ -196,7 +196,7 @@ export default function ConceptStage() {
                   className="text-base font-medium"
                 />
                 {c.aiGenerated && (
-                  <span className="shrink-0 text-[10px] font-mono uppercase tracking-wider text-muted border border-line rounded-full px-2 py-0.5">
+                  <span className="shrink-0 text-[10px] font-mono text-muted border border-line rounded-full px-2 py-0.5">
                     IA
                   </span>
                 )}

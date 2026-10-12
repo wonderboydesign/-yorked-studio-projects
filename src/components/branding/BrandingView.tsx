@@ -12,6 +12,7 @@ import DevelopmentStage from "./DevelopmentStage";
 import PresentationStage from "./PresentationStage";
 import ReferenceLibrary from "./ReferenceLibrary";
 import { Button } from "./ui";
+import { ArrowUpRight, HeroTitle, OverHero, appear, heroSize } from "../Glass";
 
 export default function BrandingView({
   projects,
@@ -51,43 +52,63 @@ function ProjectPicker({
   onOpenLibrary: () => void;
 }) {
   return (
-    <div className="space-y-8">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl tracking-tight">Branding</h1>
-          <p className="text-sm text-muted mt-1 max-w-xl">
-            Elige un proyecto para trabajar su proceso de marca, de brief a presentación.
-          </p>
-        </div>
-        <Button onClick={onOpenLibrary}>Biblioteca de referencias</Button>
-      </div>
+    <div className="space-y-16 pb-8">
+      <HeroTitle
+        eyebrow="Proceso de marca"
+        aside={<Button onClick={onOpenLibrary}>Biblioteca de referencias</Button>}
+        size={heroSize("Branding")}
+      >
+        Branding
+      </HeroTitle>
 
-      <ol className="grid gap-px bg-line border border-line rounded-3xl overflow-hidden sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        {BRAND_STAGES.map((s) => (
-          <li key={s.key} className="bg-surface p-4">
-            <span className="font-mono text-xs text-accent">{s.number}</span>
-            <h3 className="text-sm font-medium mt-1">{s.label}</h3>
-            <p className="text-xs text-muted mt-1">{s.goal}</p>
-            <p className="text-[11px] mt-2">
-              <span className="text-muted">Sale: </span>
-              {s.output}
-            </p>
-          </li>
-        ))}
-      </ol>
+      <OverHero size={heroSize("Branding")} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {projects.map((p, i) => {
+          const a = appear(i);
+          return (
+            <button
+              key={p.id}
+              onClick={() => onSelect(p.id)}
+              style={a.style}
+              className={`group text-left glass glass-hover rounded-3xl p-8 min-h-[240px] flex flex-col ${a.className}`}
+            >
+              <div className="mt-auto flex items-end justify-between gap-4">
+                <div className="min-w-0">
+                  <h3 className="text-xl truncate flex items-center gap-2.5">
+                    <span className="inline-block w-2.5 h-2.5 rounded-full shrink-0" style={{ background: p.color }} />
+                    {p.name}
+                  </h3>
+                  {p.client && <p className="text-sm text-muted mt-1 truncate">{p.client}</p>}
+                </div>
+                <ArrowUpRight className="shrink-0 mb-1" />
+              </div>
+            </button>
+          );
+        })}
+      </OverHero>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {projects.map((p) => (
-          <button
-            key={p.id}
-            onClick={() => onSelect(p.id)}
-            className="text-left border border-line bg-surface hover:border-ink/40 rounded-3xl p-5 transition-colors"
-          >
-            <span className="inline-block w-2.5 h-2.5 rounded-full mb-3" style={{ background: p.color }} />
-            <h3 className="text-base font-medium">{p.name}</h3>
-            {p.client && <p className="text-xs text-muted">{p.client}</p>}
-          </button>
-        ))}
+      <div>
+        <h2 className="text-2xl mb-1">Cómo trabajamos</h2>
+        <p className="text-base text-muted mb-6 max-w-xl">
+          Seis etapas. Cada una tiene un objetivo y una salida; la siguiente parte de lo que dejó la anterior.
+        </p>
+        <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          {BRAND_STAGES.map((s, i) => {
+            const a = appear(i + projects.length);
+            return (
+              <li key={s.key} style={a.style} className={`glass rounded-3xl p-6 flex flex-col min-h-[240px] ${a.className}`}>
+                <span className="text-sm text-muted">{s.number}</span>
+                <div className="mt-auto pt-8">
+                  <h3 className="text-xl">{s.label}</h3>
+                  <p className="text-sm text-muted mt-2">{s.goal}</p>
+                  <p className="text-xs mt-3 pt-3 border-t border-ink/[0.07]">
+                    <span className="text-muted">Sale: </span>
+                    {s.output}
+                  </p>
+                </div>
+              </li>
+            );
+          })}
+        </ol>
       </div>
     </div>
   );
@@ -128,15 +149,16 @@ function Workspace({ onOpenLibrary }: { onOpenLibrary: () => void }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-xs text-muted">{project.client ?? "Branding"}</p>
-          <h1 className="text-3xl tracking-tight">{project.name}</h1>
-        </div>
-        <Button onClick={onOpenLibrary}>Biblioteca de referencias</Button>
-      </div>
+      <HeroTitle
+        eyebrow={project.client ?? "Branding"}
+        aside={<Button onClick={onOpenLibrary}>Biblioteca de referencias</Button>}
+        size={heroSize(project.name)}
+      >
+        {project.name}
+      </HeroTitle>
 
-      <nav className="grid grid-cols-3 sm:grid-cols-6 gap-1 border border-line rounded-3xl p-1 bg-surface">
+      <OverHero size={heroSize(project.name)} className="glass rounded-3xl p-1.5 hero-pad">
+      <nav className="grid grid-cols-3 sm:grid-cols-6 gap-1">
         {BRAND_STAGES.map((s) => {
           const active = s.key === view;
           const isCurrent = s.key === data.workspace.stage;
@@ -144,15 +166,15 @@ function Workspace({ onOpenLibrary }: { onOpenLibrary: () => void }) {
             <button
               key={s.key}
               onClick={() => setView(s.key)}
-              className={`text-left rounded-[20px] px-3 py-2 transition-colors ${
-                active ? "bg-ink text-paper" : "hover:bg-button"
+              className={`text-left min-w-0 rounded-[26px] px-3 sm:px-4 py-3 transition-colors ${
+                active ? "bg-ink text-paper" : "hover:bg-ink/5"
               }`}
             >
-              <span className={`font-mono text-[11px] ${active ? "text-paper/60" : "text-muted"}`}>
+              <span className={`font-mono text-xs ${active ? "text-paper/60" : "text-muted"}`}>
                 {s.number}
                 {progress[s.key] && <span className={active ? "text-paper" : "text-accent"}> ✓</span>}
               </span>
-              <span className="block text-sm">
+              <span className="block text-sm sm:text-base truncate">
                 {s.label}
                 {isCurrent && <span className={`ml-1 ${active ? "text-paper" : "text-accent"}`}>●</span>}
               </span>
@@ -160,6 +182,7 @@ function Workspace({ onOpenLibrary }: { onOpenLibrary: () => void }) {
           );
         })}
       </nav>
+      </OverHero>
 
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <p className="text-sm">

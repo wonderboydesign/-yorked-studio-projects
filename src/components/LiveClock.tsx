@@ -2,15 +2,15 @@
 
 import { useEffect, useState } from "react";
 
-const DAYS = ["DOMINGO", "LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO"];
+const DAYS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 const MONTHS = [
-  "ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO",
-  "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE",
+  "enero", "febrero", "marzo", "abril", "mayo", "junio",
+  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
 ];
 
 function format(d: Date): string {
   const pad = (n: number) => String(n).padStart(2, "0");
-  return `${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}, ${pad(d.getHours())}:${pad(
+  return `${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]} · ${pad(d.getHours())}:${pad(
     d.getMinutes()
   )}:${pad(d.getSeconds())}`;
 }
@@ -27,8 +27,8 @@ export default function LiveClock() {
   if (!now) return null;
 
   return (
-    <div className="hidden md:block border border-line px-3 py-1.5 rounded-2xl">
-      <span className="font-mono text-[11px] uppercase tracking-wider text-muted whitespace-nowrap">
+    <div className="hidden md:block px-1 py-1.5">
+      <span className="text-base text-ink whitespace-nowrap">
         {format(now)}
       </span>
     </div>

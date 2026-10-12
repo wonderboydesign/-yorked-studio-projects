@@ -181,7 +181,7 @@ function AssigneesPicker({
         </svg>
       </button>
       {open && (
-        <div role="listbox" aria-multiselectable="true" className="absolute right-0 top-full z-20 mt-1 w-56 rounded-2xl border border-line bg-surface p-1.5 shadow-xl">
+        <div role="listbox" aria-multiselectable="true" className="absolute right-0 top-full z-20 mt-1 w-56 rounded-2xl glass-overlay p-1.5">
           {users.length === 0 && <p className="px-2.5 py-2 text-xs text-muted">No hay personas en el equipo.</p>}
           {users.map((u) => {
             const checked = value.includes(u.id);
@@ -192,7 +192,7 @@ function AssigneesPicker({
                 role="option"
                 aria-selected={checked}
                 onClick={() => onToggle(u.id)}
-                className={`flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left text-sm text-ink hover:bg-ink/5 ${checked ? "font-semibold" : ""}`}
+                className={`flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left text-sm text-ink hover:bg-ink/5 ${checked ? "font-medium" : ""}`}
               >
                 <Avatar name={u.name} size={22} />
                 <span className="flex-1 truncate">{u.name}</span>
@@ -507,12 +507,12 @@ export default function TaskModal({
 
   return (
     <aside
-      className="fixed inset-y-0 right-0 z-50 flex w-full max-w-[560px] flex-col border-l border-line bg-surface shadow-2xl rounded-3xl"
+      className="fixed inset-y-0 right-0 z-50 flex w-full max-w-[560px] flex-col glass-overlay rounded-3xl sm:m-2 sm:inset-y-0"
       role="dialog"
       aria-label={isEdit ? "Editar tarea" : "Nueva tarea"}
     >
       <div className="flex items-center justify-between px-8 pt-6 pb-4">
-        <h2 className="font-mono text-xs uppercase tracking-wider text-ink">
+        <h2 className="font-mono text-xs text-ink">
           <span className="relative top-[1px] left-[-1px] inline-block text-accent">●</span>
           {isEdit ? "Editar tarea" : "Nueva tarea"}
         </h2>
@@ -537,7 +537,7 @@ export default function TaskModal({
             <button
               type="button"
               onClick={() => setConfirmingDiscard(false)}
-              className="rounded-full bg-surface px-3 py-1.5 text-sm text-ink hover:bg-ink/10"
+              className="rounded-full bg-button px-3 py-1.5 text-sm text-ink hover:bg-button-hover"
             >
               Seguir editando
             </button>
@@ -567,7 +567,7 @@ export default function TaskModal({
           }}
           placeholder="Escribe el nombre de la tarea"
           autoFocus={!isEdit}
-          className="w-full bg-transparent text-ink text-2xl font-semibold tracking-tight placeholder:text-muted outline-none rounded-xl"
+          className="w-full bg-transparent text-ink text-2xl font-medium tracking-tight placeholder:text-muted outline-none rounded-xl"
         />
       </div>
 
@@ -687,7 +687,7 @@ export default function TaskModal({
 
             <section>
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-semibold text-ink">Notas</h3>
+                <h3 className="text-sm font-medium text-ink">Notas</h3>
                 <button
                   type="button"
                   onClick={() => setNotesExpanded((v) => !v)}
@@ -725,7 +725,7 @@ export default function TaskModal({
 
             <section>
               <div className="flex items-center gap-3 mb-2">
-                <h3 className="text-sm font-semibold text-ink">Archivos</h3>
+                <h3 className="text-sm font-medium text-ink">Archivos</h3>
                 {task && (
                   <label
                     className={`flex h-6 w-6 items-center justify-center rounded-full bg-ink/[0.06] text-base leading-none text-ink hover:bg-ink/10 ${
@@ -786,7 +786,7 @@ export default function TaskModal({
             </section>
 
             <section>
-              <h3 className="text-sm font-semibold text-ink mb-2">Comentarios</h3>
+              <h3 className="text-sm font-medium text-ink mb-2">Comentarios</h3>
               {!task ? (
                 <p className="text-xs text-muted">Guarda la tarea primero para poder comentar.</p>
               ) : (
@@ -803,11 +803,11 @@ export default function TaskModal({
                                 {c.author?.name ?? "Alguien del equipo"}
                               </span>
                               <div className="flex shrink-0 items-center gap-2">
-                                <span className="text-[11px] text-muted">{formatCommentDate(c.createdAt)}</span>
+                                <span className="text-xs text-muted">{formatCommentDate(c.createdAt)}</span>
                                 <button
                                   type="button"
                                   onClick={() => handleDeleteComment(c.id)}
-                                  className="text-[11px] text-muted hover:text-red-600"
+                                  className="text-xs text-muted hover:text-red-600"
                                 >
                                   Eliminar
                                 </button>
@@ -843,7 +843,7 @@ export default function TaskModal({
                       onClick={handleAddComment}
                       disabled={!commentDraft.trim() || postingComment}
                       aria-label="Comentar"
-                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-white hover:opacity-90 disabled:opacity-40"
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-accent-fg hover:opacity-90 disabled:opacity-40"
                     >
                       <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <path d="M8 13V3M3.5 7.5 8 3l4.5 4.5" />

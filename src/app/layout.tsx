@@ -1,15 +1,8 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import "@fontsource/open-sauce-sans/400.css";
+import "@fontsource/open-sauce-sans/500.css";
+import "@fontsource/open-sauce-sans/600.css";
 import "./globals.css";
-
-const doto = localFont({
-  src: [{ path: "./fonts/doto-800.ttf", weight: "800", style: "normal" }],
-  variable: "--font-doto",
-});
-const helveticaNow = localFont({
-  src: "./fonts/HelveticaNowDisplay-Regular.otf",
-  variable: "--font-helvetica-now",
-});
 
 export const metadata: Metadata = {
   title: "Yorked Studio Task Manager",
@@ -44,7 +37,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${doto.variable} ${helveticaNow.variable} font-mono bg-paper text-ink antialiased`}>
+      <body className="font-sans bg-paper text-ink antialiased">
         {children}
       </body>
     </html>

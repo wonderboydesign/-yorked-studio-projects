@@ -91,12 +91,12 @@ export default function MoodboardStage() {
               />
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] text-muted">Columnas</span>
+              <span className="text-xs text-muted">Columnas</span>
               {[3, 4, 5].map((n) => (
                 <button
                   key={n}
                   onClick={() => setCols(n)}
-                  className={`text-[11px] w-6 h-6 rounded-full border ${
+                  className={`text-xs w-6 h-6 rounded-full border ${
                     cols === n ? "border-ink bg-ink text-paper" : "border-line text-muted"
                   }`}
                 >
@@ -128,9 +128,9 @@ export default function MoodboardStage() {
                           value={img.body}
                           onSave={(body) => updateItem(img.id, { body })}
                           placeholder="Nota…"
-                          className="text-[11px] text-white placeholder:text-white/60"
+                          className="text-xs text-white placeholder:text-white/60"
                         />
-                        <div className="flex items-center justify-between mt-1 text-[11px]">
+                        <div className="flex items-center justify-between mt-1 text-xs">
                           <span className="text-white/70">
                             {img.referenceId ? "● Biblioteca" : ""}
                             {img.linkUrl && (
@@ -166,7 +166,7 @@ export default function MoodboardStage() {
                   value={imageUrl}
                   onChange={(e) => setImageUrl(e.target.value)}
                   placeholder="URL de imagen"
-                  className="flex-1 min-w-0 bg-paper border border-line rounded-full px-3 py-1.5 text-xs focus:outline-none"
+                  className="flex-1 min-w-0 field rounded-full px-3 py-1.5 text-xs focus:outline-none"
                 />
                 <Button type="submit" disabled={!imageUrl.trim()}>
                   +

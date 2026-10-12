@@ -156,15 +156,15 @@ export default function ReferenceLibrary({
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-ink/40 flex items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 bg-black/20 backdrop-blur-[2px] flex items-center justify-center p-4" onClick={onClose}>
       <div
-        className="bg-surface border border-line rounded-3xl w-full max-w-5xl max-h-[90vh] flex flex-col"
+        className="glass-overlay rounded-3xl w-full max-w-5xl max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         <header className="px-6 pt-5 pb-4 border-b border-line space-y-3">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-5">
-              <h2 className="font-mono text-xs uppercase tracking-[0.15em]">Referencias</h2>
+              <h2 className="font-mono text-xs">Referencias</h2>
               <nav className="flex gap-4">
                 <TabButton active={tab === "library"} onClick={() => setTab("library")}>
                   Biblioteca del estudio ({lib?.references.length ?? 0})
@@ -185,13 +185,13 @@ export default function ReferenceLibrary({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Buscar por nombre, etiqueta o liga…"
-              className="flex-1 min-w-[180px] bg-paper border border-line rounded-full px-3 py-1.5 text-xs focus:outline-none"
+              className="flex-1 min-w-[180px] field rounded-full px-3 py-1.5 text-xs focus:outline-none"
             />
             {allTags.slice(0, 14).map((t) => (
               <button
                 key={t}
                 onClick={() => setTag(tag === t ? null : t)}
-                className={`text-[11px] px-2 py-0.5 rounded-full border ${
+                className={`text-xs px-2 py-0.5 rounded-full border ${
                   tag === t ? "border-ink bg-ink text-paper" : "border-line text-muted hover:text-ink"
                 }`}
               >
@@ -216,14 +216,14 @@ export default function ReferenceLibrary({
                   value={uploadTags}
                   onChange={(e) => setUploadTags(e.target.value)}
                   placeholder="Etiquetas para lo que subas: tipografía, editorial, packaging…"
-                  className="w-full bg-paper border border-line rounded-full px-3 py-1.5 text-xs focus:outline-none"
+                  className="w-full field rounded-full px-3 py-1.5 text-xs focus:outline-none"
                 />
                 <form onSubmit={addByUrl} className="flex gap-2">
                   <input
                     value={imageUrl}
                     onChange={(e) => setImageUrl(e.target.value)}
                     placeholder="…o pega la URL de una imagen"
-                    className="flex-1 min-w-0 bg-paper border border-line rounded-full px-3 py-1.5 text-xs focus:outline-none"
+                    className="flex-1 min-w-0 field rounded-full px-3 py-1.5 text-xs focus:outline-none"
                   />
                   <Button type="submit" disabled={!imageUrl.trim()}>
                     Agregar
@@ -274,27 +274,27 @@ export default function ReferenceLibrary({
                             value={r.tags.join(", ")}
                             onSave={(tags) => updateReference(r.id, { tags })}
                             placeholder="Etiquetas, separadas por coma"
-                            className="text-[11px]"
+                            className="text-xs"
                           />
                           <InlineInput
                             value={r.sourceUrl}
                             onSave={(sourceUrl) => updateReference(r.id, { sourceUrl })}
                             placeholder="Liga de origen"
-                            className="text-[11px]"
+                            className="text-xs"
                           />
                         </>
                       ) : (
                         <>
                           {r.title && <p className="text-xs truncate">{r.title}</p>}
                           {r.tags.length > 0 && (
-                            <p className="text-[11px] text-muted truncate">{r.tags.map((t) => `#${t}`).join(" ")}</p>
+                            <p className="text-xs text-muted truncate">{r.tags.map((t) => `#${t}`).join(" ")}</p>
                           )}
                         </>
                       )}
                       {!pick && (
                         <div className="flex items-center justify-between pt-1">
                           {r.sourceUrl ? (
-                            <a href={r.sourceUrl} target="_blank" rel="noreferrer" className="text-[11px] text-muted hover:text-ink">
+                            <a href={r.sourceUrl} target="_blank" rel="noreferrer" className="text-xs text-muted hover:text-ink">
                               Origen
                             </a>
                           ) : (
@@ -304,7 +304,7 @@ export default function ReferenceLibrary({
                             <div className="flex gap-3">
                               <button
                                 onClick={() => setEditing(editing === r.id ? null : r.id)}
-                                className="text-[11px] text-muted hover:text-ink"
+                                className="text-xs text-muted hover:text-ink"
                               >
                                 {editing === r.id ? "Listo" : "Editar"}
                               </button>

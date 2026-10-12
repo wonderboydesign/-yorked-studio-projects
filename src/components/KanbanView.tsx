@@ -19,19 +19,19 @@ export default function KanbanView({
   const projectMap = Object.fromEntries(projects.map((p) => [p.id, p]));
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
       {STATUS_ORDER.map((status) => {
         const columnTasks = tasks.filter((t) => t.status === status);
         return (
-          <div key={status} className="min-h-[200px]">
+          <div key={status} className="min-h-[320px] rounded-3xl bg-ink/[0.025] p-3">
             <div
-              className="flex items-center justify-between px-1 pb-2.5 mb-3 border-t-2"
-              style={{ borderTopColor: STATUS_COLORS[status] }}
+              className="flex items-center justify-between px-3 pt-2 pb-4"
             >
-              <h3 className="font-mono text-[12px] uppercase tracking-[0.15em] text-ink pt-2.5">
+              <h3 className="inline-flex items-center gap-2 text-base text-ink">
+                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: STATUS_COLORS[status] }} aria-hidden="true" />
                 {STATUS_LABELS[status]}
               </h3>
-              <span className="font-mono text-[12px] text-muted pt-2.5">{columnTasks.length}</span>
+              <span className="text-sm text-muted">{columnTasks.length}</span>
             </div>
             <div className="space-y-2">
               {columnTasks.map((t) => {
@@ -40,17 +40,17 @@ export default function KanbanView({
                   <div
                     key={t.id}
                     onClick={() => onSelectTask(t)}
-                    className="bg-surface border border-line p-3 cursor-pointer hover:border-ink transition-colors rounded-2xl"
+                    className="glass glass-hover p-4 cursor-pointer rounded-2xl"
                   >
                     <p className="text-sm mb-2.5">{t.name}</p>
                     <div className="flex items-center justify-between">
                       <span
-                        className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide"
+                        className="inline-flex items-center gap-1.5 font-mono text-xs"
                         style={{ color: project?.color }}
                       >
                         {project?.name}
                       </span>
-                      <span className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide text-muted shrink-0">
+                      <span className="flex items-center gap-1.5 font-mono text-xs text-muted shrink-0">
                         <AvatarStack users={t.assignees} size={20} />
                         <span className={DUE_TEXT_CLASS[dueTone(t.endDate, t.status)]}>
                           {capMonth(formatShort(parseDate(t.endDate)))}
@@ -63,7 +63,7 @@ export default function KanbanView({
                       onChange={(e) =>
                         onChangeStatus(t.id, e.target.value as Status)
                       }
-                      className="mt-2.5 w-full appearance-none font-mono text-[11px] uppercase tracking-wide border border-line px-1.5 py-1.5 bg-surface rounded-xl"
+                      className="mt-2.5 w-full appearance-none font-mono text-xs field px-2 py-1.5 rounded-xl"
                     >
                       {STATUS_ORDER.map((s) => (
                         <option key={s} value={s}>
