@@ -28,8 +28,8 @@ export const BRAND_STAGES: {
     key: "research",
     number: "03",
     label: "Investigación",
-    goal: "Definir y desarrollar ideas, y armar el plano general de lo que hay que producir.",
-    output: "Ideas priorizadas y plano general (entregables).",
+    goal: "Investigar negocio, audiencia, competencia y categoría, y aterrizarlo en hallazgos y un plano general.",
+    output: "Hallazgos, mapa de posicionamiento y plano general.",
   },
   {
     key: "moodboard",
@@ -62,7 +62,64 @@ export interface BrandWorkspace {
   context: string | null;
   conceptNotes: string | null;
   plan: string | null;
+  research: BrandResearch | null;
   updatedAt: string;
+}
+
+// Research estructurado: un texto por bloque, ejes del mapa de
+// posicionamiento y el lugar que buscamos para la marca en ese mapa
+export interface BrandResearch {
+  blocks?: Partial<Record<ResearchBlockKey, string>>;
+  axes?: { xLeft: string; xRight: string; yBottom: string; yTop: string };
+  target?: { x: number; y: number } | null;
+}
+
+export type ResearchBlockKey = "business" | "audience" | "category" | "trends";
+
+export const RESEARCH_BLOCKS: { key: ResearchBlockKey; label: string; hint: string; placeholder: string }[] = [
+  {
+    key: "business",
+    label: "Negocio",
+    hint: "Qué vende, cómo gana dinero, qué lo hace distinto y a dónde quiere llegar.",
+    placeholder: "Oferta: …\nModelo de negocio: …\nDiferenciadores reales: …\nObjetivos a 1–3 años: …",
+  },
+  {
+    key: "audience",
+    label: "Audiencia",
+    hint: "2 o 3 perfiles: quiénes son, qué les importa y dónde se encuentran con la marca.",
+    placeholder: "Perfil 1 — …\nQué busca: …\nQué le molesta: …\nDónde ve la marca: …",
+  },
+  {
+    key: "category",
+    label: "Categoría",
+    hint: "Los códigos que todos repiten en este giro (color, tipografía, tono, imágenes). ¿Seguirlos o romperlos?",
+    placeholder: "Colores típicos: …\nTipografías típicas: …\nTono típico: …\nLo que nadie está haciendo: …",
+  },
+  {
+    key: "trends",
+    label: "Tendencias",
+    hint: "Movimientos de mercado, culturales o visuales que le afectan o que puede aprovechar.",
+    placeholder: "Tendencia — por qué importa — fuente",
+  },
+];
+
+export const DEFAULT_AXES = { xLeft: "Accesible", xRight: "Premium", yBottom: "Tradicional", yTop: "Moderno" };
+
+// Campos de un competidor (BrandItem kind "competitor", en data)
+export interface CompetitorData {
+  colors?: string;
+  typography?: string;
+  tone?: string;
+  price?: string;
+  x?: number;
+  y?: number;
+}
+
+// Hallazgo: Encontramos → Significa → Oportunidad (BrandItem kind "insight")
+export interface InsightData {
+  found?: string;
+  means?: string;
+  opportunity?: string;
 }
 
 export type BrandTextField = "brief" | "context" | "conceptNotes" | "plan";
@@ -75,7 +132,9 @@ export type BrandItemKind =
   | "concept" // concepto: concepto propuesto (a mano o con IA)
   | "idea" // investigación: idea
   | "image" // moodboard: imagen
-  | "piece"; // desarrollo: boceto o pieza desarrollada
+  | "piece" // desarrollo: boceto o pieza desarrollada
+  | "competitor" // investigación: ficha de competidor
+  | "insight"; // investigación: hallazgo
 
 export interface BrandItem {
   id: string;
@@ -89,6 +148,7 @@ export interface BrandItem {
   contentType: string | null;
   linkUrl: string | null;
   status: string | null;
+  data: Record<string, unknown> | null;
   pinned: boolean;
   aiGenerated: boolean;
   order: number;
@@ -119,7 +179,7 @@ export interface Reference {
   external?: boolean;
 }
 
-export type BrandSlideType = "cover" | "section" | "text" | "image" | "moodboard" | "concept";
+export type BrandSlideType = "cover" | "section" | "text" | "image" | "moodboard" | "concept" | "insights" | "map";
 
 export interface BrandSlide {
   id: string;

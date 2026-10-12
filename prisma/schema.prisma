@@ -125,6 +125,9 @@ model BrandWorkspace {
   context      String?
   conceptNotes String?
   plan         String?
+  // Research estructurado: textos por bloque, ejes y punto objetivo del
+  // mapa de posicionamiento (ver BrandResearch en src/lib/branding.ts)
+  research     Json?
   updatedAt    DateTime @updatedAt
 }
 
@@ -144,6 +147,9 @@ model BrandItem {
   contentType String?
   linkUrl     String?
   status      String?
+  // Datos propios de cada tipo: campos de un competidor y su posición en el
+  // mapa, las tres partes de un hallazgo…
+  data        Json?
   pinned      Boolean     @default(false)
   aiGenerated Boolean     @default(false)
   order       Int         @default(0)

@@ -5,9 +5,18 @@ import { ITEM_INCLUDE, deleteBlobIfOwned, pickItemFields } from "@/lib/brandingS
 
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   const body = await request.json();
+  const fields = pickItemFields(body);
+  // `data` llega como cambio parcial (solo los campos que se editaron) y se
+  // combina con lo guardado, para que dos ediciones seguidas no se pisen
+  // (se combina dentro de Postgres, en una sola operación atómica)
+  if (fields.data && typeof fields.data === "object") {
+    const patch = JSON.stringify(fields.data);
+    await prisma.$executeRaw`UPDATE "BrandItem" SET "data" = COALESCE("data", '{}'::jsonb) || ${patch}::jsonb, "updatedAt" = now() WHERE "id" = ${params.id}`;
+    delete fields.data;
+  }
   const item = await prisma.brandItem.update({
     where: { id: params.id },
-    data: pickItemFields(body),
+    data: fields,
     include: ITEM_INCLUDE,
   });
   return NextResponse.json(item);

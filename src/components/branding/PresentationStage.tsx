@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { BrandData, BrandSlide, BrandSlideType, Presentation, isImage, newSlideId } from "@/lib/branding";
+import { BrandData, BrandSlide, BrandSlideType, InsightData, Presentation, isImage, newSlideId } from "@/lib/branding";
 import { Project } from "@/lib/types";
 import { useBrand } from "./BrandContext";
 import SlideView from "./SlideView";
@@ -15,6 +15,8 @@ const SLIDE_TYPES: { key: BrandSlideType; label: string }[] = [
   { key: "concept", label: "Concepto" },
   { key: "moodboard", label: "Moodboard" },
   { key: "image", label: "Piezas" },
+  { key: "insights", label: "Hallazgos" },
+  { key: "map", label: "Mapa" },
 ];
 
 // Borrador armado con lo que ya existe en las etapas anteriores
@@ -35,6 +37,16 @@ export function buildDraft(data: BrandData, project: Project): BrandSlide[] {
       title: "Lo que entendimos",
       body: brief.length > 900 ? `${brief.slice(0, 900).trim()}…` : brief,
     });
+  }
+  // Research: hallazgos y mapa, cuando ya existen
+  const insights = data.items.filter((i) => i.kind === "insight" && (i.data as InsightData | null)?.found);
+  if (insights.length > 0) {
+    for (let i = 0; i < insights.length; i += 4) {
+      slides.push({ id: newSlideId(), type: "insights", itemIds: insights.slice(i, i + 4).map((x) => x.id) });
+    }
+  }
+  if (data.workspace.research?.target || data.items.filter((i) => i.kind === "competitor").length >= 2) {
+    slides.push({ id: newSlideId(), type: "map" });
   }
   if (conceptList.length > 0) {
     slides.push({ id: newSlideId(), type: "section", title: "Conceptos" });

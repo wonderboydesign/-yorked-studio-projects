@@ -120,7 +120,10 @@ function stageProgress(data: BrandData): Record<BrandStage, boolean> {
   return {
     brief: !!data.workspace.brief?.trim(),
     concept: items.some((i) => i.kind === "concept" && i.status === "chosen"),
-    research: !!data.workspace.plan?.trim() || items.some((i) => i.kind === "idea" && i.status === "develop"),
+    research:
+      items.some((i) => i.kind === "insight") ||
+      !!data.workspace.plan?.trim() ||
+      items.some((i) => i.kind === "idea" && i.status === "develop"),
     moodboard: data.moodboards.some((b) => items.some((i) => i.boardId === b.id)),
     development: items.some((i) => i.kind === "piece" && (i.status === "present" || i.status === "final")),
     presentation: data.presentations.some((p) => p.slides.length > 1),
