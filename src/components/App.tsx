@@ -16,14 +16,16 @@ import TeamPanel from "./TeamPanel";
 import NotificationBell from "./NotificationBell";
 import LiveClock from "./LiveClock";
 import Toast from "./Toast";
+import BrandingView from "./branding/BrandingView";
 
-type View = "dashboard" | "gantt" | "list" | "kanban" | "calendar";
+type View = "dashboard" | "gantt" | "list" | "kanban" | "calendar" | "branding";
 
 const VIEWS: { key: View; label: string; mobileLabel: string }[] = [
   { key: "gantt", label: "Gantt", mobileLabel: "Gantt" },
   { key: "list", label: "Lista", mobileLabel: "Lista" },
   { key: "kanban", label: "Kanban", mobileLabel: "Kanban" },
   { key: "calendar", label: "Calendario", mobileLabel: "Calendar" },
+  { key: "branding", label: "Branding", mobileLabel: "Brand" },
 ];
 
 export default function App() {
@@ -337,7 +339,7 @@ export default function App() {
           >
            <img src="/logo-header.png" alt="Logo" className="h-8 w-auto" />
           </button>
-          <nav className="flex gap-6">
+          <nav className="flex flex-wrap gap-x-6 gap-y-2">
             {VIEWS.map((v) => (
               <button
                 key={v.key}
@@ -641,6 +643,14 @@ export default function App() {
                 projects={projects}
                 onSelectTask={(t) => setTaskModal({ open: true, task: t })}
                 onChangeStatus={changeTaskStatus}
+              />
+            )}
+            {view === "branding" && (
+              <BrandingView
+                projects={activeProjects}
+                projectId={projectFilter !== "all" ? projectFilter : null}
+                onSelectProject={setProjectFilter}
+                notify={notify}
               />
             )}
             {view === "calendar" && (
