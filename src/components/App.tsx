@@ -420,7 +420,7 @@ export default function App() {
         </div>
       </header>
 
-      <div className="fixed bottom-[26px] sm:bottom-4 left-4 sm:left-6 hidden sm:flex items-center gap-5 z-10 glass-overlay px-4 py-2.5 rounded-2xl">
+      <div className="fixed bottom-[26px] sm:bottom-4 left-4 sm:left-6 hidden sm:flex items-center gap-5 z-40 glass-overlay px-4 py-2.5 rounded-2xl">
         <button
           onClick={() => window.open("https://meet.google.com/new", "_blank", "noopener,noreferrer")}
           className="text-sm text-muted hover:text-ink"
@@ -454,7 +454,7 @@ export default function App() {
         </button>
       </div>
 
-      <div className="fixed bottom-[26px] sm:bottom-4 right-6 z-10 flex items-center gap-4">
+      <div className="fixed bottom-[26px] sm:bottom-4 right-6 z-40 flex items-center gap-4">
         <NotificationBell
           enabled={!!currentUser}
           onOpenTask={(taskId) => {
