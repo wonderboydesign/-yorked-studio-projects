@@ -18,6 +18,12 @@ model Project {
   archived  Boolean  @default(false)
   createdAt DateTime @default(now())
   tasks     Task[]
+  // Flujo de branding (Brief → Concepto → Investigación → Moodboard →
+  // Desarrollo → Presentación), opcional por proyecto
+  brand         BrandWorkspace?
+  brandItems    BrandItem[]
+  moodboards    Moodboard[]
+  presentations Presentation[]
 }
 
 enum Status {
@@ -48,6 +54,8 @@ model User {
   assignees     Task[]         @relation("TaskAssignees")
   notifications Notification[]
   comments      Comment[]
+  brandItems    BrandItem[]
+  references    Reference[]
 }
 
 model Task {
@@ -103,4 +111,88 @@ model Notification {
   taskId    String
 
   @@index([userId, read])
+}
+
+// ─── Branding ────────────────────────────────────────────────────────────
+
+// Textos largos de cada etapa del proyecto de branding (uno por proyecto)
+model BrandWorkspace {
+  id           String   @id @default(cuid())
+  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId    String   @unique
+  stage        String   @default("brief")
+  brief        String?
+  context      String?
+  conceptNotes String?
+  plan         String?
+  updatedAt    DateTime @updatedAt
+}
+
+// Cualquier pieza que se agrega dentro de una etapa: comentarios del
+// cliente, archivos, referencias, conceptos, ideas, imágenes de moodboard,
+// bocetos y piezas de desarrollo. `section` es la etapa y `kind` el tipo.
+model BrandItem {
+  id          String      @id @default(cuid())
+  project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId   String
+  section     String
+  kind        String
+  title       String?
+  body        String?
+  url         String?
+  pathname    String?
+  contentType String?
+  linkUrl     String?
+  status      String?
+  pinned      Boolean     @default(false)
+  aiGenerated Boolean     @default(false)
+  order       Int         @default(0)
+  board       Moodboard?  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  boardId     String?
+  reference   Reference?  @relation(fields: [referenceId], references: [id], onDelete: SetNull)
+  referenceId String?
+  author      User?       @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorId    String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([projectId, section])
+}
+
+model Moodboard {
+  id        String      @id @default(cuid())
+  project   Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  name      String
+  notes     String?
+  items     BrandItem[]
+  createdAt DateTime    @default(now())
+}
+
+// Biblioteca de referencias del estudio, compartida entre proyectos.
+// Las imágenes de un moodboard pueden venir de aquí (quedan ligadas).
+model Reference {
+  id          String      @id @default(cuid())
+  title       String?
+  url         String
+  pathname    String?
+  sourceUrl   String?
+  tags        String[]    @default([])
+  notes       String?
+  author      User?       @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorId    String?
+  createdAt   DateTime    @default(now())
+  usedIn      BrandItem[]
+}
+
+// Presentación armada a partir de las piezas del proyecto. `slides` guarda
+// la secuencia de láminas como JSON (ver BrandSlide en src/lib/branding.ts).
+model Presentation {
+  id        String   @id @default(cuid())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  title     String
+  slides    Json     @default("[]")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

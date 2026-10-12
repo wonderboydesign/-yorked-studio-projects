@@ -2,7 +2,11 @@ import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/session";
 
-const ALLOWED_EXTENSIONS = ["ai", "svg", "pdf", "jpg", "jpeg", "png", "webp"];
+const ALLOWED_EXTENSIONS = [
+  "ai", "svg", "pdf", "jpg", "jpeg", "png", "webp", "gif",
+  // Briefs y documentos de contexto del flujo de branding
+  "doc", "docx", "txt", "md", "pptx", "key",
+];
 const MAX_SIZE_BYTES = 50 * 1024 * 1024;
 
 export async function POST(request: Request) {

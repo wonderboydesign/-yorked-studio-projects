@@ -76,7 +76,36 @@ Cada tarea puede llevar archivos adjuntos (.ai, .svg, .pdf, .jpg, .png, .webp, h
 
 Sin esta variable, la sección de adjuntar archivos en una tarea simplemente da error al intentar subir algo — el resto de la app sigue funcionando igual.
 
-## 6. Correr en local
+## 6. Flujo de Branding
+
+En el menú de arriba, **Branding** abre el proceso de marca de cada proyecto, en seis etapas. Cada una tiene un objetivo y una salida, y la siguiente arranca de lo que dejó la anterior:
+
+| Etapa | Qué se hace | Qué sale |
+|---|---|---|
+| 01 Brief | Brief principal, contexto, comentarios del cliente/equipo y archivos | Brief limpio y completo |
+| 02 Concepto | Detalle de conceptualización, referencias y conceptos (a mano o generados con Claude) | 1 a 3 conceptos marcados “Elegido” |
+| 03 Investigación | Ideas en tablero (Explorar → Desarrollar → Descartada) y plano general de entregables | Ideas priorizadas y plano general |
+| 04 Moodboard | Un moodboard por dirección visual: subir imágenes, pegar URLs o traerlas de la biblioteca | Dirección visual por concepto |
+| 05 Desarrollo | Subir bocetos y piezas con estado (Boceto, Propuesta, Para presentar, Final) | Piezas “Para presentar” |
+| 06 Presentación | Borrador automático con brief, conceptos, moodboards y piezas; se edita lámina por lámina | Presentar en pantalla completa o exportar a PDF |
+
+El proyecto guarda en qué etapa va (punto azul) y cada etapa se marca con ✓ cuando ya tiene su salida. Todo se guarda solo.
+
+**Biblioteca de referencias:** es compartida entre proyectos (botón “Biblioteca de referencias”). Las imágenes que llevas de ahí a un moodboard quedan ligadas a la referencia original, con su liga de origen y etiquetas.
+
+**Generar conceptos con Claude (opcional):** agrega `ANTHROPIC_API_KEY` en `.env` (y en Vercel). Claude lee el brief, el contexto, los comentarios, tus notas de conceptualización y las referencias, y propone conceptos distintos a los que ya existen. Sin la variable, todo lo demás funciona igual.
+
+**Conectar tu dashboard de referencias (opcional):** si tu dashboard puede exponer una URL que devuelva JSON, ponla en `REFERENCES_FEED_URL` (y `REFERENCES_FEED_TOKEN` si pide autenticación, se manda como `Authorization: Bearer`). Aparecerá una pestaña “Mi dashboard” en la biblioteca; al elegir una referencia de ahí se guarda en la biblioteca y queda ligada al moodboard. Formato aceptado:
+
+```json
+[
+  { "id": "123", "title": "Packaging japonés", "imageUrl": "https://…/img.jpg", "sourceUrl": "https://…", "tags": ["packaging", "minimal"] }
+]
+```
+
+También acepta `{ "items": [...] }`, y los nombres `image`/`url` para la imagen y `link` para el origen.
+
+## 7. Correr en local
 
 ```bash
 npm run dev
@@ -84,11 +113,11 @@ npm run dev
 
 Abre http://localhost:3000 y entra con el correo y contraseña que acabas de crear.
 
-## 7. Desplegar en Vercel (para verla desde tu celular sin usar Claude)
+## 8. Desplegar en Vercel (para verla desde tu celular sin usar Claude)
 
 1. Sube esta carpeta a un repositorio de GitHub (puede ser privado).
 2. Entra a https://vercel.com, crea una cuenta gratis y elige "Import Project" desde ese repositorio.
-3. En "Environment Variables" agrega las variables de tu `.env` (`APP_SECRET`, `DATABASE_URL`, y si las usas, `RESEND_API_KEY`/`RESEND_FROM_EMAIL`/`BLOB_READ_WRITE_TOKEN`).
+3. En "Environment Variables" agrega las variables de tu `.env` (`APP_SECRET`, `DATABASE_URL`, y si las usas, `RESEND_API_KEY`/`RESEND_FROM_EMAIL`/`BLOB_READ_WRITE_TOKEN`/`ANTHROPIC_API_KEY`/`REFERENCES_FEED_URL`).
 4. Dale a "Deploy". En un par de minutos tendrás una URL pública como `tu-proyecto.vercel.app`.
 5. Ábrela desde tu celular: te pedirá tu correo y contraseña y ya funciona como cualquier página web, sin pasar por Claude. Puedes "Agregar a pantalla de inicio" desde el navegador del celular para que se sienta como una app.
 
@@ -98,8 +127,9 @@ Nota: el script `build` corre `prisma db push` automáticamente antes de compila
 
 - `src/app` — páginas y rutas de API (Next.js App Router)
 - `src/components` — vistas (Gantt, Lista, Kanban, Calendario), panel de equipo y modales de proyecto/tarea/usuario
+- `src/components/branding` — flujo de Branding (etapas, biblioteca de referencias, editor y visor de presentaciones)
 - `src/lib` — autenticación, sesión, conexión a base de datos, utilidades de fecha
-- `prisma/schema.prisma` — modelo de datos (Usuario, Proyecto y Tarea)
+- `prisma/schema.prisma` — modelo de datos (Usuario, Proyecto, Tarea y las tablas de Branding)
 
 ## Personalización visual
 

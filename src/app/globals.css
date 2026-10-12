@@ -90,3 +90,33 @@ select:focus-visible,
 .animate-fade-in-up {
   animation: fadeInUp 160ms ease-out;
 }
+
+/* Exportar presentación a PDF: solo cuando existe .print-deck (al dar
+   "Exportar PDF"); imprimir la app normalmente no se ve afectado. */
+.print-deck {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: 338.67mm 190.5mm;
+    margin: 0;
+  }
+  body:has(> .print-deck) {
+    background: #fff;
+  }
+  body:has(> .print-deck) > *:not(.print-deck) {
+    display: none !important;
+  }
+  .print-deck {
+    display: block;
+  }
+  .print-slide {
+    width: 338.67mm;
+    height: 190.5mm;
+    overflow: hidden;
+    break-after: page;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
