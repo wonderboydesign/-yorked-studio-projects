@@ -16,6 +16,9 @@ export function pickItemFields(body: Record<string, unknown>) {
   if (typeof body.pinned === "boolean") data.pinned = body.pinned;
   if (typeof body.order === "number") data.order = body.order;
   if (body.boardId !== undefined) data.boardId = body.boardId || null;
+  if (body.data !== undefined) {
+    data.data = body.data && typeof body.data === "object" && !Array.isArray(body.data) ? body.data : null;
+  }
   return data;
 }
 

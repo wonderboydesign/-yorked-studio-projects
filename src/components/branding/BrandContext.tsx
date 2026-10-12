@@ -1,9 +1,10 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   BrandData,
   BrandItem,
+  BrandResearch,
   BrandStage,
   BrandWorkspace,
   Moodboard,
@@ -13,7 +14,7 @@ import { uploadFile } from "@/lib/upload";
 import { Project } from "@/lib/types";
 
 export type NewItem = Partial<
-  Pick<BrandItem, "title" | "body" | "url" | "pathname" | "contentType" | "linkUrl" | "status" | "boardId">
+  Pick<BrandItem, "title" | "body" | "url" | "pathname" | "contentType" | "linkUrl" | "status" | "boardId" | "data">
 > & {
   section: BrandStage;
   kind: BrandItem["kind"];
@@ -24,7 +25,12 @@ interface BrandApi {
   project: Project;
   data: BrandData;
   notify: (message: string, tone?: "ok" | "error") => void;
-  patchWorkspace: (fields: Partial<Pick<BrandWorkspace, "brief" | "context" | "conceptNotes" | "plan" | "stage">>) => Promise<void>;
+  patchWorkspace: (
+    fields: Partial<Pick<BrandWorkspace, "brief" | "context" | "conceptNotes" | "plan" | "stage" | "research">>
+  ) => Promise<void>;
+  // Cambia el research a partir del valor más reciente (no del de este
+  // render), para que dos guardados seguidos no se pisen
+  patchResearch: (update: (current: BrandResearch) => BrandResearch) => Promise<void>;
   addItem: (item: NewItem) => Promise<BrandItem | null>;
   updateItem: (id: string, fields: Partial<BrandItem>) => Promise<void>;
   deleteItem: (id: string) => Promise<void>;
@@ -71,6 +77,10 @@ export function BrandProvider({
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(0);
   const projectId = project.id;
+  const researchRef = useRef<BrandResearch>({});
+  useEffect(() => {
+    researchRef.current = data?.workspace.research ?? {};
+  }, [data?.workspace.research]);
 
   const reload = useCallback(async () => {
     try {
@@ -107,6 +117,12 @@ export function BrandProvider({
       }
     }
 
+    async function patchResearch(update: (current: BrandResearch) => BrandResearch) {
+      const next = update(researchRef.current);
+      researchRef.current = next;
+      await patchWorkspace({ research: next });
+    }
+
     async function addItem(item: NewItem) {
       try {
         const created = await json<BrandItem>(await fetch(`/api/branding/${projectId}/items`, {
@@ -123,7 +139,17 @@ export function BrandProvider({
     }
 
     async function updateItem(id: string, fields: Partial<BrandItem>) {
-      setData((d) => d && { ...d, items: d.items.map((i) => (i.id === id ? { ...i, ...fields } : i)) });
+      setData(
+        (d) =>
+          d && {
+            ...d,
+            items: d.items.map((i) =>
+              i.id === id
+                ? { ...i, ...fields, ...(fields.data ? { data: { ...(i.data ?? {}), ...fields.data } } : {}) }
+                : i
+            ),
+          }
+      );
       try {
         await json(await fetch(`/api/branding/items/${id}`, {
           method: "PATCH",
@@ -271,6 +297,7 @@ export function BrandProvider({
       data,
       notify,
       patchWorkspace,
+      patchResearch,
       addItem,
       updateItem,
       deleteItem,

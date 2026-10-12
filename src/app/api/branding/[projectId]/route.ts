@@ -35,6 +35,9 @@ export async function PATCH(request: NextRequest, { params }: { params: { projec
   for (const field of ["brief", "context", "conceptNotes", "plan"]) {
     if (typeof body[field] === "string") data[field] = body[field];
   }
+  if (body.research && typeof body.research === "object" && !Array.isArray(body.research)) {
+    data.research = body.research;
+  }
   if (typeof body.stage === "string" && BRAND_STAGE_KEYS.includes(body.stage)) {
     data.stage = body.stage;
   }

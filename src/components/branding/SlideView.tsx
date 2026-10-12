@@ -1,6 +1,7 @@
 "use client";
 
-import { BrandData, BrandItem, BrandSlide, isImage } from "@/lib/branding";
+import { BrandData, BrandItem, BrandSlide, DEFAULT_AXES, InsightData, isImage } from "@/lib/branding";
+import PositionMap, { competitorPoints } from "./PositionMap";
 import { Project } from "@/lib/types";
 
 // Una lámina 16:9. Los tamaños usan unidades de contenedor (cqw) para que la
@@ -131,6 +132,77 @@ function SlideContent({
               />
             ))}
           </div>
+        </div>
+      );
+    }
+
+    case "insights": {
+      const all = data.items.filter((i) => i.kind === "insight");
+      const shown = (items.length > 0 ? items : all).slice(0, 4);
+      return (
+        <div className="flex flex-col h-full pb-[3cqw] min-h-0">
+          <span className="text-[1cqw] tracking-[0.2em] uppercase text-[#86868b]">Research</span>
+          <h2 className="mt-[1cqw] mb-[2.5cqw] text-[3.6cqw] leading-[1.05] tracking-[-0.02em] font-medium">
+            {slide.title || "Lo que encontramos"}
+          </h2>
+          <div className={`grid gap-[1.2cqw] flex-1 min-h-0 ${shown.length > 2 ? "grid-cols-2" : `grid-cols-${Math.max(shown.length, 1)}`}`}>
+            {shown.map((ins, n) => {
+              const d = (ins.data ?? {}) as InsightData;
+              const big = shown.length <= 2;
+              return (
+                <div key={ins.id} className="rounded-[1.4cqw] bg-[#f5f5f7] p-[2cqw] flex flex-col gap-[1cqw] min-h-0 overflow-hidden">
+                  <span className="text-[0.9cqw] text-[#86868b]">{String(n + 1).padStart(2, "0")}</span>
+                  <p className={big ? "text-[2cqw] leading-[1.25] tracking-[-0.01em]" : "text-[1.15cqw] leading-[1.4]"}>
+                    {d.found}
+                  </p>
+                  {d.means && (
+                    <p className={`text-[#6e6e73] ${big ? "text-[1.35cqw] leading-[1.45]" : "text-[1cqw] leading-[1.4]"}`}>
+                      {d.means}
+                    </p>
+                  )}
+                  {d.opportunity && (
+                    <p
+                      className={`mt-auto font-medium ${
+                        big ? "text-[2.2cqw] leading-[1.2] tracking-[-0.01em]" : "text-[1.25cqw] leading-[1.35]"
+                      }`}
+                    >
+                      → {d.opportunity}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    case "map": {
+      const research = data.workspace.research ?? {};
+      const competitors = data.items.filter((i) => i.kind === "competitor");
+      return (
+        <div
+          className="grid grid-cols-[1fr_2.2fr] gap-[3cqw] h-full pb-[3cqw] min-h-0"
+          // El mapa usa los colores del tema; en la lámina van fijos
+          style={{ ["--color-ink" as string]: "29 29 31", ["--color-muted" as string]: "134 134 139" }}
+        >
+          <div className="flex flex-col">
+            <span className="text-[1cqw] tracking-[0.2em] uppercase text-[#86868b]">Research</span>
+            <h2 className="mt-[1.5cqw] text-[3.2cqw] leading-[1.05] tracking-[-0.02em] font-medium">
+              {slide.title || "Dónde está la oportunidad"}
+            </h2>
+            {slide.body && (
+              <p className="mt-auto text-[1.2cqw] leading-[1.5] text-[#424245] whitespace-pre-wrap">{slide.body}</p>
+            )}
+          </div>
+          <PositionMap
+            className="w-full h-full rounded-[1.4cqw] bg-[#f5f5f7]"
+            labelClass="text-[1cqw]"
+            axisClass="text-[0.95cqw] p-[1cqw]"
+            axes={research.axes ?? DEFAULT_AXES}
+            target={research.target}
+            points={competitorPoints(competitors)}
+          />
         </div>
       );
     }

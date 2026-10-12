@@ -5,7 +5,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { ITEM_INCLUDE, ensureWorkspace } from "@/lib/brandingServer";
-import { isImage } from "@/lib/branding";
+import { BrandResearch, CompetitorData, DEFAULT_AXES, InsightData, RESEARCH_BLOCKS, isImage } from "@/lib/branding";
 
 // Generar conceptos puede tardar; en Vercel se amplía el límite de la función
 export const maxDuration = 120;
@@ -25,7 +25,7 @@ const ConceptsSchema = z.object({
 
 const SYSTEM_PROMPT = `Eres director/a creativo/a senior en Yorked Studio, un estudio de branding. Tu trabajo es proponer conceptos de marca a partir de un brief, para que el equipo los explore después en investigación, moodboards y bocetos.
 
-Cada concepto debe ser una idea central distinta (no variaciones de la misma), anclada en algo concreto del brief: el cliente, su público, su contexto o un problema que mencionen. Evita lugares comunes de branding ("innovación", "cercanía", "calidad") salvo que el brief los convierta en algo específico.
+Cada concepto debe ser una idea central distinta (no variaciones de la misma), anclada en algo concreto del brief o del research: el cliente, su público, su contexto, un hallazgo, el espacio libre que deja la competencia o un problema que mencionen. Cuando haya hallazgos o un posicionamiento buscado, cada concepto debe responder al menos a uno. Evita lugares comunes de branding ("innovación", "cercanía", "calidad") salvo que el brief los convierta en algo específico.
 
 Para cada concepto entrega:
 - name: un nombre corto y memorable para el concepto (2 a 4 palabras).
@@ -81,12 +81,20 @@ export async function POST(request: NextRequest, { params }: { params: { project
   }
 
   const items = await prisma.brandItem.findMany({
-    where: { projectId: params.projectId, section: { in: ["brief", "concept"] } },
+    where: { projectId: params.projectId, section: { in: ["brief", "concept", "research"] } },
     orderBy: { createdAt: "asc" },
   });
   const comments = items.filter((i) => i.kind === "comment" && i.body);
   const references = items.filter((i) => i.kind === "reference");
   const existingConcepts = items.filter((i) => i.kind === "concept" && i.status !== "discarded");
+  const competitors = items.filter((i) => i.kind === "competitor");
+  const insights = items.filter((i) => i.kind === "insight");
+  const research = (workspace.research ?? {}) as BrandResearch;
+  const blocks = research.blocks ?? {};
+  const axes = research.axes ?? DEFAULT_AXES;
+  // Lado del mapa en el que cae un valor de 0 a 1
+  const side = (v: number | undefined, low: string, high: string) =>
+    v === undefined ? null : v < 0.4 ? low : v > 0.6 ? high : `entre ${low.toLowerCase()} y ${high.toLowerCase()}`;
 
   const promptText = [
     `# Proyecto: ${project.name}${project.client ? ` — cliente: ${project.client}` : ""}`,
@@ -94,6 +102,42 @@ export async function POST(request: NextRequest, { params }: { params: { project
     section("Contexto", workspace.context),
     section("Comentarios del cliente y del equipo", comments.map((c) => `- ${c.body}`).join("\n")),
     section("Notas de conceptualización", workspace.conceptNotes),
+    ...RESEARCH_BLOCKS.map((b) => section(`Research — ${b.label}`, blocks[b.key])),
+    section(
+      "Competencia",
+      competitors
+        .map((c) => {
+          const d = (c.data ?? {}) as CompetitorData;
+          const fields = [
+            d.colors && `colores: ${d.colors}`,
+            d.typography && `tipografía: ${d.typography}`,
+            d.tone && `tono: ${d.tone}`,
+            d.price && `precio: ${d.price}`,
+            side(d.x, axes.xLeft, axes.xRight),
+            side(d.y, axes.yBottom, axes.yTop),
+          ].filter(Boolean);
+          return `- ${c.title}${fields.length ? ` (${fields.join("; ")})` : ""}${c.body ? `: ${c.body}` : ""}`;
+        })
+        .join("\n")
+    ),
+    research.target
+      ? section(
+          "Posicionamiento buscado para la marca",
+          `${side(research.target.x, axes.xLeft, axes.xRight)} y ${side(research.target.y, axes.yBottom, axes.yTop)}`
+        )
+      : "",
+    section(
+      "Hallazgos del research",
+      insights
+        .map((i) => {
+          const d = (i.data ?? {}) as InsightData;
+          return [d.found && `- Encontramos: ${d.found}`, d.means && `  Significa: ${d.means}`, d.opportunity && `  Oportunidad: ${d.opportunity}`]
+            .filter(Boolean)
+            .join("\n");
+        })
+        .filter(Boolean)
+        .join("\n")
+    ),
     section(
       "Referencias que subió el equipo",
       references

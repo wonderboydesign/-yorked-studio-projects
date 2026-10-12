@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { BRAND_STAGE_KEYS, ITEM_INCLUDE, pickItemFields } from "@/lib/brandingServer";
 
-const KINDS = ["comment", "file", "reference", "concept", "idea", "image", "piece"];
+const KINDS = ["comment", "file", "reference", "concept", "idea", "image", "piece", "competitor", "insight"];
 
 export async function POST(request: NextRequest, { params }: { params: { projectId: string } }) {
   const user = await getCurrentUser();
