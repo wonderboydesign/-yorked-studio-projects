@@ -149,7 +149,7 @@ export default function DashboardView({
   }) {
     const a = appear(index);
     return (
-      <section className={`glass p-6 sm:p-8 rounded-3xl flex flex-col ${a.className} ${className}`} style={a.style}>
+      <section className={`glass p-6 sm:p-8 rounded-3xl flex flex-col min-w-0 ${a.className} ${className}`} style={a.style}>
         <div className="flex items-baseline justify-between gap-3 mb-4">
           <h3 className="text-xl text-ink">{title}</h3>
           {count !== undefined && <span className="text-sm text-muted">{count}</span>}
@@ -195,9 +195,9 @@ export default function DashboardView({
           )}
         </Card>
 
-        <div className="lg:col-span-4 grid gap-4 content-start">
+        <div className="lg:col-span-4 grid gap-4 content-start min-w-0">
           <section
-            className={`glass rounded-3xl py-6 sm:py-8 lg:hero-pad ${appear(1).className}`}
+            className={`glass rounded-3xl py-6 sm:py-8 lg:hero-pad min-w-0 overflow-hidden ${appear(1).className}`}
             style={appear(1).style}
           >
             <div className="flex items-baseline justify-between px-6 sm:px-8 mb-5">
