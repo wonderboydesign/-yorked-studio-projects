@@ -93,7 +93,8 @@ body::before {
 
 /* Paneles flotantes (modales, menús): vidrio más denso para que se lea */
 .glass-overlay {
-  background-color: rgb(var(--overlay-bg) / 0.68);
+  /* Lo bastante sólido para que el texto de atrás no compita al leer */
+  background-color: rgb(var(--overlay-bg) / 0.86);
   -webkit-backdrop-filter: blur(32px) saturate(1.6);
   backdrop-filter: blur(32px) saturate(1.6);
   box-shadow:
