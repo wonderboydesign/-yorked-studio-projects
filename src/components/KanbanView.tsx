@@ -19,19 +19,19 @@ export default function KanbanView({
   const projectMap = Object.fromEntries(projects.map((p) => [p.id, p]));
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
       {STATUS_ORDER.map((status) => {
         const columnTasks = tasks.filter((t) => t.status === status);
         return (
-          <div key={status} className="min-h-[200px]">
+          <div key={status} className="min-h-[320px] rounded-3xl bg-ink/[0.025] p-3">
             <div
-              className="flex items-center justify-between px-1 pb-2.5 mb-3 border-t-2"
-              style={{ borderTopColor: STATUS_COLORS[status] }}
+              className="flex items-center justify-between px-3 pt-2 pb-4"
             >
-              <h3 className="font-mono text-xs text-ink pt-2.5">
+              <h3 className="inline-flex items-center gap-2 text-base text-ink">
+                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: STATUS_COLORS[status] }} aria-hidden="true" />
                 {STATUS_LABELS[status]}
               </h3>
-              <span className="font-mono text-xs text-muted pt-2.5">{columnTasks.length}</span>
+              <span className="text-sm text-muted">{columnTasks.length}</span>
             </div>
             <div className="space-y-2">
               {columnTasks.map((t) => {

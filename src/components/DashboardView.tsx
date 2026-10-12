@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Task, Project, STATUS_LABELS, STATUS_COLORS } from "@/lib/types";
 import { parseDate, localToday, addDays, formatLong, capMonth } from "@/lib/date";
+import { ArrowUpRight, HeroTitle, Marquee, OverHero, appear, heroSize } from "./Glass";
 
 function stripTime(d: Date) {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
@@ -34,6 +35,7 @@ export default function DashboardView({
   projects,
   onSelectTask,
   onOpenProjects,
+  onOpenProject,
   currentUserName,
   onLogout,
 }: {
@@ -41,6 +43,7 @@ export default function DashboardView({
   projects: Project[];
   onSelectTask: (t: Task) => void;
   onOpenProjects: () => void;
+  onOpenProject?: (projectId: string) => void;
   currentUserName?: string;
   onLogout: () => void;
 }) {
@@ -101,15 +104,15 @@ export default function DashboardView({
     return (
       <button
         onClick={() => onSelectTask(t)}
-        className="w-full flex items-start justify-between gap-3 py-2 text-left hover:bg-ink/[0.03] px-2 -mx-2 rounded-full"
+        className="w-full flex items-start justify-between gap-3 py-3 text-left hover:bg-ink/[0.03] px-3 -mx-3 rounded-xl transition-colors"
       >
         <div className="min-w-0 flex items-start gap-2">
           <span
-            className="w-1.5 h-1.5 rounded-full inline-block shrink-0 mt-1"
+            className="w-2 h-2 rounded-full inline-block shrink-0 mt-1.5"
             style={{ backgroundColor: project?.color }}
           />
           <div className="min-w-0">
-            <span className="text-xs block">{t.name}</span>
+            <span className="text-sm block">{t.name}</span>
             <span className="text-xs text-muted truncate hidden sm:block">{project?.name}</span>
           </div>
         </div>
@@ -119,9 +122,9 @@ export default function DashboardView({
               {capMonth(formatLong(parseDate(t.endDate)))}
             </span>
           )}
-          <span className="inline-flex items-center gap-1.5 font-mono text-xs text-ink border border-line px-2 py-1 whitespace-nowrap rounded-full">
+          <span className="inline-flex items-center gap-1.5 text-xs text-ink bg-ink/[0.05] px-2.5 py-1 whitespace-nowrap rounded-lg">
             <span
-              className="w-1.5 h-1.5 inline-block shrink-0"
+              className="w-1.5 h-1.5 inline-block shrink-0 rounded-full ring-1 ring-ink/20"
               style={{ backgroundColor: STATUS_COLORS[t.status] }}
             />
             {STATUS_LABELS[t.status]}
@@ -131,47 +134,156 @@ export default function DashboardView({
     );
   }
 
-  function Card({ title, children }: { title: string; children: React.ReactNode }) {
+  function Card({
+    title,
+    count,
+    index,
+    className = "",
+    children,
+  }: {
+    title: string;
+    count?: number;
+    index: number;
+    className?: string;
+    children: React.ReactNode;
+  }) {
+    const a = appear(index);
     return (
-      <div className="glass p-6 sm:p-8 rounded-3xl">
-        <h3 className="text-lg text-ink mb-5">{title}</h3>
+      <section className={`glass p-6 sm:p-8 rounded-3xl flex flex-col ${a.className} ${className}`} style={a.style}>
+        <div className="flex items-baseline justify-between gap-3 mb-4">
+          <h3 className="text-xl text-ink">{title}</h3>
+          {count !== undefined && <span className="text-sm text-muted">{count}</span>}
+        </div>
         {children}
-      </div>
+      </section>
     );
   }
 
   function Empty({ text }: { text: string }) {
-    return <p className="text-xs text-muted py-2">{text}</p>;
+    return <p className="text-sm text-muted py-2">{text}</p>;
   }
 
+  const firstName = currentUserName?.split(" ")[0];
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Buenos días" : hour < 19 ? "Buenas tardes" : "Buenas noches";
+  const heroText = firstName ? `Hola, ${firstName}` : "Hola";
+  const size = heroSize(heroText);
+  // Con pocos proyectos se repiten para que la fila no deje huecos
+  const marqueeProjects =
+    projects.length === 0 ? [] : Array.from({ length: Math.ceil(8 / projects.length) }, () => projects).flat();
+
   return (
-    <div className="space-y-4">
-      <div>
-        <div className="flex items-baseline gap-4 mb-8 mt-4">
-          <h2 className="text-6xl leading-none">{thisWeek.length}</h2>
-          <p className="text-lg text-muted">
-            {thisWeek.length === 1 ? "tarea pendiente esta semana" : "tareas pendientes esta semana"}
-          </p>
-        </div>
-        <div className="glass p-6 sm:p-8 rounded-3xl">
+    <div className="pb-8">
+      <HeroTitle
+        eyebrow={`${greeting}${firstName ? `, ${firstName}` : ""}`}
+        aside={`${thisWeek.length} ${thisWeek.length === 1 ? "tarea" : "tareas"} esta semana`}
+        size={size}
+      >
+        {heroText}
+      </HeroTitle>
+
+      <OverHero size={size} className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <Card title="Esta semana" count={thisWeek.length} index={0} className="lg:col-span-8 min-h-[320px] hero-pad">
           {thisWeek.length === 0 ? (
             <Empty text="No tienes tareas pendientes esta semana." />
           ) : (
-            <div className="divide-y divide-line">
+            <div className="divide-y divide-ink/[0.06]">
               {thisWeek.map((t) => (
                 <TaskRow key={t.id} t={t} />
               ))}
             </div>
           )}
-        </div>
-      </div>
+        </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card title="Tareas atrasadas">
+        <div className="lg:col-span-4 grid gap-4 content-start">
+          <section
+            className={`glass rounded-3xl py-6 sm:py-8 lg:hero-pad ${appear(1).className}`}
+            style={appear(1).style}
+          >
+            <div className="flex items-baseline justify-between px-6 sm:px-8 mb-5">
+              <h3 className="text-xl text-ink">Proyectos</h3>
+              <button onClick={onOpenProjects} className="group inline-flex items-center gap-1 text-sm text-muted hover:text-ink">
+                Ver todos <ArrowUpRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            {projects.length === 0 ? (
+              <p className="px-6 sm:px-8 text-sm text-muted">Sin proyectos activos.</p>
+            ) : (
+              <Marquee seconds={Math.max(18, marqueeProjects.length * 3)}>
+                {marqueeProjects.map((p, i) => (
+                  <button
+                    key={`${p.id}-${i}`}
+                    onClick={() => onOpenProject?.(p.id)}
+                    title={`${p.name} — abrir en Branding`}
+                    className="w-[72px] h-[72px] shrink-0 rounded-2xl bg-ink/[0.05] hover:bg-ink/[0.09] transition-colors flex flex-col items-center justify-center gap-1.5"
+                  >
+                    <span className="w-6 h-6 rounded-lg" style={{ backgroundColor: p.color }} />
+                    <span className="text-[11px] text-ink leading-none max-w-[60px] truncate">
+                      {p.name.split(" ").map((w) => w[0]).join("").slice(0, 3)}
+                    </span>
+                  </button>
+                ))}
+              </Marquee>
+            )}
+          </section>
+
+          <Card title="Reuniones" index={2}>
+            {calendarLoading ? (
+              <Empty text="Cargando…" />
+            ) : !calendarConnected ? (
+              <div className="py-1">
+                <p className="text-sm text-muted mb-4">
+                  {calendarExpired
+                    ? "Tu conexión con Google Calendar expiró. Vuelve a conectarla para seguir viendo tus reuniones."
+                    : "Conecta tu Google Calendar para ver tus próximas reuniones aquí."}
+                </p>
+                <a
+                  href="/api/auth/google"
+                  className="group inline-flex items-center gap-2 text-sm text-accent-fg bg-accent hover:opacity-90 transition-opacity px-4 py-2 rounded-xl"
+                >
+                  {calendarExpired ? "Reconectar Google Calendar" : "Conectar Google Calendar"}
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            ) : calendarEvents.length === 0 ? (
+              <div className="py-1">
+                <Empty text="No tienes reuniones en los próximos días." />
+                <button onClick={handleDisconnectCalendar} className="text-xs text-muted hover:text-ink mt-2">
+                  Desconectar
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="divide-y divide-ink/[0.06]">
+                  {calendarEvents.map((e) => (
+                    <a
+                      key={e.id}
+                      href={e.link || "#"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group flex items-center justify-between gap-3 py-3 hover:bg-ink/[0.03] px-3 -mx-3 rounded-xl transition-colors"
+                    >
+                      <span className="min-w-0">
+                        <span className="block text-sm truncate">{e.title}</span>
+                        <span className="block text-xs text-muted">{formatEventTime(e)}</span>
+                      </span>
+                      <ArrowUpRight className="w-3.5 h-3.5 shrink-0 text-muted" />
+                    </a>
+                  ))}
+                </div>
+                <button onClick={handleDisconnectCalendar} className="text-xs text-muted hover:text-ink mt-3 self-start">
+                  Desconectar
+                </button>
+              </>
+            )}
+          </Card>
+        </div>
+
+        <Card title="Atrasadas" count={overdue.length} index={3} className="lg:col-span-6">
           {overdue.length === 0 ? (
             <Empty text="No tienes tareas atrasadas." />
           ) : (
-            <div className="divide-y divide-line">
+            <div className="divide-y divide-ink/[0.06]">
               {overdue.map((t) => (
                 <TaskRow key={t.id} t={t} />
               ))}
@@ -179,88 +291,25 @@ export default function DashboardView({
           )}
         </Card>
 
-        <Card title="Tareas por vencer">
+        <Card title="Por vencer" count={dueSoon.length} index={4} className="lg:col-span-6">
           {dueSoon.length === 0 ? (
             <Empty text="No tienes tareas por vencer esta semana." />
           ) : (
-            <div className="divide-y divide-line">
+            <div className="divide-y divide-ink/[0.06]">
               {dueSoon.map((t) => (
                 <TaskRow key={t.id} t={t} />
               ))}
             </div>
           )}
         </Card>
+      </OverHero>
 
-        <Card title="Reuniones">
-          {calendarLoading ? (
-            <Empty text="Cargando…" />
-          ) : !calendarConnected ? (
-            <div className="py-1">
-              <p className="text-xs text-muted mb-3">
-                {calendarExpired
-                  ? "Tu conexión con Google Calendar expiró. Vuelve a conectarla para seguir viendo tus reuniones."
-                  : "Conecta tu Google Calendar para ver tus próximas reuniones aquí."}
-              </p>
-              <a
-                href="/api/auth/google"
-                className="inline-block text-sm text-accent-fg bg-accent hover:opacity-90 transition-opacity px-4 py-2 rounded-xl"
-              >
-                {calendarExpired ? "Reconectar Google Calendar" : "Conectar Google Calendar"}
-              </a>
-            </div>
-          ) : calendarEvents.length === 0 ? (
-            <div className="py-1">
-              <Empty text="No tienes reuniones en los próximos días." />
-              <button
-                onClick={handleDisconnectCalendar}
-                className="font-display text-xs text-muted hover:text-ink rounded-full"
-              >
-                Desconectar
-              </button>
-            </div>
-          ) : (
-            <>
-              <div className="divide-y divide-line">
-                {calendarEvents.map((e) => (
-                  <a
-                    key={e.id}
-                    href={e.link || "#"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block py-2 hover:bg-ink/[0.03] px-2 -mx-2"
-                  >
-                    <p className="text-xs truncate">{e.title}</p>
-                    <p className="text-xs text-muted">{formatEventTime(e)}</p>
-                  </a>
-                ))}
-              </div>
-              <button
-                onClick={handleDisconnectCalendar}
-                className="font-display text-xs text-muted hover:text-ink mt-3 rounded-full"
-              >
-                Desconectar
-              </button>
-            </>
-          )}
-        </Card>
-      </div>
-
-      <div className="flex items-center justify-end gap-5 pt-2">
-        {currentUserName && (
-          <span className="font-display text-xs text-muted">
-            Hola, {currentUserName}
-          </span>
-        )}
-        <button
-          onClick={onOpenProjects}
-          className="font-display text-xs text-muted hover:text-ink rounded-full"
-        >
+      <div className="flex items-center justify-end gap-6 pt-6">
+        {currentUserName && <span className="text-sm text-muted">{currentUserName}</span>}
+        <button onClick={onOpenProjects} className="text-sm text-muted hover:text-ink">
           Proyectos
         </button>
-        <button
-          onClick={onLogout}
-          className="font-display text-xs text-muted hover:text-ink rounded-full"
-        >
+        <button onClick={onLogout} className="text-sm text-muted hover:text-ink">
           Salir
         </button>
       </div>

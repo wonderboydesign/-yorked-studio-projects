@@ -71,12 +71,13 @@ export default function ListView({
       .sort((a, b) => parseDate(a.startDate).getTime() - parseDate(b.startDate).getTime()),
   })).filter((g) => g.items.length > 0);
 
-  const headCell = "px-4 py-3 font-mono font-normal text-xs";
+  const headCell = "px-4 py-4 font-normal text-xs";
 
   return (
-    <table className="w-full text-xs border-collapse">
+    <div className="glass rounded-3xl px-4 sm:px-8 pt-2 pb-6 overflow-x-auto">
+    <table className="w-full text-sm border-collapse">
       <thead>
-        <tr className="text-left text-muted border-b-2 border-ink">
+        <tr className="text-left text-muted border-b border-ink/10">
           <th className={`pl-0 pr-4 ${headCell.replace("px-4 ", "")}`}>Tarea</th>
           <th className={headCell}>Proyecto</th>
           <th className={headCell}>Inicio</th>
@@ -89,8 +90,8 @@ export default function ListView({
       {groups.map(({ status, items }) => (
         <tbody key={status}>
           <tr>
-            <td colSpan={7} className="pt-6 pb-2">
-              <span className="inline-flex items-center gap-2 font-mono text-xs text-ink">
+            <td colSpan={7} className="pt-8 pb-2">
+              <span className="inline-flex items-center gap-2 text-base text-ink">
                 <span className="h-2 w-2 rounded-full" style={{ backgroundColor: STATUS_COLORS[status] }} aria-hidden="true" />
                 {STATUS_LABELS[status]}
                 <span className="text-muted">{items.length}</span>
@@ -251,5 +252,6 @@ export default function ListView({
         </tbody>
       ))}
     </table>
+    </div>
   );
 }

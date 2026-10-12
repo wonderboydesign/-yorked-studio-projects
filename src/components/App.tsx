@@ -420,7 +420,7 @@ export default function App() {
         </div>
       </header>
 
-      <div className="fixed bottom-[26px] sm:bottom-4 left-4 sm:left-6 flex items-center gap-5 z-10 glass-overlay px-4 py-2.5 rounded-2xl">
+      <div className="fixed bottom-[26px] sm:bottom-4 left-4 sm:left-6 hidden sm:flex items-center gap-5 z-10 glass-overlay px-4 py-2.5 rounded-2xl">
         <button
           onClick={() => window.open("https://meet.google.com/new", "_blank", "noopener,noreferrer")}
           className="text-sm text-muted hover:text-ink"
@@ -611,6 +611,10 @@ export default function App() {
                 }
                 onSelectTask={(t) => setTaskModal({ open: true, task: t })}
                 onOpenProjects={() => setProjectsPanelOpen(true)}
+                onOpenProject={(id) => {
+                  setProjectFilter(id);
+                  setView("branding");
+                }}
                 currentUserName={currentUser?.name}
                 onLogout={handleLogout}
               />

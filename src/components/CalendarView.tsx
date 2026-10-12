@@ -81,30 +81,30 @@ export default function CalendarView({
 
   return (
     <div>
-      <div className="flex flex-col items-center gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
-        <h3 className="text-xs text-ink text-center sm:text-left">
+      <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-center sm:justify-between mb-5">
+        <h3 className="text-2xl text-ink text-center sm:text-left">
           {title()}
         </h3>
         <div className="flex flex-wrap items-center justify-center gap-4">
-          <button onClick={() => { setView("day"); setCursor(localToday()); }} className={`font-display text-xs ${view === "day" ? "text-ink" : "text-muted hover:text-ink"}`}>{view === "day" ? <span className="text-accent">●</span> : ""}Día</button>
-          <button onClick={() => { setView("week"); setCursor(localToday()); }} className={`font-display text-xs ${view === "week" ? "text-ink" : "text-muted hover:text-ink"}`}>{view === "week" ? <span className="text-accent">●</span> : ""}Semana</button>
-          <button onClick={() => setView("month")} className={`font-display text-xs ${view === "month" ? "text-ink" : "text-muted hover:text-ink"}`}>{view === "month" ? <span className="text-accent">●</span> : ""}Mes</button>
+          <button onClick={() => { setView("day"); setCursor(localToday()); }} className={`text-sm ${view === "day" ? "text-ink" : "text-muted hover:text-ink"}`}>{view === "day" ? <span className="text-ink text-[10px] mr-1 relative -top-px">●</span> : ""}Día</button>
+          <button onClick={() => { setView("week"); setCursor(localToday()); }} className={`text-sm ${view === "week" ? "text-ink" : "text-muted hover:text-ink"}`}>{view === "week" ? <span className="text-ink text-[10px] mr-1 relative -top-px">●</span> : ""}Semana</button>
+          <button onClick={() => setView("month")} className={`text-sm ${view === "month" ? "text-ink" : "text-muted hover:text-ink"}`}>{view === "month" ? <span className="text-ink text-[10px] mr-1 relative -top-px">●</span> : ""}Mes</button>
           <div className="flex items-center gap-1">
             <button
               onClick={goPrev}
-              className="text-xs px-2 py-1 border border-line text-muted hover:text-ink rounded-full"
+              className="text-sm px-3 py-1.5 glass glass-hover text-ink rounded-full"
             >
               ←
             </button>
             <button
               onClick={goToday}
-              className="font-display text-xs px-2 py-1 border border-line text-muted hover:text-ink rounded-full"
+              className="text-sm px-3 py-1.5 glass glass-hover text-ink rounded-full"
             >
               Hoy
             </button>
             <button
               onClick={goNext}
-              className="text-xs px-2 py-1 border border-line text-muted hover:text-ink rounded-full"
+              className="text-sm px-3 py-1.5 glass glass-hover text-ink rounded-full"
             >
               →
             </button>
@@ -112,11 +112,11 @@ export default function CalendarView({
         </div>
       </div>
 
-      <div className={`grid ${gridCols} border-t border-l border-line`}>
+      <div className={`grid ${gridCols} glass rounded-3xl overflow-hidden`}>
         {view !== "day" && (view === "week" ? WEEKDAY_LETTERS.slice(0, 5) : WEEKDAY_LETTERS).map((d, i) => (
           <div
             key={i}
-            className="text-xs text-muted text-center py-1.5 border-r border-b border-line bg-ink/[0.02]"
+            className="text-xs text-muted text-center py-3 border-r border-b border-ink/[0.06] last:border-r-0"
           >
             {d}
           </div>
@@ -129,7 +129,7 @@ export default function CalendarView({
           return (
             <div
               key={i}
-              className={`border-r border-b border-line ${cellHeight} p-1.5 ${
+              className={`border-r border-b border-ink/[0.06] ${cellHeight} p-1.5 ${
                 isToday && view !== "day" ? "bg-ink/[0.06]" : inMonth ? "" : "bg-ink/[0.015]"
               }`}
             >
