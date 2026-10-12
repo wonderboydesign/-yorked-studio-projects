@@ -90,7 +90,7 @@ export default function NotificationBell({
       </button>
 
       {open && (
-        <div className="absolute right-0 bottom-full mb-2 w-80 max-h-96 overflow-y-auto glass-overlay z-20 animate-fade-in-up rounded-3xl">
+        <div className="absolute right-0 bottom-full mb-2 w-80 max-h-96 overflow-y-auto glass-menu z-20 animate-fade-in-up rounded-3xl">
           <div className="px-4 py-3 border-b border-line">
             <h3 className="font-display text-xs">Notificaciones</h3>
           </div>
