@@ -218,7 +218,7 @@ export default function ListView({
                       </button>
 
                       {assigningId === t.id && (
-                        <div role="listbox" aria-multiselectable="true" className="absolute right-0 top-full z-20 mt-1 w-48 rounded-2xl glass-overlay p-1.5 text-left">
+                        <div role="listbox" aria-multiselectable="true" className="absolute right-0 top-full z-20 mt-1 w-48 rounded-2xl glass-menu p-1.5 text-left">
                           {users.length === 0 && <p className="px-3 py-2 text-xs text-muted">No hay personas en el equipo.</p>}
                           {users.map((u) => {
                             const checked = t.assignees.some((a) => a.id === u.id);

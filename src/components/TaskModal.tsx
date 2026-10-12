@@ -181,7 +181,7 @@ function AssigneesPicker({
         </svg>
       </button>
       {open && (
-        <div role="listbox" aria-multiselectable="true" className="absolute right-0 top-full z-20 mt-1 w-56 rounded-2xl glass-overlay p-1.5">
+        <div role="listbox" aria-multiselectable="true" className="absolute right-0 top-full z-20 mt-1 w-56 rounded-2xl glass-menu p-1.5">
           {users.length === 0 && <p className="px-2.5 py-2 text-xs text-muted">No hay personas en el equipo.</p>}
           {users.map((u) => {
             const checked = value.includes(u.id);
