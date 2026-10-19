@@ -16,6 +16,7 @@ import {
 } from "@/lib/types";
 import { toISODate, localToday } from "@/lib/date";
 import Avatar from "./Avatar";
+import { RichTextEditor, RichTextView } from "./RichText";
 import AvatarStack from "./AvatarStack";
 
 const ALLOWED_EXTENSIONS = ["ai", "svg", "pdf", "jpg", "jpeg", "png", "webp"];
@@ -41,44 +42,6 @@ function sameIds(a: string[], b: string[]): boolean {
   return sortedA.every((id, i) => id === sortedB[i]);
 }
 
-// Convierte las URLs de un comentario en vínculos, igual que en Notas,
-// pero intercaladas en el texto en vez de mostrarse aparte
-function renderCommentText(text: string): React.ReactNode[] {
-  const regex = /https?:\/\/[^\s<>"']+/g;
-  const nodes: React.ReactNode[] = [];
-  let lastIndex = 0;
-  let match: RegExpExecArray | null;
-  let key = 0;
-  while ((match = regex.exec(text))) {
-    const rawUrl = match[0];
-    const trimmed = rawUrl.replace(/[.,;:)\]}"']+$/, "");
-    const trailing = rawUrl.slice(trimmed.length);
-    if (match.index > lastIndex) nodes.push(<span key={key++}>{text.slice(lastIndex, match.index)}</span>);
-    nodes.push(
-      <a
-        key={key++}
-        href={trimmed}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={(e) => e.stopPropagation()}
-        className="text-accent underline break-all"
-      >
-        {trimmed}
-      </a>
-    );
-    if (trailing) nodes.push(<span key={key++}>{trailing}</span>);
-    lastIndex = match.index + rawUrl.length;
-  }
-  if (lastIndex < text.length) nodes.push(<span key={key++}>{text.slice(lastIndex)}</span>);
-  return nodes;
-}
-
-// La casilla de comentario crece con el texto, hasta un máximo, en vez
-// de desbordarse
-function autoGrowComment(el: HTMLTextAreaElement) {
-  el.style.height = "auto";
-  el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
-}
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -261,6 +224,7 @@ export default function TaskModal({
   const [startDate, setStartDate] = useState(initialStartDate);
   const [endDate, setEndDate] = useState(initialEndDate);
   const [notes, setNotes] = useState(initialNotes);
+  const notesRef = useRef(initialNotes);
   const [assigneeIds, setAssigneeIds] = useState<string[]>(initialAssigneeIds);
   const [saving, setSaving] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -277,7 +241,6 @@ export default function TaskModal({
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [commentDraft, setCommentDraft] = useState("");
   const [postingComment, setPostingComment] = useState(false);
-  const commentInputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (!task) return;
@@ -292,9 +255,11 @@ export default function TaskModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function handleAddComment() {
-    const text = commentDraft.trim();
-    if (!text || !task) return;
+  // Devuelve true si se publicó (el editor entonces se limpia)
+  async function handleAddComment(draft = commentDraft): Promise<boolean> {
+    const text = draft.trim();
+    if (!text || !task) return false;
+    let ok = false;
     setPostingComment(true);
     try {
       const res = await fetch(`/api/tasks/${task.id}/comments`, {
@@ -306,7 +271,7 @@ export default function TaskModal({
         const created = await res.json();
         setComments((prev) => [...prev, created]);
         setCommentDraft("");
-        if (commentInputRef.current) commentInputRef.current.style.height = "auto";
+        ok = true;
       } else {
         onNotify?.("No se pudo publicar el comentario.", "error");
       }
@@ -314,6 +279,7 @@ export default function TaskModal({
       onNotify?.("No se pudo publicar el comentario.", "error");
     }
     setPostingComment(false);
+    return ok;
   }
 
   async function handleDeleteComment(id: string) {
@@ -346,14 +312,6 @@ export default function TaskModal({
       onNotify?.("No se pudo actualizar la asignación.", "error");
     }
   }
-
-  const notesLinks = Array.from(
-    new Set(
-      (notes.match(/https?:\/\/[^\s<>"']+/g) || []).map((url) =>
-        url.replace(/[.,;:)\]}"']+$/, "")
-      )
-    )
-  );
 
   const dirty =
     name !== initialName ||
@@ -696,31 +654,16 @@ export default function TaskModal({
                   {notesExpanded ? "Contraer" : "Expandir"}
                 </button>
               </div>
-              <textarea
+              <RichTextEditor
                 value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                onBlur={() => commit("notes", notes)}
-                rows={notesExpanded ? 12 : 3}
-                placeholder="¿De qué se trata esta tarea? URL, instrucciones o cualquier nota útil"
-                className="w-full rounded-2xl bg-ink/[0.04] px-4 py-3 text-sm text-ink placeholder:text-muted outline-none focus:ring-2 focus:ring-accent/30 resize-y transition-[height,box-shadow]"
+                onChange={(md) => {
+                  notesRef.current = md;
+                  setNotes(md);
+                }}
+                onBlur={() => commit("notes", notesRef.current)}
+                minHeight={notesExpanded ? 280 : 96}
+                placeholder="¿De qué se trata esta tarea? Escribe “- ” para viñetas, pega enlaces…"
               />
-              {notesLinks.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {notesLinks.map((url) => (
-                    <a
-                      key={url}
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      className="inline-flex items-center gap-1 max-w-[220px] rounded-full bg-ink/[0.05] px-3 py-1 text-xs text-accent hover:bg-ink/10"
-                      title={url}
-                    >
-                      <span className="truncate">{url}</span>
-                    </a>
-                  ))}
-                </div>
-              )}
             </section>
 
             <section>
@@ -813,34 +756,26 @@ export default function TaskModal({
                                 </button>
                               </div>
                             </div>
-                            <p className="mt-0.5 whitespace-pre-wrap break-words text-sm text-ink">{renderCommentText(c.text)}</p>
+                            <RichTextView value={c.text} className="mt-0.5 text-sm text-ink" />
                           </div>
                         </li>
                       ))}
                     </ul>
                   )}
                   <div className="flex items-end gap-2">
-                    <textarea
-                      ref={commentInputRef}
+                    <RichTextEditor
                       value={commentDraft}
-                      onChange={(e) => {
-                        setCommentDraft(e.target.value);
-                        autoGrowComment(e.target);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault();
-                          handleAddComment();
-                        }
-                      }}
-                      rows={1}
-                      placeholder="Agrega un comentario…"
-                      className="min-w-0 flex-1 resize-none overflow-y-auto break-words rounded-2xl bg-ink/[0.04] px-4 py-2.5 text-sm text-ink placeholder:text-muted outline-none focus:ring-2 focus:ring-accent/30"
-                      style={{ maxHeight: 160 }}
+                      onChange={setCommentDraft}
+                      onSubmit={(md) => handleAddComment(md)}
+                      submitOnEnter
+                      toolbar="compact"
+                      minHeight={22}
+                      placeholder="Agrega un comentario… (Shift + Enter para salto de línea)"
+                      className="min-w-0 flex-1 max-h-[260px] overflow-y-auto"
                     />
                     <button
                       type="button"
-                      onClick={handleAddComment}
+                      onClick={() => handleAddComment()}
                       disabled={!commentDraft.trim() || postingComment}
                       aria-label="Comentar"
                       className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-accent-fg hover:opacity-90 disabled:opacity-40"
