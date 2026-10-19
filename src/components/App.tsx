@@ -300,7 +300,7 @@ export default function App() {
       if (taskModal.open) {
         if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
         // En textarea y selects las flechas ya tienen uso propio
-        if (target?.closest?.("textarea, select")) return;
+        if (target?.closest?.("textarea, select, [contenteditable='true']")) return;
         // Una tarea nueva todavía no tiene lugar en la lista
         if (!taskModal.task) return;
         const index = navOrder.findIndex((t) => t.id === taskModal.task?.id);
