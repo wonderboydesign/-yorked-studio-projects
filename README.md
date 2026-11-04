@@ -105,6 +105,17 @@ El proyecto guarda en qué etapa va (punto azul) y cada etapa se marca con ✓ c
 
 También acepta `{ "items": [...] }`, y los nombres `image`/`url` para la imagen y `link` para el origen.
 
+## 6b. Clientes: prospectos y cotizaciones
+
+En el menú, **Clientes** es el embudo comercial: *Nuevo → Cotizado → En negociación → Ganado / Perdido* (las tarjetas se arrastran entre columnas).
+
+1. **+ Prospecto:** nombre de la marca y, en su ficha, contacto, giro, presupuesto y lo que necesita.
+2. **+ Nueva cotización:** parte de la plantilla de las propuestas del estudio (4 fases, notas legales, 50/50). Con **Sugerir**, Claude propone alcance, aplicaciones, tiempos y precio a partir de lo que necesita el prospecto y del tabulador (requiere `ANTHROPIC_API_KEY`). Todo se edita con vista previa en vivo.
+3. **Lista para enviar · copiar liga:** la propuesta queda en `/p/<código>`, una liga privada (no aparece en Google) que se le manda al cliente. Se ve cuántas veces la abrió y cuándo.
+4. El cliente **aprueba desde la liga** (elige la opción si hay varias). Entonces la propuesta muestra el monto del anticipo y los **datos para transferencia**, y el prospecto pasa a *Ganado*.
+
+**Datos del estudio** (botón en Clientes): contacto, cuenta para el anticipo (se muestra solo después de que el cliente aprueba), trabajos relacionados y el tabulador que usa Claude. Se guardan en la base de datos, no en el código.
+
 ## 7. Correr en local
 
 ```bash

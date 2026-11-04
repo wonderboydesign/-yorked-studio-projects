@@ -24,6 +24,7 @@ model Project {
   brandItems    BrandItem[]
   moodboards    Moodboard[]
   presentations Presentation[]
+  prospects     Prospect[]
 }
 
 enum Status {
@@ -200,5 +201,61 @@ model Presentation {
   title     String
   slides    Json     @default("[]")
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─── Clientes: prospectos y cotizaciones ────────────────────────────────
+
+// Persona o marca que pidió una propuesta. Avanza por el embudo hasta ser
+// cliente (stage "won"), y entonces puede ligarse a un proyecto.
+model Prospect {
+  id         String    @id @default(cuid())
+  brandName  String
+  contact    String?
+  email      String?
+  phone      String?
+  city       String?
+  source     String?
+  category   String?
+  needs      String?
+  budget     String?
+  stage      String    @default("new")
+  lostReason String?
+  notes      String?
+  project    Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  projectId  String?
+  quotes     Quote[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+// Propuesta que se manda al cliente por una liga privada (/p/<token>).
+// Las secciones variables (fases, opciones, extras, notas) van como JSON
+// (ver QuoteContent en src/lib/quotes.ts).
+model Quote {
+  id             String    @id @default(cuid())
+  prospect       Prospect  @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+  prospectId     String
+  token          String    @unique
+  status         String    @default("draft")
+  content        Json
+  viewCount      Int       @default(0)
+  firstViewedAt  DateTime?
+  lastViewedAt   DateTime?
+  sentAt         DateTime?
+  approvedAt     DateTime?
+  approvedOption String?
+  approvedName   String?
+  approvedEmail  String?
+  approvedNote   String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+// Datos del estudio que aparecen en las propuestas: contacto, datos para
+// transferencia y el tabulador que usa Claude para sugerir precios.
+model StudioSettings {
+  id        String   @id @default("singleton")
+  data      Json
   updatedAt DateTime @updatedAt
 }
