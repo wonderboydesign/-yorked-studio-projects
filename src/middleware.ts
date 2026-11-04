@@ -9,6 +9,9 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/privacy") ||
     pathname.startsWith("/terms") ||
     pathname.startsWith("/api/auth/login") ||
+    // Ligas de cotización para clientes (acceso por token, sin sesión)
+    pathname.startsWith("/p/") ||
+    pathname.startsWith("/api/public/") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon");
 

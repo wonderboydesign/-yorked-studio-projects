@@ -17,8 +17,9 @@ import NotificationBell from "./NotificationBell";
 import LiveClock from "./LiveClock";
 import Toast from "./Toast";
 import BrandingView from "./branding/BrandingView";
+import ClientsView from "./clients/ClientsView";
 
-type View = "dashboard" | "gantt" | "list" | "kanban" | "calendar" | "branding";
+type View = "dashboard" | "gantt" | "list" | "kanban" | "calendar" | "branding" | "clients";
 
 const VIEWS: { key: View; label: string; mobileLabel: string }[] = [
   { key: "gantt", label: "Gantt", mobileLabel: "Gantt" },
@@ -26,6 +27,7 @@ const VIEWS: { key: View; label: string; mobileLabel: string }[] = [
   { key: "kanban", label: "Kanban", mobileLabel: "Kanban" },
   { key: "calendar", label: "Calendario", mobileLabel: "Calendar" },
   { key: "branding", label: "Branding", mobileLabel: "Brand" },
+  { key: "clients", label: "Clientes", mobileLabel: "Clientes" },
 ];
 
 export default function App() {
@@ -649,6 +651,7 @@ export default function App() {
                 onChangeStatus={changeTaskStatus}
               />
             )}
+            {view === "clients" && <ClientsView notify={notify} />}
             {view === "branding" && (
               <BrandingView
                 projects={activeProjects}
