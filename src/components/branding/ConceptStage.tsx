@@ -29,7 +29,12 @@ export default function ConceptStage() {
   const [count, setCount] = useState(3);
   const [direction, setDirection] = useState("");
   const [generating, setGenerating] = useState(false);
-  const hasBrief = !!data.workspace.brief?.trim();
+  // Con el brief, el contexto, una nota o un análisis previo ya se puede generar
+  const hasBrief =
+    !!data.workspace.brief?.trim() ||
+    !!data.workspace.context?.trim() ||
+    !!data.workspace.briefAnalysis ||
+    data.items.some((i) => i.section === "brief" && i.kind === "comment");
 
   async function addLink(e: React.FormEvent) {
     e.preventDefault();
@@ -172,7 +177,7 @@ export default function ConceptStage() {
               {generating ? "Pensando…" : "Generar conceptos"}
             </Button>
           </div>
-          {!hasBrief && <p className="text-xs text-muted mt-2">Escribe primero el brief principal (etapa 01).</p>}
+          {!hasBrief && <p className="text-xs text-muted mt-2">Escribe primero el brief, una nota o un comentario (etapa 01).</p>}
           {generating && (
             <p className="text-xs text-muted mt-2">
               Claude está leyendo el brief, el contexto, los comentarios y las referencias. Tarda alrededor de un minuto.

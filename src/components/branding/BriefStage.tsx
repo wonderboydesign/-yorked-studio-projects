@@ -1,6 +1,7 @@
 "use client";
 
 import { useBrand } from "./BrandContext";
+import BriefAnalysisPanel from "./BriefAnalysisPanel";
 import { AddTextForm, AutoText, DeleteButton, DropZone, Panel, SectionTitle, formatDate } from "./ui";
 
 export default function BriefStage() {
@@ -9,6 +10,7 @@ export default function BriefStage() {
   const files = data.items.filter((i) => i.section === "brief" && i.kind === "file");
 
   return (
+    <div className="space-y-5">
     <div className="grid gap-5 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
       <div className="space-y-5 min-w-0">
         <Panel>
@@ -82,6 +84,8 @@ export default function BriefStage() {
           </ul>
         </Panel>
       </div>
+    </div>
+    <BriefAnalysisPanel />
     </div>
   );
 }
