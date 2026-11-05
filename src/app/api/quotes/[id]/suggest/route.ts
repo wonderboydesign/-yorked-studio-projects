@@ -4,6 +4,7 @@ import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { claudeErrorResponse } from "@/lib/claudeErrors";
 import { getStudio } from "@/lib/quotesServer";
 
 // Sugerir alcance, tiempos y precio puede tardar
@@ -54,7 +55,7 @@ Devuelve:
 
 Escribe en español de México, claro, sin relleno.`;
 
-export async function POST(_request: NextRequest, { params }: { params: { id: string } }) {
+async function handle(_request: NextRequest, { params }: { params: { id: string } }) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   if (!process.env.ANTHROPIC_API_KEY) {
@@ -95,20 +96,19 @@ export async function POST(_request: NextRequest, { params }: { params: { id: st
       messages: [{ role: "user", content: prompt }],
     });
   } catch (error) {
-    if (error instanceof Anthropic.AuthenticationError) {
-      return NextResponse.json({ error: "La ANTHROPIC_API_KEY no es válida." }, { status: 502 });
-    }
-    if (error instanceof Anthropic.RateLimitError) {
-      return NextResponse.json({ error: "Se alcanzó el límite de uso de la API. Intenta en un minuto." }, { status: 429 });
-    }
-    if (error instanceof Anthropic.APIError) {
-      return NextResponse.json({ error: `Error de la API de Claude (${error.status ?? "sin estado"}).` }, { status: 502 });
-    }
-    throw error;
+    return claudeErrorResponse(error, "sugerir-cotizacion");
   }
 
   if (response.stop_reason === "refusal" || !response.parsed_output) {
     return NextResponse.json({ error: "Claude no pudo armar la sugerencia. Intenta de nuevo." }, { status: 422 });
   }
   return NextResponse.json(response.parsed_output);
+}
+
+export async function POST(_request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    return await handle(_request, { params });
+  } catch (error) {
+    return claudeErrorResponse(error, "sugerir-cotizacion");
+  }
 }

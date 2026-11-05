@@ -4,6 +4,7 @@ import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { claudeErrorResponse } from "@/lib/claudeErrors";
 import { ITEM_INCLUDE, ensureWorkspace } from "@/lib/brandingServer";
 import { BrandResearch, BriefAnalysis, CompetitorData, DEFAULT_AXES, InsightData, RESEARCH_BLOCKS, isImage } from "@/lib/branding";
 
@@ -52,7 +53,7 @@ function formatConceptBody(c: z.infer<typeof ConceptsSchema>["concepts"][number]
   ].join("\n\n");
 }
 
-export async function POST(request: NextRequest, { params }: { params: { projectId: string } }) {
+async function handle(request: NextRequest, { params }: { params: { projectId: string } }) {
   const user = await getCurrentUser();
   if (!user) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
@@ -206,22 +207,7 @@ export async function POST(request: NextRequest, { params }: { params: { project
       }
     }
   } catch (error) {
-    if (error instanceof Anthropic.AuthenticationError) {
-      return NextResponse.json({ error: "La ANTHROPIC_API_KEY no es válida." }, { status: 502 });
-    }
-    if (error instanceof Anthropic.RateLimitError) {
-      return NextResponse.json(
-        { error: "Se alcanzó el límite de uso de la API. Intenta en un minuto." },
-        { status: 429 }
-      );
-    }
-    if (error instanceof Anthropic.APIError) {
-      return NextResponse.json(
-        { error: `Error de la API de Claude (${error.status ?? "sin estado"}).` },
-        { status: 502 }
-      );
-    }
-    throw error;
+    return claudeErrorResponse(error, "generar-conceptos");
   }
 
   if (response.stop_reason === "refusal") {
@@ -262,4 +248,12 @@ export async function POST(request: NextRequest, { params }: { params: { project
   );
 
   return NextResponse.json(created, { status: 201 });
+}
+
+export async function POST(request: NextRequest, { params }: { params: { projectId: string } }) {
+  try {
+    return await handle(request, { params });
+  } catch (error) {
+    return claudeErrorResponse(error, "generar-conceptos");
+  }
 }
