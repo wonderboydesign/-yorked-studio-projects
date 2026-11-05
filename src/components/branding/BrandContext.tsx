@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import {
   BrandData,
   BrandItem,
+  BrandNaming,
   BrandResearch,
   BriefAnalysis,
   BrandStage,
@@ -27,11 +28,13 @@ interface BrandApi {
   data: BrandData;
   notify: (message: string, tone?: "ok" | "error") => void;
   patchWorkspace: (
-    fields: Partial<Pick<BrandWorkspace, "brief" | "context" | "conceptNotes" | "plan" | "stage" | "research">>
+    fields: Partial<Pick<BrandWorkspace, "brief" | "context" | "conceptNotes" | "plan" | "stage" | "research" | "naming">>
   ) => Promise<void>;
   // Cambia el research a partir del valor más reciente (no del de este
   // render), para que dos guardados seguidos no se pisen
   patchResearch: (update: (current: BrandResearch) => BrandResearch) => Promise<void>;
+  // Igual que patchResearch, para los criterios de naming
+  patchNaming: (fields: Partial<BrandNaming>) => Promise<void>;
   addItem: (item: NewItem) => Promise<BrandItem | null>;
   updateItem: (id: string, fields: Partial<BrandItem>) => Promise<void>;
   deleteItem: (id: string) => Promise<void>;
@@ -44,6 +47,7 @@ interface BrandApi {
   updatePresentation: (id: string, fields: Partial<Pick<Presentation, "title" | "slides">>) => Promise<void>;
   deletePresentation: (id: string) => Promise<void>;
   generateConcepts: (count: number, direction: string) => Promise<boolean>;
+  generateNames: (count: number, direction: string) => Promise<boolean>;
   analyzeBrief: () => Promise<BriefAnalysis | null>;
   reload: () => Promise<void>;
 }
@@ -83,6 +87,10 @@ export function BrandProvider({
   useEffect(() => {
     researchRef.current = data?.workspace.research ?? {};
   }, [data?.workspace.research]);
+  const namingRef = useRef<BrandNaming>({});
+  useEffect(() => {
+    namingRef.current = data?.workspace.naming ?? {};
+  }, [data?.workspace.naming]);
 
   const reload = useCallback(async () => {
     try {
@@ -123,6 +131,12 @@ export function BrandProvider({
       const next = update(researchRef.current);
       researchRef.current = next;
       await patchWorkspace({ research: next });
+    }
+
+    async function patchNaming(fields: Partial<BrandNaming>) {
+      const next = { ...namingRef.current, ...fields };
+      namingRef.current = next;
+      await patchWorkspace({ naming: next });
     }
 
     async function addItem(item: NewItem) {
@@ -307,12 +321,30 @@ export function BrandProvider({
       }
     }
 
+    async function generateNames(count: number, direction: string) {
+      try {
+        const created = await json<BrandItem[]>(await fetch(`/api/branding/${projectId}/names`, {
+          method: "POST",
+          headers: JSON_HEADERS,
+          body: JSON.stringify({ count, direction }),
+        }));
+        setData((d) => d && { ...d, items: [...d.items, ...created] });
+        notify(`${created.length} nombre${created.length === 1 ? "" : "s"} nuevo${created.length === 1 ? "" : "s"}`);
+        return true;
+      } catch (e) {
+        fail(e, "No se pudieron sugerir nombres.");
+        return false;
+      }
+    }
+
     return {
       project,
       data,
       notify,
       patchWorkspace,
       patchResearch,
+      patchNaming,
+      generateNames,
       addItem,
       updateItem,
       deleteItem,

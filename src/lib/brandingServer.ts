@@ -1,7 +1,7 @@
 import { del } from "@vercel/blob";
 import { prisma } from "./prisma";
 
-export const BRAND_STAGE_KEYS = ["brief", "concept", "research", "moodboard", "development", "presentation"];
+export const BRAND_STAGE_KEYS = ["brief", "concept", "research", "naming", "moodboard", "development", "presentation"];
 
 const ITEM_STRING_FIELDS = ["title", "body", "url", "pathname", "contentType", "linkUrl", "status"] as const;
 

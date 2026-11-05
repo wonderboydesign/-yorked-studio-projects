@@ -131,6 +131,8 @@ model BrandWorkspace {
   research     Json?
   // Último análisis del brief hecho por Claude (ver BriefAnalysis)
   briefAnalysis Json?
+  // Naming (etapa opcional): si está activa y los criterios (ver BrandNaming)
+  naming       Json?
   updatedAt    DateTime @updatedAt
 }
 

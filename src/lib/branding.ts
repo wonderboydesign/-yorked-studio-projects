@@ -1,15 +1,19 @@
-// Flujo de branding: seis etapas en orden. Cada etapa tiene un objetivo y
-// una salida concreta; la siguiente etapa parte de lo que dejó la anterior.
+// Flujo de branding: seis etapas en orden, más el naming, que es opcional
+// por proyecto. Cada etapa tiene un objetivo y una salida concreta; la
+// siguiente etapa parte de lo que dejó la anterior.
 
-export type BrandStage = "brief" | "concept" | "research" | "moodboard" | "development" | "presentation";
+export type BrandStage = "brief" | "concept" | "research" | "naming" | "moodboard" | "development" | "presentation";
 
-export const BRAND_STAGES: {
+export interface BrandStageInfo {
   key: BrandStage;
   number: string;
   label: string;
   goal: string;
   output: string;
-}[] = [
+  optional?: boolean;
+}
+
+export const BRAND_STAGES: BrandStageInfo[] = [
   {
     key: "brief",
     number: "01",
@@ -30,6 +34,14 @@ export const BRAND_STAGES: {
     label: "Investigación",
     goal: "Investigar negocio, audiencia, competencia y categoría, y aterrizarlo en hallazgos y un plano general.",
     output: "Hallazgos, mapa de posicionamiento y plano general.",
+  },
+  {
+    key: "naming",
+    number: "",
+    label: "Naming",
+    goal: "Explorar nombres para la marca a partir del brief, los conceptos y el research, y llegar a una shortlist.",
+    output: "Shortlist de nombres revisados y un nombre elegido.",
+    optional: true,
   },
   {
     key: "moodboard",
@@ -54,6 +66,15 @@ export const BRAND_STAGES: {
   },
 ];
 
+// Las etapas que se muestran en un proyecto, numeradas en orden. El naming
+// solo aparece si se activó para ese proyecto.
+export function visibleStages(namingEnabled: boolean): BrandStageInfo[] {
+  return BRAND_STAGES.filter((s) => !s.optional || namingEnabled).map((s, i) => ({
+    ...s,
+    number: String(i + 1).padStart(2, "0"),
+  }));
+}
+
 export interface BrandWorkspace {
   id: string;
   projectId: string;
@@ -64,8 +85,58 @@ export interface BrandWorkspace {
   plan: string | null;
   research: BrandResearch | null;
   briefAnalysis: BriefAnalysis | null;
+  naming: BrandNaming | null;
   updatedAt: string;
 }
+
+// Naming: si la etapa está activa en el proyecto y los criterios con los que
+// se exploran nombres (los lee Claude al sugerir)
+export interface BrandNaming {
+  enabled?: boolean;
+  styles?: NameStyle[];
+  convey?: string; // qué debe transmitir
+  languages?: string; // español, inglés, otro…
+  length?: string; // corto, una palabra…
+  avoid?: string; // palabras, sonidos o nombres a evitar
+  notes?: string;
+}
+
+export type NameStyle = "descriptive" | "evocative" | "invented" | "compound" | "metaphor" | "foreign" | "founder" | "acronym";
+
+export const NAME_STYLES: { key: NameStyle; label: string; hint: string }[] = [
+  { key: "descriptive", label: "Descriptivo", hint: "Dice lo que hace la marca" },
+  { key: "evocative", label: "Evocativo", hint: "Sugiere una sensación o una idea" },
+  { key: "invented", label: "Inventado", hint: "Palabra nueva, fácil de registrar" },
+  { key: "compound", label: "Compuesto", hint: "Dos palabras o raíces unidas" },
+  { key: "metaphor", label: "Metáfora", hint: "Toma un objeto, lugar o figura" },
+  { key: "foreign", label: "Otro idioma", hint: "Raíz en latín, náhuatl, japonés…" },
+  { key: "founder", label: "Fundador / lugar", hint: "Nombre propio, apellido o lugar" },
+  { key: "acronym", label: "Siglas / abstracto", hint: "Letras o sonidos sin significado" },
+];
+
+export function nameStyleLabel(key: string | undefined) {
+  return NAME_STYLES.find((s) => s.key === key)?.label ?? key ?? "";
+}
+
+// Datos de un nombre (BrandItem kind "name", en data)
+export interface NameData {
+  style?: NameStyle;
+  meaning?: string; // qué significa o de dónde viene
+  rationale?: string; // por qué funciona para esta marca
+  pronunciation?: string;
+  handle?: string; // usuario sugerido para redes, sin @
+  // Revisiones que hace el equipo a mano
+  domain?: boolean;
+  social?: boolean;
+  trademark?: boolean;
+}
+
+export const NAME_STATUSES = [
+  { key: "explore", label: "Explorar" },
+  { key: "shortlist", label: "Shortlist" },
+  { key: "chosen", label: "Elegido" },
+  { key: "discarded", label: "Descartado" },
+] as const;
 
 // Lectura del brief: qué ya está claro, qué falta preguntar y un concepto
 // inicial. Lo genera Claude con todo lo capturado en la etapa 01.
@@ -162,7 +233,8 @@ export type BrandItemKind =
   | "image" // moodboard: imagen
   | "piece" // desarrollo: boceto o pieza desarrollada
   | "competitor" // investigación: ficha de competidor
-  | "insight"; // investigación: hallazgo
+  | "insight" // investigación: hallazgo
+  | "name"; // naming: nombre propuesto (a mano o con IA)
 
 export interface BrandItem {
   id: string;
@@ -207,7 +279,7 @@ export interface Reference {
   external?: boolean;
 }
 
-export type BrandSlideType = "cover" | "section" | "text" | "image" | "moodboard" | "concept" | "insights" | "map";
+export type BrandSlideType = "cover" | "section" | "text" | "image" | "moodboard" | "concept" | "insights" | "map" | "names";
 
 export interface BrandSlide {
   id: string;
