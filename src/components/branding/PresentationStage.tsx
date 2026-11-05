@@ -17,6 +17,7 @@ const SLIDE_TYPES: { key: BrandSlideType; label: string }[] = [
   { key: "image", label: "Piezas" },
   { key: "insights", label: "Hallazgos" },
   { key: "map", label: "Mapa" },
+  { key: "names", label: "Naming" },
 ];
 
 // Borrador armado con lo que ya existe en las etapas anteriores
@@ -51,6 +52,17 @@ export function buildDraft(data: BrandData, project: Project): BrandSlide[] {
   if (conceptList.length > 0) {
     slides.push({ id: newSlideId(), type: "section", title: "Conceptos" });
     conceptList.forEach((c) => slides.push({ id: newSlideId(), type: "concept", itemIds: [c.id] }));
+  }
+  // Naming: el nombre elegido; si aún no hay, la shortlist
+  const names = data.items.filter((i) => i.kind === "name");
+  const chosenName = names.find((n) => n.status === "chosen");
+  const shortlist = names.filter((n) => n.status === "shortlist");
+  if (data.workspace.naming?.enabled && (chosenName || shortlist.length > 0)) {
+    slides.push({
+      id: newSlideId(),
+      type: "names",
+      itemIds: chosenName ? [chosenName.id] : shortlist.slice(0, 6).map((n) => n.id),
+    });
   }
   data.moodboards.forEach((b) => slides.push({ id: newSlideId(), type: "moodboard", boardId: b.id }));
   if (pieces.length > 0) {
@@ -294,10 +306,11 @@ function SlideEditor({
   );
   // Primero lo de desarrollo, que es lo que normalmente se presenta
   pickable.sort((a, b) => Number(b.section === "development") - Number(a.section === "development"));
+  const names = data.items.filter((i) => i.kind === "name" && i.status !== "discarded");
   const selected = slide.itemIds ?? [];
 
-  function toggleItem(id: string) {
-    const next = selected.includes(id) ? selected.filter((x) => x !== id) : [...selected, id].slice(-4);
+  function toggleItem(id: string, max = 4) {
+    const next = selected.includes(id) ? selected.filter((x) => x !== id) : [...selected, id].slice(-max);
     onChange({ itemIds: next });
   }
 
@@ -353,7 +366,30 @@ function SlideEditor({
         </Field>
       )}
 
-      <Field label={slide.type === "concept" || slide.type === "moodboard" ? "Título (opcional, reemplaza)" : "Título"}>
+      {slide.type === "names" && (
+        <Field label={`Nombres (1 para presentarlo solo, hasta 6) · ${selected.length} elegido(s)`}>
+          {names.length === 0 ? (
+            <p className="text-xs text-muted">Agrega nombres en la etapa de Naming.</p>
+          ) : (
+            <div className="flex flex-wrap gap-1.5">
+              {names.map((n) => (
+                <button
+                  key={n.id}
+                  type="button"
+                  onClick={() => toggleItem(n.id, 6)}
+                  className={`text-xs px-2.5 py-1 rounded-full border ${
+                    selected.includes(n.id) ? "border-ink bg-ink text-paper" : "border-line text-muted hover:text-ink"
+                  }`}
+                >
+                  {n.title}
+                </button>
+              ))}
+            </div>
+          )}
+        </Field>
+      )}
+
+      <Field label={slide.type === "concept" || slide.type === "moodboard" || slide.type === "names" ? "Título (opcional, reemplaza)" : "Título"}>
         <DraftInput value={slide.title ?? ""} onCommit={(title) => onChange({ title })} />
       </Field>
       <Field label={slide.type === "cover" ? "Subtítulo / cliente" : "Texto"}>

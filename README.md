@@ -78,13 +78,14 @@ Sin esta variable, la sección de adjuntar archivos en una tarea simplemente da 
 
 ## 6. Flujo de Branding
 
-En el menú de arriba, **Branding** abre el proceso de marca de cada proyecto, en seis etapas. Cada una tiene un objetivo y una salida, y la siguiente arranca de lo que dejó la anterior:
+En el menú de arriba, **Branding** abre el proceso de marca de cada proyecto, en seis etapas, más una de naming que se activa por proyecto. Cada una tiene un objetivo y una salida, y la siguiente arranca de lo que dejó la anterior:
 
 | Etapa | Qué se hace | Qué sale |
 |---|---|---|
 | 01 Brief | Brief principal, contexto, comentarios del cliente/equipo y archivos. **Analizar brief** (Claude): qué está claro y qué falta, preguntas para el cliente y un concepto inicial | Brief limpio y completo |
 | 02 Concepto | Detalle de conceptualización, referencias y conceptos (a mano o generados con Claude) | 1 a 3 conceptos marcados “Elegido” |
 | 03 Investigación | Bloques fijos (Negocio, Audiencia, Categoría, Tendencias), fichas de competencia, mapa de posicionamiento de dos ejes, hallazgos (Encontramos → Significa → Oportunidad), ideas en tablero y plano general | Hallazgos, mapa de posicionamiento y plano general |
+| Naming (opcional) | Se activa con **+ Naming** en el proyecto. Criterios (qué debe transmitir, estilos, idioma, largo, qué evitar), sugerencias de Claude a partir del brief, conceptos, research y competencia, tablero con filtros (Explorar, Shortlist, Elegido, Descartado), revisión manual de dominio, redes e IMPI, y prueba tipográfica de la shortlist. Se numera entre Investigación y Moodboard | Shortlist y un nombre elegido |
 | 04 Moodboard | Un moodboard por dirección visual: subir imágenes, pegar URLs o traerlas de la biblioteca | Dirección visual por concepto |
 | 05 Desarrollo | Subir bocetos y piezas con estado (Boceto, Propuesta, Para presentar, Final) | Piezas “Para presentar” |
 | 06 Presentación | Borrador automático con brief, conceptos, moodboards y piezas; se edita lámina por lámina | Presentar en pantalla completa o exportar a PDF |
@@ -93,7 +94,7 @@ El proyecto guarda en qué etapa va (punto azul) y cada etapa se marca con ✓ c
 
 **Biblioteca de referencias:** es compartida entre proyectos (botón “Biblioteca de referencias”). Las imágenes que llevas de ahí a un moodboard quedan ligadas a la referencia original, con su liga de origen y etiquetas.
 
-**Generar conceptos con Claude (opcional):** agrega `ANTHROPIC_API_KEY` en `.env` (y en Vercel). Claude lee el brief, el contexto, los comentarios, tus notas de conceptualización, el research (bloques, competencia, posicionamiento buscado y hallazgos) y las referencias, y propone conceptos distintos a los que ya existen. Sin la variable, todo lo demás funciona igual.
+**Generar conceptos con Claude (opcional):** agrega `ANTHROPIC_API_KEY` en `.env` (y en Vercel). Claude lee el brief, el contexto, los comentarios, tus notas de conceptualización, el research (bloques, competencia, posicionamiento buscado y hallazgos) y las referencias, y propone conceptos distintos a los que ya existen. En Naming, Claude sugiere nombres con los criterios del estudio y aprende de lo que pasas a Shortlist o descartas (no revisa disponibilidad: dominio, redes e IMPI se revisan a mano). Sin la variable, todo lo demás funciona igual.
 
 **Conectar tu dashboard de referencias (opcional):** si tu dashboard puede exponer una URL que devuelva JSON, ponla en `REFERENCES_FEED_URL` (y `REFERENCES_FEED_TOKEN` si pide autenticación, se manda como `Authorization: Bearer`). Aparecerá una pestaña “Mi dashboard” en la biblioteca; al elegir una referencia de ahí se guarda en la biblioteca y queda ligada al moodboard. Formato aceptado:
 

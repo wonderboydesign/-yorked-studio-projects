@@ -38,6 +38,9 @@ export async function PATCH(request: NextRequest, { params }: { params: { projec
   if (body.research && typeof body.research === "object" && !Array.isArray(body.research)) {
     data.research = body.research;
   }
+  if (body.naming && typeof body.naming === "object" && !Array.isArray(body.naming)) {
+    data.naming = body.naming;
+  }
   if (typeof body.stage === "string" && BRAND_STAGE_KEYS.includes(body.stage)) {
     data.stage = body.stage;
   }

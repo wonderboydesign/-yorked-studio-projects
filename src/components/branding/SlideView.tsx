@@ -1,6 +1,6 @@
 "use client";
 
-import { BrandData, BrandItem, BrandSlide, DEFAULT_AXES, InsightData, isImage } from "@/lib/branding";
+import { BrandData, BrandItem, BrandSlide, DEFAULT_AXES, InsightData, NameData, isImage, nameStyleLabel } from "@/lib/branding";
 import PositionMap, { competitorPoints } from "./PositionMap";
 import { Project } from "@/lib/types";
 
@@ -100,6 +100,51 @@ function SlideContent({
             {rest.map((p, i) => (
               <p key={i}>{p}</p>
             ))}
+          </div>
+        </div>
+      );
+    }
+
+    case "names": {
+      const shown = items.filter((i) => i.kind === "name").slice(0, 6);
+      if (shown.length === 1) {
+        const n = shown[0];
+        const d = (n.data ?? {}) as NameData;
+        return (
+          <div className="flex flex-col h-full pb-[3cqw]">
+            <span className="text-[1cqw] tracking-[0.2em] uppercase text-[#0071e3]">Naming</span>
+            <div className="flex-1 flex items-center justify-center">
+              <h2 className="text-[11cqw] leading-none tracking-[-0.04em] font-medium text-center">{n.title}</h2>
+            </div>
+            <div className="grid grid-cols-2 gap-[4cqw] text-[1.3cqw] leading-[1.5]">
+              <p>{slide.body || d.meaning}</p>
+              <p className="text-[#6e6e73]">{d.rationale}</p>
+            </div>
+          </div>
+        );
+      }
+      return (
+        <div className="flex flex-col h-full pb-[3cqw] min-h-0">
+          <span className="text-[1cqw] tracking-[0.2em] uppercase text-[#0071e3]">Naming</span>
+          <h2 className="mt-[1cqw] mb-[2.5cqw] text-[3.6cqw] leading-[1.05] tracking-[-0.02em] font-medium">
+            {slide.title || "Rutas de nombre"}
+          </h2>
+          <div className={`grid gap-[1.2cqw] flex-1 min-h-0 ${shown.length > 3 ? "grid-cols-3 grid-rows-2" : ["grid-cols-1", "grid-cols-1", "grid-cols-2", "grid-cols-3"][shown.length]}`}>
+            {shown.map((n) => {
+              const d = (n.data ?? {}) as NameData;
+              return (
+                <div key={n.id} className="rounded-[1.4cqw] bg-[#f5f5f7] p-[2cqw] flex flex-col min-h-0 overflow-hidden">
+                  <span className="text-[0.9cqw] tracking-[0.15em] uppercase text-[#86868b]">{nameStyleLabel(d.style)}</span>
+                  <p className="mt-auto text-[3.4cqw] leading-none tracking-[-0.03em] font-medium truncate">{n.title}</p>
+                  {d.meaning && <p className="mt-[1cqw] text-[1.05cqw] leading-[1.4] text-[#6e6e73] line-clamp-3">{d.meaning}</p>}
+                </div>
+              );
+            })}
+            {shown.length === 0 && (
+              <div className="flex items-center justify-center bg-[#f5f5f7] text-[1.2cqw] text-[#86868b]">
+                Elige nombres para esta lámina
+              </div>
+            )}
           </div>
         </div>
       );

@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BRAND_STAGES, BrandData, BrandStage } from "@/lib/branding";
+import { BrandData, BrandStage, visibleStages } from "@/lib/branding";
 import { Project } from "@/lib/types";
 import { BrandProvider, useBrand } from "./BrandContext";
 import BriefStage from "./BriefStage";
 import ConceptStage from "./ConceptStage";
 import ResearchStage from "./ResearchStage";
+import NamingStage from "./NamingStage";
 import MoodboardStage from "./MoodboardStage";
 import DevelopmentStage from "./DevelopmentStage";
 import PresentationStage from "./PresentationStage";
@@ -89,14 +90,18 @@ function ProjectPicker({
       <div>
         <h2 className="text-2xl mb-1">Cómo trabajamos</h2>
         <p className="text-base text-muted mb-6 max-w-xl">
-          Seis etapas. Cada una tiene un objetivo y una salida; la siguiente parte de lo que dejó la anterior.
+          Seis etapas, más el naming cuando el proyecto lo necesita. Cada una tiene un objetivo y una salida; la
+          siguiente parte de lo que dejó la anterior.
         </p>
-        <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-          {BRAND_STAGES.map((s, i) => {
+        <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+          {visibleStages(true).map((s, i) => {
             const a = appear(i + projects.length);
             return (
               <li key={s.key} style={a.style} className={`glass rounded-3xl p-6 flex flex-col min-h-[240px] ${a.className}`}>
-                <span className="text-sm text-muted">{s.number}</span>
+                <span className="text-sm text-muted">
+                  {s.number}
+                  {s.optional && " · Opcional"}
+                </span>
                 <div className="mt-auto pt-8">
                   <h3 className="text-xl">{s.label}</h3>
                   <p className="text-sm text-muted mt-2">{s.goal}</p>
@@ -120,6 +125,7 @@ function stageProgress(data: BrandData): Record<BrandStage, boolean> {
   return {
     brief: !!data.workspace.brief?.trim(),
     concept: items.some((i) => i.kind === "concept" && i.status === "chosen"),
+    naming: items.some((i) => i.kind === "name" && i.status === "chosen"),
     research:
       items.some((i) => i.kind === "insight") ||
       !!data.workspace.plan?.trim() ||
@@ -131,21 +137,35 @@ function stageProgress(data: BrandData): Record<BrandStage, boolean> {
 }
 
 function Workspace({ onOpenLibrary }: { onOpenLibrary: () => void }) {
-  const { data, project, patchWorkspace } = useBrand();
+  const { data, project, patchWorkspace, patchNaming, notify } = useBrand();
+  const namingEnabled = !!data.workspace.naming?.enabled;
+  const stages = visibleStages(namingEnabled);
   const [view, setView] = useState<BrandStage>(data.workspace.stage);
   const progress = stageProgress(data);
-  const index = BRAND_STAGES.findIndex((s) => s.key === view);
-  const stage = BRAND_STAGES[index];
-  const next = BRAND_STAGES[index + 1];
+  // Si la etapa que se veía ya no está (se quitó el naming), se regresa a la anterior
+  const found = stages.findIndex((s) => s.key === view);
+  const index = found === -1 ? stages.findIndex((s) => s.key === "research") : found;
+  const stage = stages[index];
+  const next = stages[index + 1];
 
   useEffect(() => {
     window.scrollTo({ top: 0 });
   }, [view]);
 
+  useEffect(() => {
+    if (found === -1) setView(stage.key);
+  }, [found, stage.key]);
+
+  function enableNaming() {
+    patchNaming({ enabled: true });
+    setView("naming");
+    notify("Etapa de naming agregada al proyecto");
+  }
+
   function advance() {
     if (!next) return;
     // La etapa "actual" del proyecto es la más avanzada a la que se ha llegado
-    const currentIndex = BRAND_STAGES.findIndex((s) => s.key === data.workspace.stage);
+    const currentIndex = stages.findIndex((s) => s.key === data.workspace.stage);
     if (index + 1 > currentIndex) patchWorkspace({ stage: next.key });
     setView(next.key);
   }
@@ -154,15 +174,24 @@ function Workspace({ onOpenLibrary }: { onOpenLibrary: () => void }) {
     <div className="space-y-6">
       <HeroTitle
         eyebrow={project.client ?? "Branding"}
-        aside={<Button onClick={onOpenLibrary}>Biblioteca de referencias</Button>}
+        aside={
+          <div className="flex flex-wrap gap-2 justify-end">
+            {!namingEnabled && (
+              <Button onClick={enableNaming} title="Agrega la etapa opcional de naming a este proyecto">
+                + Naming
+              </Button>
+            )}
+            <Button onClick={onOpenLibrary}>Biblioteca de referencias</Button>
+          </div>
+        }
         size={heroSize(project.name)}
       >
         {project.name}
       </HeroTitle>
 
       <OverHero size={heroSize(project.name)} className="glass rounded-3xl p-1.5 hero-pad">
-      <nav className="grid grid-cols-3 sm:grid-cols-6 gap-1">
-        {BRAND_STAGES.map((s) => {
+      <nav className={`grid gap-1 ${namingEnabled ? "grid-cols-4 sm:grid-cols-7" : "grid-cols-3 sm:grid-cols-6"}`}>
+        {stages.map((s) => {
           const active = s.key === view;
           const isCurrent = s.key === data.workspace.stage;
           return (
@@ -200,6 +229,7 @@ function Workspace({ onOpenLibrary }: { onOpenLibrary: () => void }) {
       {view === "brief" && <BriefStage />}
       {view === "concept" && <ConceptStage />}
       {view === "research" && <ResearchStage />}
+      {view === "naming" && namingEnabled && <NamingStage />}
       {view === "moodboard" && <MoodboardStage />}
       {view === "development" && <DevelopmentStage />}
       {view === "presentation" && <PresentationStage />}
