@@ -90,7 +90,7 @@ async function handle(_request: NextRequest, { params }: { params: { id: string 
       max_tokens: 16000,
       betas: ["server-side-fallback-2026-07-01"],
       fallbacks: "default",
-      output_config: { effort: "high", format: betaZodOutputFormat(SuggestionSchema) },
+      output_config: { effort: "medium", format: betaZodOutputFormat(SuggestionSchema) },
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: prompt }],
     });
