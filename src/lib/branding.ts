@@ -63,8 +63,36 @@ export interface BrandWorkspace {
   conceptNotes: string | null;
   plan: string | null;
   research: BrandResearch | null;
+  briefAnalysis: BriefAnalysis | null;
   updatedAt: string;
 }
+
+// Lectura del brief: qué ya está claro, qué falta preguntar y un concepto
+// inicial. Lo genera Claude con todo lo capturado en la etapa 01.
+export type BriefFieldStatus = "ok" | "partial" | "missing";
+
+export interface BriefAnalysis {
+  analyzedAt: string;
+  summary: string;
+  fields: { key: string; label: string; status: BriefFieldStatus; value: string }[];
+  questions: { question: string; why: string }[];
+  keywords: string[];
+  conceptSeed: { name: string; idea: string; why: string };
+}
+
+// Lo que un brief de branding debería cubrir, en orden
+export const BRIEF_CHECKLIST: { key: string; label: string; hint: string }[] = [
+  { key: "business", label: "Negocio", hint: "Qué vende, cómo opera, desde cuándo" },
+  { key: "goal", label: "Objetivo del proyecto", hint: "Por qué ahora: abrir, relanzar, crecer, cambiar de público" },
+  { key: "audience", label: "Público", hint: "A quién le vende y qué le importa" },
+  { key: "competition", label: "Competencia y referentes", hint: "Con quién la comparan, qué marcas admira o rechaza" },
+  { key: "differentiator", label: "Diferenciador", hint: "Por qué elegirla sobre otras" },
+  { key: "personality", label: "Personalidad y tono", hint: "Cómo quiere sentirse y hablar la marca" },
+  { key: "deliverables", label: "Entregables", hint: "Logo, empaque, aplicaciones, digital" },
+  { key: "timeline", label: "Tiempos", hint: "Fecha de lanzamiento o entrega" },
+  { key: "budget", label: "Presupuesto", hint: "Rango que tiene contemplado" },
+  { key: "constraints", label: "Restricciones", hint: "Lo que debe conservarse, colores o elementos obligatorios" },
+];
 
 // Research estructurado: un texto por bloque, ejes del mapa de
 // posicionamiento y el lugar que buscamos para la marca en ese mapa

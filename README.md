@@ -82,7 +82,7 @@ En el menú de arriba, **Branding** abre el proceso de marca de cada proyecto, e
 
 | Etapa | Qué se hace | Qué sale |
 |---|---|---|
-| 01 Brief | Brief principal, contexto, comentarios del cliente/equipo y archivos | Brief limpio y completo |
+| 01 Brief | Brief principal, contexto, comentarios del cliente/equipo y archivos. **Analizar brief** (Claude): qué está claro y qué falta, preguntas para el cliente y un concepto inicial | Brief limpio y completo |
 | 02 Concepto | Detalle de conceptualización, referencias y conceptos (a mano o generados con Claude) | 1 a 3 conceptos marcados “Elegido” |
 | 03 Investigación | Bloques fijos (Negocio, Audiencia, Categoría, Tendencias), fichas de competencia, mapa de posicionamiento de dos ejes, hallazgos (Encontramos → Significa → Oportunidad), ideas en tablero y plano general | Hallazgos, mapa de posicionamiento y plano general |
 | 04 Moodboard | Un moodboard por dirección visual: subir imágenes, pegar URLs o traerlas de la biblioteca | Dirección visual por concepto |

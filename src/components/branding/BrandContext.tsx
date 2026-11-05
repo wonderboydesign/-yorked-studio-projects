@@ -5,6 +5,7 @@ import {
   BrandData,
   BrandItem,
   BrandResearch,
+  BriefAnalysis,
   BrandStage,
   BrandWorkspace,
   Moodboard,
@@ -43,6 +44,7 @@ interface BrandApi {
   updatePresentation: (id: string, fields: Partial<Pick<Presentation, "title" | "slides">>) => Promise<void>;
   deletePresentation: (id: string) => Promise<void>;
   generateConcepts: (count: number, direction: string) => Promise<boolean>;
+  analyzeBrief: () => Promise<BriefAnalysis | null>;
   reload: () => Promise<void>;
 }
 
@@ -276,6 +278,19 @@ export function BrandProvider({
       }
     }
 
+    async function analyzeBrief() {
+      try {
+        const analysis = await json<BriefAnalysis>(
+          await fetch(`/api/branding/${projectId}/analyze`, { method: "POST" })
+        );
+        setData((d) => d && { ...d, workspace: { ...d.workspace, briefAnalysis: analysis } });
+        return analysis;
+      } catch (e) {
+        fail(e, "No se pudo analizar el brief.");
+        return null;
+      }
+    }
+
     async function generateConcepts(count: number, direction: string) {
       try {
         const created = await json<BrandItem[]>(await fetch(`/api/branding/${projectId}/concepts`, {
@@ -310,6 +325,7 @@ export function BrandProvider({
       updatePresentation,
       deletePresentation,
       generateConcepts,
+      analyzeBrief,
       reload,
     };
   }, [data, project, projectId, notify, fail, reload, uploading]);

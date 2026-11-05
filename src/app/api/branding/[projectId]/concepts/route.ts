@@ -5,7 +5,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { ITEM_INCLUDE, ensureWorkspace } from "@/lib/brandingServer";
-import { BrandResearch, CompetitorData, DEFAULT_AXES, InsightData, RESEARCH_BLOCKS, isImage } from "@/lib/branding";
+import { BrandResearch, BriefAnalysis, CompetitorData, DEFAULT_AXES, InsightData, RESEARCH_BLOCKS, isImage } from "@/lib/branding";
 
 // Generar conceptos puede tardar; en Vercel se amplía el límite de la función
 export const maxDuration = 120;
@@ -73,18 +73,19 @@ export async function POST(request: NextRequest, { params }: { params: { project
     return NextResponse.json({ error: "Proyecto no encontrado" }, { status: 404 });
   }
   const workspace = await ensureWorkspace(params.projectId);
-  if (!workspace.brief?.trim()) {
-    return NextResponse.json(
-      { error: "Primero escribe el brief principal en la etapa 01." },
-      { status: 400 }
-    );
-  }
-
   const items = await prisma.brandItem.findMany({
     where: { projectId: params.projectId, section: { in: ["brief", "concept", "research"] } },
     orderBy: { createdAt: "asc" },
   });
   const comments = items.filter((i) => i.kind === "comment" && i.body);
+  const analysis = workspace.briefAnalysis as unknown as BriefAnalysis | null;
+  // Basta con el brief, el contexto, una nota o un análisis previo
+  if (!workspace.brief?.trim() && !workspace.context?.trim() && comments.length === 0 && !analysis) {
+    return NextResponse.json(
+      { error: "Primero escribe el brief, una nota o un comentario en la etapa 01." },
+      { status: 400 }
+    );
+  }
   const references = items.filter((i) => i.kind === "reference");
   const existingConcepts = items.filter((i) => i.kind === "concept" && i.status !== "discarded");
   const competitors = items.filter((i) => i.kind === "competitor");
@@ -100,6 +101,18 @@ export async function POST(request: NextRequest, { params }: { params: { project
     `# Proyecto: ${project.name}${project.client ? ` — cliente: ${project.client}` : ""}`,
     section("Brief principal", workspace.brief),
     section("Contexto", workspace.context),
+    analysis &&
+      section(
+        "Lectura del brief (análisis previo)",
+        [
+          analysis.summary,
+          ...analysis.fields.filter((f) => f.status !== "missing").map((f) => `- ${f.label}: ${f.value}`),
+          analysis.fields.some((f) => f.status === "missing") &&
+            `Aún no se sabe: ${analysis.fields.filter((f) => f.status === "missing").map((f) => f.label.toLowerCase()).join(", ")}.`,
+        ]
+          .filter(Boolean)
+          .join("\n")
+      ),
     section("Comentarios del cliente y del equipo", comments.map((c) => `- ${c.body}`).join("\n")),
     section("Notas de conceptualización", workspace.conceptNotes),
     ...RESEARCH_BLOCKS.map((b) => section(`Research — ${b.label}`, blocks[b.key])),

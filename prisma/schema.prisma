@@ -129,6 +129,8 @@ model BrandWorkspace {
   // Research estructurado: textos por bloque, ejes y punto objetivo del
   // mapa de posicionamiento (ver BrandResearch en src/lib/branding.ts)
   research     Json?
+  // Último análisis del brief hecho por Claude (ver BriefAnalysis)
+  briefAnalysis Json?
   updatedAt    DateTime @updatedAt
 }
 
