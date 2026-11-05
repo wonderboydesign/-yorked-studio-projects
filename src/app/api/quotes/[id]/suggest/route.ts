@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
-import { claudeErrorResponse } from "@/lib/claudeErrors";
+import { claudeClient, claudeErrorResponse } from "@/lib/claudeErrors";
 import { getStudio } from "@/lib/quotesServer";
 
 // Sugerir alcance, tiempos y precio puede tardar
@@ -83,7 +82,7 @@ async function handle(_request: NextRequest, { params }: { params: { id: string 
     .filter(Boolean)
     .join("\n\n");
 
-  const client = new Anthropic();
+  const client = claudeClient();
   let response;
   try {
     response = await client.beta.messages.parse({

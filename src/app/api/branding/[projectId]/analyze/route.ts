@@ -4,7 +4,7 @@ import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
-import { claudeErrorResponse } from "@/lib/claudeErrors";
+import { claudeClient, claudeErrorResponse } from "@/lib/claudeErrors";
 import { ensureWorkspace } from "@/lib/brandingServer";
 import { BRIEF_CHECKLIST, BriefAnalysis, isImage } from "@/lib/branding";
 
@@ -106,7 +106,7 @@ async function handle(_request: NextRequest, { params }: { params: { projectId: 
     return [];
   });
 
-  const client = new Anthropic();
+  const client = claudeClient();
   const run = (withFiles: boolean) =>
     client.beta.messages.parse({
       model: "claude-opus-5-5",
