@@ -113,6 +113,8 @@ export interface QuoteContent {
   extras: QuoteExtra[];
   notes: QuoteNote[];
   visionPoints: string[];
+  // Trabajos relacionados que muestra esta propuesta; vacío = todos
+  workIds?: string[];
 }
 
 export interface StudioData {
@@ -135,7 +137,20 @@ export interface StudioData {
   };
   // Tabulador base que Claude usa para sugerir alcance y precio
   pricing: string;
-  works: { name: string; city: string; year: string; tone: string }[];
+  works: StudioWork[];
+}
+
+// Trabajo del portafolio que se muestra en "Trabajos relacionados"
+export interface StudioWork {
+  id: string;
+  name: string;
+  city: string;
+  year: string;
+  tone: string; // color de fondo mientras no haya foto
+  kind?: string; // "Identidad de marca", "Empaque"…
+  image?: string; // render o foto (Vercel Blob)
+  imagePath?: string;
+  link?: string; // página del proyecto en el portafolio
 }
 
 export const DEFAULT_STUDIO: StudioData = {
@@ -156,11 +171,11 @@ export const DEFAULT_STUDIO: StudioData = {
 Extras: SKU adicional $5,000 · Ilustración custom para etiqueta $7,000 · Naming y verificación $14,000 · Registro ante IMPI $6,000 + derechos · Ronda de refinamiento extra $2,500.
 Pagos: 50% anticipo, 50% contraentrega. Vigencia 15 días; 5% de descuento si confirma en los primeros 7 días.`,
   works: [
-    { name: "312 Café/Barra", city: "Tamaulipas", year: "2025", tone: "#dfe5cf" },
-    { name: "Koffein", city: "Querétaro", year: "2022", tone: "#2b2d2a" },
-    { name: "Casa Carmín", city: "Querétaro", year: "2025", tone: "#e6ddd0" },
-    { name: "Punta Sirena", city: "Acapulco, Gro.", year: "2023", tone: "#cbd6b3" },
-    { name: "Machete", city: "Guatemala", year: "2025", tone: "#e8e5dd" },
+    { id: "312-cafe-barra", name: "312 Café/Barra", city: "Tamaulipas", year: "2025", tone: "#dfe5cf" },
+    { id: "koffein", name: "Koffein", city: "Querétaro", year: "2022", tone: "#2b2d2a" },
+    { id: "casa-carmin", name: "Casa Carmín", city: "Querétaro", year: "2025", tone: "#e6ddd0" },
+    { id: "punta-sirena", name: "Punta Sirena", city: "Acapulco, Gro.", year: "2023", tone: "#cbd6b3" },
+    { id: "machete", name: "Machete", city: "Guatemala", year: "2025", tone: "#e8e5dd" },
   ],
 };
 
@@ -344,4 +359,20 @@ export function formatMonthYear(iso: string) {
 
 export function whatsappLink(phone: string, text: string) {
   return `https://wa.me/${phone.replace(/\D/g, "")}?text=${encodeURIComponent(text)}`;
+}
+
+export function slugify(text: string) {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+// Los trabajos que van en una propuesta: los elegidos para ella, en el orden
+// del estudio, o todos si no se eligió ninguno (o ya no existe ninguno)
+export function worksForQuote(works: StudioWork[], workIds?: string[]) {
+  const picked = workIds?.length ? works.filter((w) => workIds.includes(w.id)) : [];
+  return picked.length > 0 ? picked : works;
 }

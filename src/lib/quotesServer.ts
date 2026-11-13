@@ -1,6 +1,6 @@
 import { randomBytes } from "crypto";
 import { prisma } from "./prisma";
-import { DEFAULT_STUDIO, StudioData } from "./quotes";
+import { DEFAULT_STUDIO, StudioData, StudioWork, slugify } from "./quotes";
 
 // Liga privada de cada cotización: imposible de adivinar
 export function newQuoteToken() {
@@ -10,7 +10,41 @@ export function newQuoteToken() {
 export async function getStudio(): Promise<StudioData> {
   const row = await prisma.studioSettings.findUnique({ where: { id: "singleton" } });
   const data = (row?.data ?? {}) as Partial<StudioData>;
-  return { ...DEFAULT_STUDIO, ...data, bank: { ...DEFAULT_STUDIO.bank, ...(data.bank ?? {}) } };
+  return {
+    ...DEFAULT_STUDIO,
+    ...data,
+    bank: { ...DEFAULT_STUDIO.bank, ...(data.bank ?? {}) },
+    works: normalizeWorks(data.works ?? DEFAULT_STUDIO.works),
+  };
+}
+
+// Limpia la lista de trabajos que llega del editor: solo texto, una liga
+// http(s) y un id único (los trabajos guardados antes no tenían id)
+export function normalizeWorks(input: unknown): StudioWork[] {
+  if (!Array.isArray(input)) return [];
+  const seen = new Set<string>();
+  const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
+  const url = (v: unknown) => (/^https?:\/\//i.test(str(v)) ? str(v) : undefined);
+  return input
+    .filter((w): w is Record<string, unknown> => !!w && typeof w === "object" && !!str((w as Record<string, unknown>).name))
+    .map((w) => {
+      const base = str(w.id) || slugify(str(w.name)) || "trabajo";
+      let id = base;
+      for (let n = 2; seen.has(id); n++) id = `${base}-${n}`;
+      seen.add(id);
+      const image = url(w.image);
+      return {
+        id,
+        name: str(w.name),
+        city: str(w.city),
+        year: str(w.year),
+        tone: /^#[0-9a-f]{3,8}$/i.test(str(w.tone)) ? str(w.tone) : "#e6e3da",
+        kind: str(w.kind) || undefined,
+        image,
+        imagePath: image ? str(w.imagePath) || undefined : undefined,
+        link: url(w.link),
+      };
+    });
 }
 
 export const PROSPECT_FIELDS = [

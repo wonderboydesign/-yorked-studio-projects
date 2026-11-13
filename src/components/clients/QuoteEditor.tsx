@@ -8,6 +8,7 @@ import {
   QuoteContent,
   QuoteOption,
   QuoteStatus,
+  StudioWork,
   formatMoney,
 } from "@/lib/quotes";
 import { Button } from "../branding/ui";
@@ -38,6 +39,7 @@ export default function QuoteEditor({ quoteId, notify, onClose }: { quoteId: str
   const [suggesting, setSuggesting] = useState(false);
   const [suggestion, setSuggestion] = useState<Suggestion | null>(null);
   const [previewKey, setPreviewKey] = useState(0);
+  const [works, setWorks] = useState<StudioWork[]>([]);
   const timer = useRef<ReturnType<typeof setTimeout>>();
   const latest = useRef<QuoteContent | null>(null);
 
@@ -51,6 +53,13 @@ export default function QuoteEditor({ quoteId, notify, onClose }: { quoteId: str
       })
       .catch(() => notify("No se pudo abrir la cotización.", "error"));
   }, [quoteId, notify]);
+
+  useEffect(() => {
+    fetch("/api/studio")
+      .then((r) => r.json())
+      .then((s) => setWorks(s.works ?? []))
+      .catch(() => {});
+  }, []);
 
   async function flush() {
     clearTimeout(timer.current);
@@ -332,6 +341,61 @@ export default function QuoteEditor({ quoteId, notify, onClose }: { quoteId: str
               </div>
             ))}
           </Group>
+
+          {works.length > 0 && (
+            <Group
+              title="Trabajos relacionados"
+              action={
+                (content.workIds?.length ?? 0) > 0 && (
+                  <Button tone="ghost" onClick={() => update((c) => ({ ...c, workIds: [] }))}>
+                    Mostrar todos
+                  </Button>
+                )
+              }
+            >
+              <p className="text-xs text-muted">
+                {(content.workIds?.length ?? 0) > 0
+                  ? `Se muestran ${works.filter((w) => content.workIds!.includes(w.id)).length} de ${works.length}. Toca para agregar o quitar.`
+                  : `Se muestran todos (${works.length}). Toca los que van con este cliente para mostrar solo esos.`}{" "}
+                Las fotos se suben en Datos del estudio.
+              </p>
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                {works.map((w) => {
+                  const on = !!content.workIds?.includes(w.id);
+                  return (
+                    <button
+                      key={w.id}
+                      type="button"
+                      onClick={() =>
+                        update((c) => {
+                          const ids = c.workIds ?? [];
+                          return { ...c, workIds: on ? ids.filter((x) => x !== w.id) : [...ids, w.id] };
+                        })
+                      }
+                      className={`relative aspect-[4/5] rounded-xl overflow-hidden text-left border-2 transition-opacity ${
+                        on ? "border-ink" : "border-transparent"
+                      } ${(content.workIds?.length ?? 0) > 0 && !on ? "opacity-45 hover:opacity-80" : ""}`}
+                      style={{ background: w.tone }}
+                      title={w.name}
+                    >
+                      {w.image && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={w.image} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                      )}
+                      <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-2 pb-1.5 pt-5 text-[11px] leading-tight text-white truncate">
+                        {w.name}
+                      </span>
+                      {on && (
+                        <span className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-ink text-paper text-[11px] flex items-center justify-center">
+                          ✓
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </Group>
+          )}
 
           <Group
             title="Inversión"
