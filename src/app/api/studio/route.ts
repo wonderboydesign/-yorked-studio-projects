@@ -28,9 +28,9 @@ export async function PATCH(request: NextRequest) {
   });
 
   // Fotos que se quitaron o reemplazaron: se borran del almacenamiento
-  const kept = new Set(next.works.map((w) => w.image).filter(Boolean));
-  const removed = current.works.filter((w) => w.image && w.imagePath && !kept.has(w.image));
-  await Promise.all(removed.map((w) => del(w.image!).catch(() => {})));
+  const kept = new Set(next.works.flatMap((w) => (w.images ?? []).map((im) => im.url)));
+  const removed = current.works.flatMap((w) => (w.images ?? []).filter((im) => im.path && !kept.has(im.url)));
+  await Promise.all(removed.map((im) => del(im.url).catch(() => {})));
 
   return NextResponse.json(next);
 }

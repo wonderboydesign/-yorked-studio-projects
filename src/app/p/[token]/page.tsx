@@ -7,6 +7,7 @@ import { AUTH_COOKIE_NAME, verifySessionToken } from "@/lib/auth";
 import { getStudio } from "@/lib/quotesServer";
 import { QuoteContent, StudioWork, fillNote, formatMoney, formatMonthYear, whatsappLink, worksForQuote } from "@/lib/quotes";
 import ApproveForm from "./ApproveForm";
+import WorkCarousel from "./WorkCarousel";
 
 // La tipografía de las propuestas del estudio
 const helvetica = localFont({
@@ -513,45 +514,43 @@ function BankDetails({
   );
 }
 
-// Cuadro de un trabajo: con foto, el render llena el cuadro y el texto va en
-// blanco sobre un degradado; sin foto, el color de fondo como antes
+// Cuadro de un trabajo: con fotos, se muestran en carrusel a todo el cuadro y
+// el texto va en blanco sobre un degradado; sin fotos, el color de fondo.
+// La liga al proyecto va en el nombre, para no chocar con las flechas.
 function WorkCard({ work: w }: { work: StudioWork }) {
-  const light = !!w.image || isDark(w.tone);
-  const inner = (
+  const images = (w.images ?? []).map((im) => im.url);
+  const hasImages = images.length > 0;
+  const light = hasImages || isDark(w.tone);
+  const name = (
     <>
-      {w.image && (
-        <>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={w.image}
-            alt={`${w.name}, ${w.kind || "identidad de marca"}`}
-            loading="lazy"
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
-          />
-          <span className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/0 to-black/30" />
-        </>
-      )}
-      <span className="relative text-[11px] uppercase tracking-[0.14em] opacity-70">{w.kind || "Identidad de marca"}</span>
-      <p className="relative mt-auto text-[30px] font-medium leading-tight tracking-[-0.02em]">
-        {w.name}
-        {w.link && <span className="ml-2 inline-block text-[20px] opacity-70">↗</span>}
+      {w.name}
+      {w.link && <span className="ml-2 inline-block text-[20px] opacity-70">↗</span>}
+    </>
+  );
+  return (
+    <div
+      className={`group relative flex aspect-[4/5] flex-col overflow-hidden rounded-[22px] p-5 sm:aspect-[5/6] ${
+        light ? "text-[#f1efe9]" : ""
+      }`}
+      style={{ background: w.tone }}
+    >
+      {hasImages && <WorkCarousel images={images} alt={`${w.name}, ${w.kind || "identidad de marca"}`} />}
+      <span className="pointer-events-none relative text-[11px] uppercase tracking-[0.14em] opacity-70">
+        {w.kind || "Identidad de marca"}
+      </span>
+      <p className="relative mt-auto w-fit text-[30px] font-medium leading-tight tracking-[-0.02em]">
+        {w.link ? (
+          <a href={w.link} target="_blank" rel="noreferrer" className="hover:opacity-80">
+            {name}
+          </a>
+        ) : (
+          name
+        )}
       </p>
-      <div className={`relative flex justify-between text-[12px] opacity-70 ${w.image ? "mt-3" : "mt-auto"}`}>
+      <div className={`pointer-events-none relative flex justify-between text-[12px] opacity-70 ${hasImages ? "mt-3" : "mt-auto"}`}>
         <span>{w.city}</span>
         <span>©{w.year}</span>
       </div>
-    </>
-  );
-  const className = `group relative flex aspect-[4/5] flex-col overflow-hidden rounded-[22px] p-5 sm:aspect-[5/6] ${
-    light ? "text-[#f1efe9]" : ""
-  }`;
-  return w.link ? (
-    <a href={w.link} target="_blank" rel="noreferrer" className={className} style={{ background: w.tone }}>
-      {inner}
-    </a>
-  ) : (
-    <div className={className} style={{ background: w.tone }}>
-      {inner}
     </div>
   );
 }

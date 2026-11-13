@@ -1,6 +1,6 @@
 import { randomBytes } from "crypto";
 import { prisma } from "./prisma";
-import { DEFAULT_STUDIO, StudioData, StudioWork, slugify } from "./quotes";
+import { DEFAULT_STUDIO, MAX_WORK_IMAGES, StudioData, StudioWork, slugify } from "./quotes";
 
 // Liga privada de cada cotización: imposible de adivinar
 export function newQuoteToken() {
@@ -32,7 +32,16 @@ export function normalizeWorks(input: unknown): StudioWork[] {
       let id = base;
       for (let n = 2; seen.has(id); n++) id = `${base}-${n}`;
       seen.add(id);
-      const image = url(w.image);
+      // Antes había una sola foto (image); ahora una lista (images)
+      const rawImages = Array.isArray(w.images) ? w.images : w.image ? [{ url: w.image, path: w.imagePath }] : [];
+      const images = rawImages
+        .map((im: unknown) => {
+          const o = (im ?? {}) as Record<string, unknown>;
+          const u = url(o.url);
+          return u ? { url: u, path: str(o.path) || undefined } : null;
+        })
+        .filter((im): im is { url: string; path: string | undefined } => !!im)
+        .slice(0, MAX_WORK_IMAGES);
       return {
         id,
         name: str(w.name),
@@ -40,8 +49,9 @@ export function normalizeWorks(input: unknown): StudioWork[] {
         year: str(w.year),
         tone: /^#[0-9a-f]{3,8}$/i.test(str(w.tone)) ? str(w.tone) : "#e6e3da",
         kind: str(w.kind) || undefined,
-        image,
-        imagePath: image ? str(w.imagePath) || undefined : undefined,
+        images,
+        image: images[0]?.url,
+        imagePath: images[0]?.path,
         link: url(w.link),
       };
     });
