@@ -5,7 +5,7 @@ import localFont from "next/font/local";
 import { prisma } from "@/lib/prisma";
 import { AUTH_COOKIE_NAME, verifySessionToken } from "@/lib/auth";
 import { getStudio } from "@/lib/quotesServer";
-import { QuoteContent, fillNote, formatMoney, formatMonthYear, whatsappLink } from "@/lib/quotes";
+import { QuoteContent, StudioWork, fillNote, formatMoney, formatMonthYear, whatsappLink, worksForQuote } from "@/lib/quotes";
 import ApproveForm from "./ApproveForm";
 
 // La tipografía de las propuestas del estudio
@@ -57,6 +57,7 @@ export default async function ProposalPage({ params }: { params: { token: string
   const single = c.options.length === 1;
   const chosen = c.options.find((o) => o.key === quote.approvedOption) ?? c.options.find((o) => o.recommended) ?? c.options[0];
   const totalWeeks = c.weeks;
+  const works = worksForQuote(studio.works, c.workIds);
   const waApprove = whatsappLink(studio.whatsapp, `Hola, revisé la propuesta de ${c.brandName} y quiero arrancar.`);
 
   return (
@@ -229,7 +230,7 @@ export default async function ProposalPage({ params }: { params: { token: string
         </section>
 
         {/* 05 · Trabajos */}
-        {studio.works.length > 0 && (
+        {works.length > 0 && (
           <section id="trabajos" className="pb-24">
             <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
               <p className="eyebrow">
@@ -240,23 +241,9 @@ export default async function ProposalPage({ params }: { params: { token: string
               </h2>
             </div>
             <div className="mt-14 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {studio.works.map((w) => {
-                const dark = isDark(w.tone);
-                return (
-                  <div
-                    key={w.name}
-                    className={`flex aspect-[4/5] flex-col rounded-[22px] p-5 sm:aspect-[5/6] ${dark ? "text-[#f1efe9]" : ""}`}
-                    style={{ background: w.tone }}
-                  >
-                    <span className="text-[11px] uppercase tracking-[0.14em] opacity-60">Identidad de marca</span>
-                    <p className="mt-auto text-[30px] font-medium leading-tight tracking-[-0.02em]">{w.name}</p>
-                    <div className="mt-auto flex justify-between text-[12px] opacity-60">
-                      <span>{w.city}</span>
-                      <span>©{w.year}</span>
-                    </div>
-                  </div>
-                );
-              })}
+              {works.map((w) => (
+                <WorkCard key={w.id} work={w} />
+              ))}
               <a
                 href={studio.portfolioUrl}
                 target="_blank"
@@ -522,6 +509,49 @@ function BankDetails({
           <span className="text-right font-medium tabular-nums">{v}</span>
         </div>
       ))}
+    </div>
+  );
+}
+
+// Cuadro de un trabajo: con foto, el render llena el cuadro y el texto va en
+// blanco sobre un degradado; sin foto, el color de fondo como antes
+function WorkCard({ work: w }: { work: StudioWork }) {
+  const light = !!w.image || isDark(w.tone);
+  const inner = (
+    <>
+      {w.image && (
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={w.image}
+            alt={`${w.name}, ${w.kind || "identidad de marca"}`}
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+          />
+          <span className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/0 to-black/30" />
+        </>
+      )}
+      <span className="relative text-[11px] uppercase tracking-[0.14em] opacity-70">{w.kind || "Identidad de marca"}</span>
+      <p className="relative mt-auto text-[30px] font-medium leading-tight tracking-[-0.02em]">
+        {w.name}
+        {w.link && <span className="ml-2 inline-block text-[20px] opacity-70">↗</span>}
+      </p>
+      <div className={`relative flex justify-between text-[12px] opacity-70 ${w.image ? "mt-3" : "mt-auto"}`}>
+        <span>{w.city}</span>
+        <span>©{w.year}</span>
+      </div>
+    </>
+  );
+  const className = `group relative flex aspect-[4/5] flex-col overflow-hidden rounded-[22px] p-5 sm:aspect-[5/6] ${
+    light ? "text-[#f1efe9]" : ""
+  }`;
+  return w.link ? (
+    <a href={w.link} target="_blank" rel="noreferrer" className={className} style={{ background: w.tone }}>
+      {inner}
+    </a>
+  ) : (
+    <div className={className} style={{ background: w.tone }}>
+      {inner}
     </div>
   );
 }

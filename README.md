@@ -117,6 +117,8 @@ En el menú, **Clientes** es el embudo comercial: *Nuevo → Cotizado → En neg
 
 **Datos del estudio** (botón en Clientes): contacto, cuenta para el anticipo (se muestra solo después de que el cliente aprueba), trabajos relacionados y el tabulador que usa Claude. Se guardan en la base de datos, no en el código.
 
+**Trabajos relacionados con fotos:** en Datos del estudio cada trabajo es una tarjeta con su render o foto (se reduce a 2000 px en WebP al subir, va a Vercel Blob), nombre, tipo, ciudad, año, color de respaldo y liga opcional al proyecto. En el editor de cada cotización se eligen los que se muestran a ese cliente; si no eliges ninguno, se muestran todos.
+
 ## 7. Correr en local
 
 ```bash
