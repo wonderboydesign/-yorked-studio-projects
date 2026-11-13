@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { StudioData, StudioWork } from "@/lib/quotes";
+import { MAX_WORK_IMAGES, StudioData, StudioWork } from "@/lib/quotes";
 import { IMAGE_EXTENSIONS, shrinkImage, uploadFile } from "@/lib/upload";
 import { Button } from "../branding/ui";
 
@@ -156,14 +156,18 @@ function WorksEditor({
   notify: Notify;
   onUploading: (delta: number) => void;
 }) {
-  const [busyId, setBusyId] = useState<string | null>(null);
+  // Fotos subiéndose por trabajo
+  const [busy, setBusy] = useState<Record<string, number>>({});
   // Siempre se edita sobre la lista más reciente (la subida tarda)
   const latest = useRef(works);
   latest.current = works;
   const field = "field w-full rounded-lg px-2.5 py-1.5 text-sm";
 
-  const patch = (id: string, fields: Partial<StudioWork>) =>
-    onChange(latest.current.map((w) => (w.id === id ? { ...w, ...fields } : w)));
+  const patch = (id: string, fields: Partial<StudioWork>) => {
+    const next = latest.current.map((w) => (w.id === id ? { ...w, ...fields } : w));
+    latest.current = next;
+    onChange(next);
+  };
 
   function move(i: number, d: number) {
     const next = [...works];
@@ -172,18 +176,42 @@ function WorksEditor({
     onChange(next);
   }
 
-  async function upload(id: string, file: File) {
-    setBusyId(id);
-    onUploading(1);
-    try {
-      const up = await uploadFile(await shrinkImage(file), IMAGE_EXTENSIONS);
-      patch(id, { image: up.url, imagePath: up.pathname });
-    } catch (e) {
-      notify(e instanceof Error ? e.message : "No se pudo subir la foto.", "error");
-    } finally {
-      setBusyId(null);
-      onUploading(-1);
+  // Cambia las fotos de un trabajo sobre la lista más reciente; la primera
+  // queda como portada (image) para las miniaturas
+  function setImages(id: string, fn: (images: NonNullable<StudioWork["images"]>) => NonNullable<StudioWork["images"]>) {
+    const w = latest.current.find((x) => x.id === id);
+    if (!w) return;
+    const images = fn(w.images ?? []).slice(0, MAX_WORK_IMAGES);
+    patch(id, { images, image: images[0]?.url, imagePath: images[0]?.path });
+  }
+
+  // Sube una o varias fotos: llenan los lugares libres, o reemplazan la que
+  // se tocó (replaceAt)
+  async function upload(id: string, files: File[], replaceAt?: number) {
+    const w = latest.current.find((x) => x.id === id);
+    const free = MAX_WORK_IMAGES - (w?.images?.length ?? 0);
+    const list = replaceAt !== undefined ? files.slice(0, 1) : files.slice(0, free);
+    if (files.length > list.length && replaceAt === undefined) {
+      notify(`Cada trabajo lleva hasta ${MAX_WORK_IMAGES} fotos; se subieron las primeras.`);
     }
+    await Promise.all(
+      list.map(async (file) => {
+        setBusy((b) => ({ ...b, [id]: (b[id] ?? 0) + 1 }));
+        onUploading(1);
+        try {
+          const up = await uploadFile(await shrinkImage(file), IMAGE_EXTENSIONS);
+          const im = { url: up.url, path: up.pathname };
+          setImages(id, (images) =>
+            replaceAt !== undefined && images[replaceAt] ? images.map((x, j) => (j === replaceAt ? im : x)) : [...images, im]
+          );
+        } catch (e) {
+          notify(e instanceof Error ? e.message : "No se pudo subir la foto.", "error");
+        } finally {
+          setBusy((b) => ({ ...b, [id]: (b[id] ?? 1) - 1 }));
+          onUploading(-1);
+        }
+      })
+    );
   }
 
   return (
@@ -192,7 +220,7 @@ function WorksEditor({
         <div>
           <h3 className="text-base">Trabajos relacionados</h3>
           <p className="text-xs text-muted mt-1">
-            Aparecen en las propuestas. Sube un render o foto por proyecto (mejor vertical 4:5); se optimiza al subir. En cada
+            Aparecen en las propuestas. Sube hasta 3 renders o fotos por proyecto (mejor verticales 4:5); en la propuesta se ven en carrusel y la primera es la portada. Se optimizan al subir. En cada
             cotización puedes elegir cuáles mostrar.
           </p>
         </div>
@@ -201,7 +229,13 @@ function WorksEditor({
       <ul className="space-y-2">
         {works.map((w, i) => (
           <li key={w.id} className="field rounded-2xl p-3 flex gap-3">
-            <PhotoSlot work={w} busy={busyId === w.id} onFile={(f) => upload(w.id, f)} onRemove={() => patch(w.id, { image: undefined, imagePath: undefined })} />
+            <PhotoStrip
+              work={w}
+              busy={busy[w.id] ?? 0}
+              onFiles={(files, at) => upload(w.id, files, at)}
+              onRemove={(at) => setImages(w.id, (images) => images.filter((_, j) => j !== at))}
+              onCover={(at) => setImages(w.id, (images) => [images[at], ...images.filter((_, j) => j !== at)])}
+            />
             <div className="flex-1 min-w-0 grid gap-2 sm:grid-cols-2 content-start">
               <input value={w.name} onChange={(e) => patch(w.id, { name: e.target.value })} placeholder="Nombre de la marca" className={`${field} font-medium`} />
               <input value={w.kind ?? ""} onChange={(e) => patch(w.id, { kind: e.target.value })} placeholder="Tipo (Identidad de marca)" className={field} />
@@ -235,54 +269,106 @@ function WorksEditor({
   );
 }
 
-function PhotoSlot({ work, busy, onFile, onRemove }: { work: StudioWork; busy: boolean; onFile: (f: File) => void; onRemove: () => void }) {
+function PhotoStrip({
+  work,
+  busy,
+  onFiles,
+  onRemove,
+  onCover,
+}: {
+  work: StudioWork;
+  busy: number;
+  onFiles: (files: File[], replaceAt?: number) => void;
+  onRemove: (at: number) => void;
+  onCover: (at: number) => void;
+}) {
   const input = useRef<HTMLInputElement>(null);
+  const target = useRef<number | undefined>(undefined);
   const [over, setOver] = useState(false);
+  const images = work.images ?? [];
+  const slots = Array.from({ length: MAX_WORK_IMAGES }, (_, i) => images[i] ?? null);
+  const pick = (at?: number) => {
+    target.current = at;
+    if (input.current) {
+      input.current.multiple = at === undefined;
+      input.current.click();
+    }
+  };
+
   return (
-    <div className="shrink-0 w-[88px] space-y-1">
-      <button
-        type="button"
-        onClick={() => input.current?.click()}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setOver(true);
-        }}
-        onDragLeave={() => setOver(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setOver(false);
-          const f = e.dataTransfer.files[0];
-          if (f) onFile(f);
-        }}
-        title={work.image ? "Cambiar foto" : "Subir foto"}
-        className={`relative block w-[88px] aspect-[4/5] rounded-xl overflow-hidden border ${over ? "border-ink" : "border-line"}`}
-        style={{ background: work.tone }}
-      >
-        {work.image && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={work.image} alt="" className="absolute inset-0 w-full h-full object-cover" />
-        )}
-        <span
-          className={`absolute inset-0 flex items-center justify-center text-[11px] text-center px-1 ${
-            work.image && !busy ? "opacity-0 hover:opacity-100 bg-black/45 text-white" : "bg-black/5 text-ink/60"
-          }`}
-        >
-          {busy ? "Subiendo…" : work.image ? "Cambiar" : "+ Foto"}
-        </span>
-      </button>
-      {work.image && !busy && (
-        <button type="button" onClick={onRemove} className="block w-full text-center text-[11px] text-muted hover:text-red-600">
-          Quitar foto
-        </button>
-      )}
+    <div
+      className={`shrink-0 rounded-xl ${over ? "ring-2 ring-ink/40" : ""}`}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setOver(true);
+      }}
+      onDragLeave={() => setOver(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setOver(false);
+        const files = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith("image/"));
+        if (files.length) onFiles(files);
+      }}
+    >
+      <div className="flex gap-1.5">
+        {slots.map((im, i) => {
+          const loading = !im && i < images.length + busy;
+          return im ? (
+            <div key={im.url} className="group/photo relative w-[60px] aspect-[4/5] rounded-lg overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={im.url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <button
+                type="button"
+                onClick={() => pick(i)}
+                title="Cambiar foto"
+                className="absolute inset-0 bg-black/45 text-white text-[10px] opacity-0 group-hover/photo:opacity-100 transition-opacity"
+              >
+                Cambiar
+              </button>
+              <button
+                type="button"
+                onClick={() => onRemove(i)}
+                title="Quitar foto"
+                className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-black/60 text-white text-[10px] leading-none opacity-0 group-hover/photo:opacity-100"
+              >
+                ×
+              </button>
+              {i === 0 ? (
+                <span className="absolute bottom-0.5 left-0.5 rounded-full bg-black/60 px-1.5 text-[9px] text-white">Portada</span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onCover(i)}
+                  title="Usar como portada"
+                  className="absolute bottom-0.5 left-0.5 rounded-full bg-black/60 px-1.5 text-[9px] text-white opacity-0 group-hover/photo:opacity-100"
+                >
+                  ★ Portada
+                </button>
+              )}
+            </div>
+          ) : (
+            <button
+              key={`empty-${i}`}
+              type="button"
+              onClick={() => pick()}
+              disabled={loading}
+              title="Subir fotos (puedes elegir varias)"
+              className="w-[60px] aspect-[4/5] rounded-lg border border-dashed border-ink/20 hover:border-ink/50 text-[10px] text-muted flex items-center justify-center text-center"
+              style={i === 0 ? { background: work.tone } : undefined}
+            >
+              {loading ? "Subiendo…" : "+ Foto"}
+            </button>
+          );
+        })}
+      </div>
       <input
         ref={input}
         type="file"
         accept="image/jpeg,image/png,image/webp"
         className="hidden"
         onChange={(e) => {
-          const f = e.target.files?.[0];
-          if (f) onFile(f);
+          const files = Array.from(e.target.files ?? []);
+          if (files.length) onFiles(files, target.current);
           e.target.value = "";
         }}
       />

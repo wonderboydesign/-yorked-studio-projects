@@ -140,6 +140,8 @@ export interface StudioData {
   works: StudioWork[];
 }
 
+export const MAX_WORK_IMAGES = 3;
+
 // Trabajo del portafolio que se muestra en "Trabajos relacionados"
 export interface StudioWork {
   id: string;
@@ -148,7 +150,10 @@ export interface StudioWork {
   year: string;
   tone: string; // color de fondo mientras no haya foto
   kind?: string; // "Identidad de marca", "Empaque"…
-  image?: string; // render o foto (Vercel Blob)
+  // Renders o fotos del proyecto (Vercel Blob), hasta MAX_WORK_IMAGES; en la
+  // propuesta se muestran en carrusel. `image` es la primera, como portada.
+  images?: { url: string; path?: string }[];
+  image?: string;
   imagePath?: string;
   link?: string; // página del proyecto en el portafolio
 }
