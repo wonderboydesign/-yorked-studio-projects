@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { uploadFile } from "@/lib/upload";
-import { IVA_RATE, PaymentRow, Progress, clientAmount } from "@/lib/portal";
+import { PaymentRow, Progress, clientAmount } from "@/lib/portal";
 import { formatMoney } from "@/lib/quotes";
 import { Button } from "../branding/ui";
 
@@ -21,7 +21,6 @@ interface PortalState {
   };
   hasApprovedQuote: boolean;
   priceTotal: number | null;
-  withIva: boolean;
   documents: PortalDocument[];
 }
 
@@ -79,7 +78,7 @@ export default function ClientPortalPanel({ projectId, notify, onClose }: { proj
     else notify("No se pudo actualizar el portal.", "error");
   }
 
-  async function savePrice(fields: { priceTotal?: number | null; withIva?: boolean }) {
+  async function savePrice(fields: { priceTotal?: number | null }) {
     const res = await fetch(`/api/projects/${projectId}/portal`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -87,7 +86,7 @@ export default function ClientPortalPanel({ projectId, notify, onClose }: { proj
     });
     if (res.ok) {
       setS(await res.json());
-      notify(fields.priceTotal !== undefined ? "Precio guardado; los pagos pendientes se ajustaron" : "Guardado");
+      notify("Precio guardado; los pagos pendientes se ajustaron");
     } else notify("No se pudo guardar el precio.", "error");
   }
 
@@ -162,6 +161,7 @@ export default function ClientPortalPanel({ projectId, notify, onClose }: { proj
   const invoices = s?.documents.filter((d) => d.kind === "invoice") ?? [];
   const shortDate = (iso: string) => new Date(iso).toLocaleDateString("es-MX", { day: "numeric", month: "short" });
 
+  const clientTotal = s?.payments.reduce((n, p) => n + clientAmount(p.amount, p.withIva), 0) ?? 0;
   const total = s?.payments.reduce((n, p) => n + p.amount, 0) ?? 0;
   const paid = s?.payments.filter((p) => p.paidAt).reduce((n, p) => n + p.amount, 0) ?? 0;
   const today = new Date();
@@ -271,7 +271,7 @@ export default function ClientPortalPanel({ projectId, notify, onClose }: { proj
             {/* Precio (interno: el cliente solo ve lo que paga) */}
             <section className="space-y-3">
               <h3 className="text-base">Precio del proyecto</h3>
-              <div className="rounded-2xl bg-ink/[0.04] p-4 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+              <div className="rounded-2xl bg-ink/[0.04] p-4 space-y-3">
                 <label className="block space-y-1">
                   <span className="text-xs text-muted">Precio completo, sin IVA (MXN)</span>
                   <input
@@ -287,15 +287,10 @@ export default function ClientPortalPanel({ projectId, notify, onClose }: { proj
                     className="field w-full rounded-xl px-3 py-2 text-sm"
                   />
                 </label>
-                <label className="flex items-center gap-2 text-sm pb-2 cursor-pointer select-none">
-                  <input type="checkbox" checked={s.withIva} onChange={(e) => savePrice({ withIva: e.target.checked })} />
-                  Cobrar con IVA ({Math.round(IVA_RATE * 100)}%)
-                </label>
-                <p className="sm:col-span-2 text-xs text-muted">
-                  El cliente paga{" "}
-                  <span className="text-ink">{formatMoney(clientAmount(s.priceTotal ?? total, s.withIva))}</span>
-                  {s.withIva ? " con IVA incluido" : " sin IVA"}. En su portal solo ve lo que tiene que pagar, sin desglose. Si
-                  cambias el precio, se reparte entre los pagos pendientes.
+                <p className="text-xs text-muted">
+                  Se reparte entre los pagos pendientes y no cambia con el IVA. Activa <span className="text-ink">+ IVA</span> en
+                  el pago que lo lleve: el cliente lo ve con IVA incluido, sin desglose. En total paga{" "}
+                  <span className="text-ink">{formatMoney(clientTotal)}</span>.
                 </p>
               </div>
             </section>
@@ -328,7 +323,6 @@ export default function ClientPortalPanel({ projectId, notify, onClose }: { proj
                       type="number"
                       min={0}
                       defaultValue={p.amount}
-                      title={s.withIva ? `El cliente paga ${formatMoney(clientAmount(p.amount, true))} con IVA` : undefined}
                       onBlur={(e) => Number(e.target.value) !== p.amount && patchPayment(p.id, { amount: Number(e.target.value) })}
                       className="field rounded-lg px-2.5 py-1.5 text-sm tabular-nums"
                       aria-label="Monto"
@@ -360,6 +354,13 @@ export default function ClientPortalPanel({ projectId, notify, onClose }: { proj
                           />
                         </label>
                       )}
+                      <button
+                        onClick={() => patchPayment(p.id, { withIva: !p.withIva })}
+                        title={`Con IVA el cliente paga ${formatMoney(clientAmount(p.amount, true))}`}
+                        className={`rounded-full px-3 py-1 ${p.withIva ? "bg-ink text-paper" : "bg-button hover:bg-button-hover text-ink"}`}
+                      >
+                        {p.withIva ? `✓ IVA · cliente paga ${formatMoney(clientAmount(p.amount, true))}` : "+ IVA"}
+                      </button>
                       {p.paidAt && s.portalToken && (
                         <a href={`/c/${s.portalToken}/recibo/${p.id}`} target="_blank" rel="noreferrer" className="text-muted hover:text-ink">
                           Recibo ↗
@@ -374,8 +375,8 @@ export default function ClientPortalPanel({ projectId, notify, onClose }: { proj
               </ul>
               <div className="flex justify-between items-center">
                 <p className="text-xs text-muted">
-                  Montos sin IVA.{s.withIva ? " El cliente los ve con IVA incluido." : ""} El cliente ve siempre tus datos de
-                  transferencia y el recibo de cada pago marcado como pagado.
+                  Montos sin IVA; los que tienen IVA, el cliente los ve con IVA incluido. Siempre ve tus datos de transferencia y el
+                  recibo de cada pago marcado como pagado.
                 </p>
                 <Button onClick={() => addPayment(false)}>+ Pago</Button>
               </div>

@@ -69,6 +69,8 @@ model Payment {
   amount    Float
   dueDate   DateTime?
   paidAt    DateTime?
+  // Si este pago se cobra con IVA (el cliente ve el monto con IVA incluido)
+  withIva   Boolean   @default(false)
   order     Int       @default(0)
   createdAt DateTime  @default(now())
 }

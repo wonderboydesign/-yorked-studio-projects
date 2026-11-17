@@ -4,9 +4,17 @@ import { redistribute } from "@/lib/portal";
 import { DOCUMENT_SELECT, PAYMENT_SELECT, ensurePayments, newPortalToken, projectProgress, projectQuote } from "@/lib/portalServer";
 
 async function state(projectId: string) {
+  // Antes el IVA era de todo el proyecto: se pasa a cada pago una sola vez
+  const legacy = await prisma.project.findUnique({ where: { id: projectId }, select: { withIva: true } });
+  if (legacy?.withIva) {
+    await prisma.$transaction([
+      prisma.payment.updateMany({ where: { projectId }, data: { withIva: true } }),
+      prisma.project.update({ where: { id: projectId }, data: { withIva: false } }),
+    ]);
+  }
   const project = await prisma.project.findUnique({
     where: { id: projectId },
-    select: { id: true, name: true, portalToken: true, portalViewedAt: true, priceTotal: true, withIva: true },
+    select: { id: true, name: true, portalToken: true, portalViewedAt: true, priceTotal: true },
   });
   if (!project) return null;
   const [payments, progress, quote, documents] = await Promise.all([
@@ -37,10 +45,9 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   } else if (action === "regenerate") {
     await prisma.project.update({ where: { id: params.id }, data: { portalToken: newPortalToken() } });
   } else if (action === "price") {
-    // Precio completo (sin IVA) e IVA: interno; el cliente solo ve lo que paga.
-    // Si cambia el precio, se reparte entre los pagos pendientes.
-    const data: { priceTotal?: number | null; withIva?: boolean } = {};
-    if (typeof body.withIva === "boolean") data.withIva = body.withIva;
+    // Precio completo (sin IVA): interno; el cliente solo ve lo que paga. Si
+    // cambia, se reparte entre los pagos pendientes (el IVA va por pago).
+    const data: { priceTotal?: number | null } = {};
     if (body.priceTotal === null) data.priceTotal = null;
     else if (body.priceTotal !== undefined) {
       const n = Number(body.priceTotal);
