@@ -127,7 +127,7 @@ export default function ScheduleSection({
         <div className="space-y-4">
           <p className="text-xs text-muted">
             Cada fase de la {source.status === "approved" ? `propuesta aprobada${quote?.approvedOption ? ` (opción ${quote.approvedOption})` : ""}` : "última cotización"}{" "}
-            se vuelve una tarea sin asignar, una tras otra de lunes a viernes. Ajusta las semanas si hace falta.
+            se vuelve una tarea sin asignar, una tras otra de lunes a viernes y sin días festivos. Ajusta las semanas si hace falta.
           </p>
 
           <div className="grid gap-3 sm:grid-cols-2">
@@ -169,6 +169,11 @@ export default function ScheduleSection({
                         {ph.name}
                       </p>
                       <p className="text-xs text-muted">{p ? `${formatShort(p.start)} – ${formatShort(p.end)}` : "No se agrega"}</p>
+                      {p && p.holidays.length > 0 && (
+                        <p className="text-[11px] text-muted">
+                          Sin contar: {p.holidays.map((h) => `${formatShort(h.date)} (${h.name})`).join(", ")}
+                        </p>
+                      )}
                     </div>
                     <label className="flex items-center gap-1.5 text-xs text-muted shrink-0">
                       <input
