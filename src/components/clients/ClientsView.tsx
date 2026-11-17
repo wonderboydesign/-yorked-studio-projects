@@ -11,7 +11,15 @@ import StudioSettingsPanel from "./StudioSettingsPanel";
 type Notify = (message: string, tone?: "ok" | "error") => void;
 
 // Embudo comercial: prospecto → cotización → aprobada (ganado)
-export default function ClientsView({ notify, onDataChanged }: { notify: Notify; onDataChanged?: () => void }) {
+export default function ClientsView({
+  notify,
+  onDataChanged,
+  onOpenPortal,
+}: {
+  notify: Notify;
+  onDataChanged?: () => void;
+  onOpenPortal?: (projectId: string) => void;
+}) {
   const [prospects, setProspects] = useState<Prospect[] | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
   const [editingQuoteId, setEditingQuoteId] = useState<string | null>(null);
@@ -143,6 +151,7 @@ export default function ClientsView({ notify, onDataChanged }: { notify: Notify;
           onEditQuote={(id) => setEditingQuoteId(id)}
           onReload={load}
           onScheduled={() => onDataChanged?.()}
+          onOpenPortal={onOpenPortal}
         />
       )}
       {editingQuoteId && (

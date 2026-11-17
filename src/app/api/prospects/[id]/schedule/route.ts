@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { QUOTE_SUMMARY_SELECT } from "@/lib/quotesServer";
+import { ensurePayments } from "@/lib/portalServer";
 import { QuoteContent } from "@/lib/quotes";
 import { parseWeeks, phaseNotes, phaseTaskName, phasesForOption, planPhases } from "@/lib/schedule";
 
@@ -77,6 +78,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         await tx.task.create({
           data: {
             name: phaseTaskName(p.phase, prospect.brandName),
+            phase: p.phase.number,
             projectId: project.id,
             startDate: p.start,
             endDate: p.end,
@@ -92,6 +94,9 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     });
     return tasks;
   });
+
+  // Anticipo y finiquito para el portal del cliente, si aún no hay pagos
+  await ensurePayments(project!.id);
 
   const updated = await prisma.prospect.findUnique({
     where: { id: prospect.id },

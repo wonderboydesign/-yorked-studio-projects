@@ -152,7 +152,7 @@ export default async function ProposalPage({ params }: { params: { token: string
         {/* 03 · Visión */}
         <section className="rounded-[28px] bg-[#121210] px-6 py-16 text-[#f1efe9] sm:px-10">
           <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
-            <p className="eyebrow text-[#f1efe9]/50">
+            <p className="eyebrow" style={{ color: "rgb(241 239 233 / 0.5)" }}>
               <span className="text-[#f1efe9]">03</span> Nuestra visión
             </p>
             <div>

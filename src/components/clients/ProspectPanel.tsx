@@ -37,6 +37,7 @@ export default function ProspectPanel({
   onEditQuote,
   onReload,
   onScheduled,
+  onOpenPortal,
 }: {
   prospect: Prospect;
   notify: Notify;
@@ -46,6 +47,7 @@ export default function ProspectPanel({
   onEditQuote: (quoteId: string) => void;
   onReload: () => void;
   onScheduled?: (p: Prospect) => void;
+  onOpenPortal?: (projectId: string) => void;
 }) {
   const [draft, setDraft] = useState<Prospect>(prospect);
   useEffect(() => setDraft(prospect), [prospect]);
@@ -139,6 +141,7 @@ export default function ProspectPanel({
               onChange(p);
               onScheduled?.(p);
             }}
+            onOpenPortal={onOpenPortal}
           />
         )}
 

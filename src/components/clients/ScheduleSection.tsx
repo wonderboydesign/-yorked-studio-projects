@@ -19,10 +19,12 @@ export default function ScheduleSection({
   prospect,
   notify,
   onScheduled,
+  onOpenPortal,
 }: {
   prospect: Prospect;
   notify: Notify;
   onScheduled: (p: Prospect) => void;
+  onOpenPortal?: (projectId: string) => void;
 }) {
   const quotes = prospect.quotes ?? [];
   const source = quotes.find((q) => q.status === "approved") ?? quotes[0] ?? null;
@@ -121,6 +123,9 @@ export default function ScheduleSection({
           )}
           . Asigna las fases desde el calendario o la lista.
         </p>
+      )}
+      {prospect.scheduledAt && prospect.projectId && onOpenPortal && !open && (
+        <Button onClick={() => onOpenPortal(prospect.projectId!)}>Portal del cliente: avance y pagos →</Button>
       )}
 
       {open && (
