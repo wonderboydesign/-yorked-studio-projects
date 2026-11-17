@@ -18,6 +18,7 @@ import LiveClock from "./LiveClock";
 import Toast from "./Toast";
 import BrandingView from "./branding/BrandingView";
 import ClientsView from "./clients/ClientsView";
+import ClientPortalPanel from "./clients/ClientPortalPanel";
 
 type View = "dashboard" | "gantt" | "list" | "kanban" | "calendar" | "branding" | "clients";
 
@@ -71,6 +72,7 @@ export default function App() {
   }, []);
 
   const [toast, setToast] = useState<{ id: number; message: string; tone: "ok" | "error" } | null>(null);
+  const [portalProjectId, setPortalProjectId] = useState<string | null>(null);
   const notify = useCallback((message: string, tone: "ok" | "error" = "ok") => {
     setToast({ id: Date.now(), message, tone });
   }, []);
@@ -405,20 +407,26 @@ export default function App() {
               </svg>
             </div>
           </div>
-          <button
-            onClick={() =>
-              projectFilter !== "all" &&
-              setProjectModal({
-                open: true,
-                project: projects.find((p) => p.id === projectFilter) || null,
-              })
-            }
-            className={`text-sm text-muted hover:text-ink ${
-              projectFilter === "all" ? "invisible" : ""
-            }`}
-          >
-            Editar proyecto
-          </button>
+          <div className={`flex gap-4 ${projectFilter === "all" ? "invisible" : ""}`}>
+            <button
+              onClick={() => projectFilter !== "all" && setPortalProjectId(projectFilter)}
+              className="text-sm text-muted hover:text-ink"
+            >
+              Portal del cliente
+            </button>
+            <button
+              onClick={() =>
+                projectFilter !== "all" &&
+                setProjectModal({
+                  open: true,
+                  project: projects.find((p) => p.id === projectFilter) || null,
+                })
+              }
+              className="text-sm text-muted hover:text-ink"
+            >
+              Editar proyecto
+            </button>
+          </div>
         </div>
       </header>
 
@@ -651,7 +659,7 @@ export default function App() {
                 onChangeStatus={changeTaskStatus}
               />
             )}
-            {view === "clients" && <ClientsView notify={notify} onDataChanged={load} />}
+            {view === "clients" && <ClientsView notify={notify} onDataChanged={load} onOpenPortal={setPortalProjectId} />}
             {view === "branding" && (
               <BrandingView
                 projects={activeProjects}
@@ -675,6 +683,9 @@ export default function App() {
       </main>
 
       {toast && <Toast key={toast.id} message={toast.message} tone={toast.tone} onDone={dismissToast} />}
+      {portalProjectId && (
+        <ClientPortalPanel projectId={portalProjectId} notify={notify} onClose={() => setPortalProjectId(null)} />
+      )}
       {projectModal.open && (
         <ProjectModal
           project={projectModal.project}

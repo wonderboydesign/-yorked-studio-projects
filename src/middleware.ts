@@ -11,6 +11,8 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/api/auth/login") ||
     // Ligas de cotización para clientes (acceso por token, sin sesión)
     pathname.startsWith("/p/") ||
+    // Portal del cliente con avance y pagos (acceso por token, sin sesión)
+    pathname.startsWith("/c/") ||
     pathname.startsWith("/api/public/") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon");

@@ -8,23 +8,45 @@ datasource db {
 }
 
 model Project {
-  id        String   @id @default(cuid())
-  name      String
-  client    String?
-  color     String   @default("#1E4FFF")
-  startDate DateTime
-  endDate   DateTime
-  notes     String?
-  archived  Boolean  @default(false)
-  createdAt DateTime @default(now())
-  tasks     Task[]
+  id             String          @id @default(cuid())
+  name           String
+  client         String?
+  color          String          @default("#1E4FFF")
+  startDate      DateTime
+  endDate        DateTime
+  notes          String?
+  archived       Boolean         @default(false)
+  createdAt      DateTime        @default(now())
+  tasks          Task[]
   // Flujo de branding (Brief → Concepto → Investigación → Moodboard →
   // Desarrollo → Presentación), opcional por proyecto
-  brand         BrandWorkspace?
-  brandItems    BrandItem[]
-  moodboards    Moodboard[]
-  presentations Presentation[]
-  prospects     Prospect[]
+  brand          BrandWorkspace?
+  brandItems     BrandItem[]
+  moodboards     Moodboard[]
+  presentations  Presentation[]
+  prospects      Prospect[]
+  // Portal del cliente: liga privada /c/<portalToken> con avance y pagos
+  // Sin @unique para que el build (prisma db push) no pida confirmación en
+  // una tabla con datos; es aleatorio (18 bytes) y se busca con índice
+  portalToken    String?
+  portalViewedAt DateTime?
+  payments       Payment[]
+
+  @@index([portalToken])
+}
+
+// Pago del proyecto que ve el cliente en su portal (anticipo, finiquito,
+// extras). Monto en MXN sin IVA.
+model Payment {
+  id        String    @id @default(cuid())
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  label     String
+  amount    Float
+  dueDate   DateTime?
+  paidAt    DateTime?
+  order     Int       @default(0)
+  createdAt DateTime  @default(now())
 }
 
 enum Status {
@@ -70,6 +92,9 @@ model Task {
   updatedAt     DateTime       @updatedAt
   project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId     String
+  // Número de fase ("01") si la tarea es una fase de la propuesta; las fases
+  // son lo que el cliente ve en su portal
+  phase         String?
   // En desuso, ver nota en User.assignedTasks
   assignee      User?          @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
   assigneeId    String?
@@ -118,30 +143,30 @@ model Notification {
 
 // Textos largos de cada etapa del proyecto de branding (uno por proyecto)
 model BrandWorkspace {
-  id           String   @id @default(cuid())
-  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  projectId    String   @unique
-  stage        String   @default("brief")
-  brief        String?
-  context      String?
-  conceptNotes String?
-  plan         String?
+  id            String   @id @default(cuid())
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId     String   @unique
+  stage         String   @default("brief")
+  brief         String?
+  context       String?
+  conceptNotes  String?
+  plan          String?
   // Research estructurado: textos por bloque, ejes y punto objetivo del
   // mapa de posicionamiento (ver BrandResearch en src/lib/branding.ts)
-  research     Json?
+  research      Json?
   // Último análisis del brief hecho por Claude (ver BriefAnalysis)
   briefAnalysis Json?
   // Naming (etapa opcional): si está activa y los criterios (ver BrandNaming)
-  naming       Json?
-  updatedAt    DateTime @updatedAt
+  naming        Json?
+  updatedAt     DateTime @updatedAt
 }
 
 // Cualquier pieza que se agrega dentro de una etapa: comentarios del
 // cliente, archivos, referencias, conceptos, ideas, imágenes de moodboard,
 // bocetos y piezas de desarrollo. `section` es la etapa y `kind` el tipo.
 model BrandItem {
-  id          String      @id @default(cuid())
-  project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  id          String     @id @default(cuid())
+  project     Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId   String
   section     String
   kind        String
@@ -155,17 +180,17 @@ model BrandItem {
   // Datos propios de cada tipo: campos de un competidor y su posición en el
   // mapa, las tres partes de un hallazgo…
   data        Json?
-  pinned      Boolean     @default(false)
-  aiGenerated Boolean     @default(false)
-  order       Int         @default(0)
-  board       Moodboard?  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  pinned      Boolean    @default(false)
+  aiGenerated Boolean    @default(false)
+  order       Int        @default(0)
+  board       Moodboard? @relation(fields: [boardId], references: [id], onDelete: Cascade)
   boardId     String?
-  reference   Reference?  @relation(fields: [referenceId], references: [id], onDelete: SetNull)
+  reference   Reference? @relation(fields: [referenceId], references: [id], onDelete: SetNull)
   referenceId String?
-  author      User?       @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  author      User?      @relation(fields: [authorId], references: [id], onDelete: SetNull)
   authorId    String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
   @@index([projectId, section])
 }
@@ -183,17 +208,17 @@ model Moodboard {
 // Biblioteca de referencias del estudio, compartida entre proyectos.
 // Las imágenes de un moodboard pueden venir de aquí (quedan ligadas).
 model Reference {
-  id          String      @id @default(cuid())
-  title       String?
-  url         String
-  pathname    String?
-  sourceUrl   String?
-  tags        String[]    @default([])
-  notes       String?
-  author      User?       @relation(fields: [authorId], references: [id], onDelete: SetNull)
-  authorId    String?
-  createdAt   DateTime    @default(now())
-  usedIn      BrandItem[]
+  id        String      @id @default(cuid())
+  title     String?
+  url       String
+  pathname  String?
+  sourceUrl String?
+  tags      String[]    @default([])
+  notes     String?
+  author    User?       @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorId  String?
+  createdAt DateTime    @default(now())
+  usedIn    BrandItem[]
 }
 
 // Presentación armada a partir de las piezas del proyecto. `slides` guarda
@@ -213,26 +238,26 @@ model Presentation {
 // Persona o marca que pidió una propuesta. Avanza por el embudo hasta ser
 // cliente (stage "won"), y entonces puede ligarse a un proyecto.
 model Prospect {
-  id         String    @id @default(cuid())
-  brandName  String
-  contact    String?
-  email      String?
-  phone      String?
-  city       String?
-  source     String?
-  category   String?
-  needs      String?
-  budget     String?
-  stage      String    @default("new")
-  lostReason String?
-  notes      String?
-  project    Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  projectId  String?
+  id          String    @id @default(cuid())
+  brandName   String
+  contact     String?
+  email       String?
+  phone       String?
+  city        String?
+  source      String?
+  category    String?
+  needs       String?
+  budget      String?
+  stage       String    @default("new")
+  lostReason  String?
+  notes       String?
+  project     Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  projectId   String?
   // Cuándo se mandaron las fases de la propuesta al calendario
   scheduledAt DateTime?
-  quotes     Quote[]
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  quotes      Quote[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 // Propuesta que se manda al cliente por una liga privada (/p/<token>).
