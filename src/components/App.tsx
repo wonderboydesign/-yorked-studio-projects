@@ -684,7 +684,7 @@ export default function App() {
 
       {toast && <Toast key={toast.id} message={toast.message} tone={toast.tone} onDone={dismissToast} />}
       {portalProjectId && (
-        <ClientPortalPanel projectId={portalProjectId} notify={notify} onClose={() => setPortalProjectId(null)} />
+        <ClientPortalPanel projectId={portalProjectId} notify={notify} onClose={() => setPortalProjectId(null)} onDataChanged={load} />
       )}
       {projectModal.open && (
         <ProjectModal

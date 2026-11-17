@@ -6,6 +6,7 @@ import { PaymentRow, Progress, clientAmount } from "@/lib/portal";
 import { formatMoney } from "@/lib/quotes";
 import { Button } from "../branding/ui";
 import PortalLinksEditor, { PortalLinkRow } from "./PortalLinksEditor";
+import PhaseBuilder from "./PhaseBuilder";
 
 type Notify = (message: string, tone?: "ok" | "error") => void;
 
@@ -41,7 +42,17 @@ const STATE = { done: "✓ Terminada", active: "En curso", upcoming: "Por venir"
 
 // Portal del cliente de un proyecto: la liga para mandarle, una vista previa
 // del avance (sale de las tareas) y los pagos que se marcan como pagados
-export default function ClientPortalPanel({ projectId, notify, onClose }: { projectId: string; notify: Notify; onClose: () => void }) {
+export default function ClientPortalPanel({
+  projectId,
+  notify,
+  onClose,
+  onDataChanged,
+}: {
+  projectId: string;
+  notify: Notify;
+  onClose: () => void;
+  onDataChanged?: () => void;
+}) {
   const [s, setS] = useState<PortalState | null>(null);
   const [busy, setBusy] = useState(false);
   const [uploadingInvoices, setUploadingInvoices] = useState(0);
@@ -91,6 +102,19 @@ export default function ClientPortalPanel({ projectId, notify, onClose }: { proj
       setS(await res.json());
       notify("Precio guardado; los pagos pendientes se ajustaron");
     } else notify("No se pudo guardar el precio.", "error");
+  }
+
+  async function completeAll() {
+    if (!window.confirm("¿Marcar todas las fases como terminadas? El portal mostrará el proyecto al 100%.")) return;
+    const res = await fetch(`/api/projects/${projectId}/phases`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "complete" }),
+    });
+    if (!res.ok) return notify("No se pudo actualizar.", "error");
+    notify("Proyecto al 100%");
+    load();
+    onDataChanged?.();
   }
 
   async function addPayment(fromQuote = false) {
@@ -265,10 +289,14 @@ export default function ClientPortalPanel({ projectId, notify, onClose }: { proj
                 <div className="h-full rounded-full bg-accent" style={{ width: `${s.progress.percent}%` }} />
               </div>
               {s.progress.phases.length === 0 ? (
-                <p className="text-xs text-muted">
-                  Este proyecto no tiene fases todavía: calendarízalo desde el prospecto ganado (Clientes) o nombra tareas como
-                  “Fase 01 Nombre”.
-                </p>
+                <PhaseBuilder
+                  projectId={projectId}
+                  notify={notify}
+                  onDone={() => {
+                    load();
+                    onDataChanged?.();
+                  }}
+                />
               ) : (
                 <ul className="text-sm divide-y divide-line">
                   {s.progress.phases.map((ph) => (
@@ -285,10 +313,17 @@ export default function ClientPortalPanel({ projectId, notify, onClose }: { proj
                   ))}
                 </ul>
               )}
-              <p className="text-xs text-muted">
-                Se actualiza solo con el estado de las tareas: al marcar una fase como terminada, sube el avance. Las fases en
-                curso avanzan según los días que llevan.
-              </p>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <p className="text-xs text-muted max-w-md">
+                  Se actualiza solo con el estado de las tareas: al marcar una fase como terminada, sube el avance. Las fases en
+                  curso avanzan según los días que llevan.
+                </p>
+                {s.progress.phases.some((p) => p.state !== "done") && (
+                  <Button tone="ghost" onClick={completeAll}>
+                    Marcar todo como terminado
+                  </Button>
+                )}
+              </div>
             </section>
 
             <PortalLinksEditor kind="delivery" projectId={projectId} links={s.links} phases={phaseOptions} notify={notify} onChange={setLinks} />

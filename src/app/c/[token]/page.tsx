@@ -216,7 +216,15 @@ export default async function ClientPortal({ params }: { params: { token: string
               <span className="text-black">{num("fases")}</span> Fases
             </p>
             <h2 className="section-title">
-              Dónde vamos. <span className="text-black/45">Lo que sigue.</span>
+              {allDone ? (
+                <>
+                  Así lo hicimos. <span className="text-black/45">Paso a paso.</span>
+                </>
+              ) : (
+                <>
+                  Dónde vamos. <span className="text-black/45">Lo que sigue.</span>
+                </>
+              )}
             </h2>
           </div>
           <div className="mt-16">
