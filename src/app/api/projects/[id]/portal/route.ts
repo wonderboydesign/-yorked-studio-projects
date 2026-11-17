@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { redistribute } from "@/lib/portal";
 import { DOCUMENT_SELECT, PAYMENT_SELECT, ensurePayments, newPortalToken, projectProgress, projectQuote } from "@/lib/portalServer";
 
 async function state(projectId: string) {
   const project = await prisma.project.findUnique({
     where: { id: projectId },
-    select: { id: true, name: true, portalToken: true, portalViewedAt: true },
+    select: { id: true, name: true, portalToken: true, portalViewedAt: true, priceTotal: true, withIva: true },
   });
   if (!project) return null;
   const [payments, progress, quote, documents] = await Promise.all([
@@ -25,7 +26,8 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
 // enable: crea la liga (y los pagos desde la propuesta, si no hay)
 // regenerate: liga nueva, la anterior deja de funcionar · disable: sin liga
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
-  const { action } = await request.json().catch(() => ({}));
+  const body = await request.json().catch(() => ({}));
+  const { action } = body;
   const project = await prisma.project.findUnique({ where: { id: params.id }, select: { portalToken: true } });
   if (!project) return NextResponse.json({ error: "Proyecto no encontrado" }, { status: 404 });
 
@@ -34,6 +36,37 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     await ensurePayments(params.id);
   } else if (action === "regenerate") {
     await prisma.project.update({ where: { id: params.id }, data: { portalToken: newPortalToken() } });
+  } else if (action === "price") {
+    // Precio completo (sin IVA) e IVA: interno; el cliente solo ve lo que paga.
+    // Si cambia el precio, se reparte entre los pagos pendientes.
+    const data: { priceTotal?: number | null; withIva?: boolean } = {};
+    if (typeof body.withIva === "boolean") data.withIva = body.withIva;
+    if (body.priceTotal === null) data.priceTotal = null;
+    else if (body.priceTotal !== undefined) {
+      const n = Number(body.priceTotal);
+      if (!Number.isFinite(n) || n < 0) return NextResponse.json({ error: "Precio no válido" }, { status: 400 });
+      data.priceTotal = Math.round(n * 100) / 100;
+    }
+    await prisma.project.update({ where: { id: params.id }, data });
+    if (typeof data.priceTotal === "number") {
+      const payments = await prisma.payment.findMany({
+        where: { projectId: params.id },
+        orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+      });
+      const changes = redistribute(payments.map((p) => ({ id: p.id, amount: p.amount, paid: !!p.paidAt })), data.priceTotal);
+      // "Finiquito 50%" deja de ser 50% al cambiar el precio: se quita el porcentaje
+      const byId = new Map(payments.map((p) => [p.id, p]));
+      await prisma.$transaction(
+        changes
+          .filter((c) => byId.get(c.id)!.amount !== c.amount)
+          .map((c) =>
+            prisma.payment.update({
+              where: { id: c.id },
+              data: { amount: c.amount, label: byId.get(c.id)!.label.replace(/\s*\d+(?:[.,]\d+)?\s*%$/, "") || byId.get(c.id)!.label },
+            })
+          )
+      );
+    }
   } else if (action === "disable") {
     await prisma.project.update({ where: { id: params.id }, data: { portalToken: null } });
   } else {
