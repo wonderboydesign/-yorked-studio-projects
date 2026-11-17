@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { redistribute } from "@/lib/portal";
-import { DOCUMENT_SELECT, PAYMENT_SELECT, ensurePayments, newPortalToken, projectProgress, projectQuote } from "@/lib/portalServer";
+import { DOCUMENT_SELECT, LINK_SELECT, PAYMENT_SELECT, ensurePayments, newPortalToken, projectProgress, projectQuote } from "@/lib/portalServer";
 
 async function state(projectId: string) {
   // Antes el IVA era de todo el proyecto: se pasa a cada pago una sola vez
@@ -17,13 +17,23 @@ async function state(projectId: string) {
     select: { id: true, name: true, portalToken: true, portalViewedAt: true, priceTotal: true },
   });
   if (!project) return null;
-  const [payments, progress, quote, documents] = await Promise.all([
+  const [payments, progress, quote, documents, links] = await Promise.all([
     prisma.payment.findMany({ where: { projectId }, select: PAYMENT_SELECT, orderBy: [{ order: "asc" }, { createdAt: "asc" }] }),
     projectProgress(projectId),
     projectQuote(projectId),
     prisma.projectDocument.findMany({ where: { projectId }, select: DOCUMENT_SELECT, orderBy: { createdAt: "desc" } }),
+    prisma.portalLink.findMany({ where: { projectId }, select: LINK_SELECT, orderBy: [{ date: "desc" }, { createdAt: "desc" }] }),
   ]);
-  return { ...project, payments, progress, documents, hasApprovedQuote: quote?.status === "approved" };
+  return {
+    ...project,
+    payments,
+    progress,
+    documents,
+    links,
+    hasApprovedQuote: quote?.status === "approved",
+    // La propuesta que el cliente puede abrir (no los borradores)
+    quoteToken: quote && quote.status !== "draft" ? quote.token : null,
+  };
 }
 
 export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {

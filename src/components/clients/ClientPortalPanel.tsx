@@ -5,6 +5,7 @@ import { uploadFile } from "@/lib/upload";
 import { PaymentRow, Progress, clientAmount } from "@/lib/portal";
 import { formatMoney } from "@/lib/quotes";
 import { Button } from "../branding/ui";
+import PortalLinksEditor, { PortalLinkRow } from "./PortalLinksEditor";
 
 type Notify = (message: string, tone?: "ok" | "error") => void;
 
@@ -22,6 +23,8 @@ interface PortalState {
   hasApprovedQuote: boolean;
   priceTotal: number | null;
   documents: PortalDocument[];
+  links: PortalLinkRow[];
+  quoteToken: string | null;
 }
 
 interface PortalDocument {
@@ -162,6 +165,9 @@ export default function ClientPortalPanel({ projectId, notify, onClose }: { proj
   const shortDate = (iso: string) => new Date(iso).toLocaleDateString("es-MX", { day: "numeric", month: "short" });
 
   const clientTotal = s?.payments.reduce((n, p) => n + clientAmount(p.amount, p.withIva), 0) ?? 0;
+  const setLinks = (links: PortalLinkRow[]) => setS((x) => (x ? { ...x, links } : x));
+  const phaseOptions = s?.progress.phases.map((p) => ({ number: p.number, name: p.name })) ?? [];
+
   const total = s?.payments.reduce((n, p) => n + p.amount, 0) ?? 0;
   const paid = s?.payments.filter((p) => p.paidAt).reduce((n, p) => n + p.amount, 0) ?? 0;
   const today = new Date();
@@ -232,6 +238,23 @@ export default function ClientPortalPanel({ projectId, notify, onClose }: { proj
               )}
             </section>
 
+            {/* Propuesta */}
+            <section className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-ink/[0.04] px-4 py-3">
+              <div className="min-w-0">
+                <p className="text-sm">Propuesta</p>
+                <p className="text-xs text-muted">
+                  {s.quoteToken ? "El cliente la tiene a la mano arriba en su portal, para recordar el alcance." : "Este proyecto no tiene una propuesta enviada ligada."}
+                </p>
+              </div>
+              {s.quoteToken && (
+                <a href={`/p/${s.quoteToken}`} target="_blank" rel="noreferrer" className="text-sm text-muted hover:text-ink shrink-0">
+                  Ver propuesta ↗
+                </a>
+              )}
+            </section>
+
+            <PortalLinksEditor kind="meeting" projectId={projectId} links={s.links} phases={phaseOptions} notify={notify} onChange={setLinks} />
+
             {/* Avance */}
             <section className="space-y-3">
               <div className="flex items-baseline justify-between">
@@ -267,6 +290,8 @@ export default function ClientPortalPanel({ projectId, notify, onClose }: { proj
                 curso avanzan según los días que llevan.
               </p>
             </section>
+
+            <PortalLinksEditor kind="delivery" projectId={projectId} links={s.links} phases={phaseOptions} notify={notify} onChange={setLinks} />
 
             {/* Precio (interno: el cliente solo ve lo que paga) */}
             <section className="space-y-3">
@@ -445,6 +470,8 @@ export default function ClientPortalPanel({ projectId, notify, onClose }: { proj
                 )}
               </div>
             </section>
+
+            <PortalLinksEditor kind="brand" projectId={projectId} links={s.links} phases={phaseOptions} notify={notify} onChange={setLinks} />
           </div>
         )}
       </div>

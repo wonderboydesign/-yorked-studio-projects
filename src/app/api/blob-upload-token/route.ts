@@ -8,6 +8,8 @@ const ALLOWED_EXTENSIONS = [
   "doc", "docx", "txt", "md", "pptx", "key",
   // Facturas (PDF + XML del CFDI) para el portal del cliente
   "xml",
+  // Descargables de marca en el portal del cliente
+  "zip",
 ];
 const MAX_SIZE_BYTES = 50 * 1024 * 1024;
 

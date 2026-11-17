@@ -22,6 +22,18 @@ const helvetica = localFont({
 export const dynamic = "force-dynamic";
 
 const longDate = (d: Date) => d.toLocaleDateString("es-MX", { day: "numeric", month: "long", timeZone: "UTC" });
+// Fecha y hora de una reunión, en la hora del centro de México
+const meetingDate = (d: Date) =>
+  d
+    .toLocaleString("es-MX", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      hour: "numeric",
+      minute: "2-digit",
+      timeZone: "America/Mexico_City",
+    })
+    .replace(/^./, (c) => c.toUpperCase()) + " (hora del centro)";
 const shortDate = (d: Date) => d.toLocaleDateString("es-MX", { day: "numeric", month: "short", timeZone: "UTC" });
 
 export async function generateMetadata({ params }: { params: { token: string } }): Promise<Metadata> {
@@ -39,6 +51,7 @@ export default async function ClientPortal({ params }: { params: { token: string
       tasks: { select: { name: true, status: true, startDate: true, endDate: true, phase: true } },
       payments: { orderBy: [{ order: "asc" }, { createdAt: "asc" }] },
       documents: { orderBy: { createdAt: "desc" } },
+      links: { orderBy: [{ date: "desc" }, { createdAt: "desc" }] },
     },
   });
   if (!project) notFound();
@@ -69,6 +82,29 @@ export default async function ClientPortal({ params }: { params: { token: string
   const current = progress.phases.find((p) => p.state === "active");
   const allDone = progress.percent >= 100 || (progress.phases.length > 0 && progress.phases.every((p) => p.state === "done"));
   const waPaid = whatsappLink(studio.whatsapp, `Hola, ya hice el pago de "${next?.label ?? ""}" de ${project.name}. Te comparto el comprobante.`);
+  // Reuniones: la próxima (o la que está en curso, hasta 2 h después) arriba
+  const now = Date.now();
+  const meetings = project.links.filter((l) => l.kind === "meeting" && l.date);
+  const upcoming = meetings
+    .filter((l) => l.date!.getTime() >= now - 2 * 3600 * 1000)
+    .sort((a, b) => a.date!.getTime() - b.date!.getTime());
+  const nextMeeting = upcoming[0];
+  const deliveries = project.links.filter((l) => l.kind === "delivery");
+  const brandFiles = project.links.filter((l) => l.kind === "brand");
+  const proposalUrl = quote && quote.status !== "draft" ? `/p/${quote.token}` : null;
+  const phaseName = new Map(progress.phases.map((p) => [p.number, p.name]));
+
+  // Numeración de secciones según lo que tenga el proyecto
+  const order = [
+    "fases",
+    meetings.length > 0 && "reuniones",
+    deliveries.length > 0 && "entregas",
+    payments.length > 0 && "pagos",
+    "facturacion",
+    brandFiles.length > 0 && "marca",
+  ].filter(Boolean) as string[];
+  const num = (id: string) => String(order.indexOf(id) + 2).padStart(2, "0");
+
   const waHello = whatsappLink(studio.whatsapp, `Hola, tengo una duda sobre el proyecto de ${project.name}.`);
 
   return (
@@ -84,8 +120,10 @@ export default async function ClientPortal({ params }: { params: { token: string
           </span>
           <nav className="hidden gap-7 text-[13px] text-black/60 md:flex">
             <a href="#fases" className="hover:text-black">Fases</a>
+            {deliveries.length > 0 && <a href="#entregas" className="hover:text-black">Entregas</a>}
             {payments.length > 0 && <a href="#pagos" className="hover:text-black">Pagos</a>}
             <a href="#facturacion" className="hover:text-black">Facturación</a>
+            {brandFiles.length > 0 && <a href="#marca" className="hover:text-black">Tu marca</a>}
             <a href="#contacto" className="hover:text-black">Contacto</a>
           </nav>
           <a href={waHello} target="_blank" rel="noreferrer" className="pill-dark">
@@ -109,6 +147,39 @@ export default async function ClientPortal({ params }: { params: { token: string
               </>
             )}
           </h1>
+
+          {/* Accesos rápidos: propuesta, próxima reunión y descargables */}
+          {(proposalUrl || nextMeeting || brandFiles.length > 0) && (
+            <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {nextMeeting && (
+                <div className="flex flex-col rounded-[22px] p-5 text-white sm:col-span-2 lg:col-span-1" style={{ background: "var(--accent)" }}>
+                  <span className="text-[11px] uppercase tracking-[0.14em] opacity-75">Próxima reunión</span>
+                  <p className="mt-3 text-[22px] font-medium leading-tight">{nextMeeting.title}</p>
+                  <p className="mt-1 text-[14px] opacity-85">{meetingDate(nextMeeting.date!)}</p>
+                  {nextMeeting.note && <p className="mt-2 text-[13px] opacity-75">{nextMeeting.note}</p>}
+                  <a href={nextMeeting.url} target="_blank" rel="noreferrer" className="pill-light mt-5 w-fit">
+                    Unirme a la reunión <span aria-hidden>→</span>
+                  </a>
+                </div>
+              )}
+              {proposalUrl && (
+                <a href={proposalUrl} target="_blank" rel="noreferrer" className="group flex flex-col rounded-[22px] border border-black/10 p-5 hover:bg-black/[0.03]">
+                  <span className="eyebrow">Tu propuesta</span>
+                  <p className="mt-3 text-[22px] font-medium leading-tight">Alcance, fases e inversión acordados</p>
+                  <span className="mt-auto pt-5 text-[13px] text-black/60 group-hover:text-black">Ver propuesta ↗</span>
+                </a>
+              )}
+              {brandFiles.length > 0 && (
+                <a href="#marca" className="group flex flex-col rounded-[22px] bg-[#121210] p-5 text-[#f1efe9]">
+                  <span className="text-[11px] uppercase tracking-[0.14em] text-[#f1efe9]/55">Tu marca</span>
+                  <p className="mt-3 text-[22px] font-medium leading-tight">Descargables de tu marca</p>
+                  <span className="mt-auto pt-5 text-[13px] text-[#f1efe9]/60 group-hover:text-[#f1efe9]">
+                    {brandFiles.length} {brandFiles.length === 1 ? "archivo" : "archivos"} ↓
+                  </span>
+                </a>
+              )}
+            </div>
+          )}
 
           <div className="mt-auto pt-12">
             <div className="flex flex-wrap items-end justify-between gap-6">
@@ -142,7 +213,7 @@ export default async function ClientPortal({ params }: { params: { token: string
         <section id="fases" className="py-24">
           <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
             <p className="eyebrow">
-              <span className="text-black">02</span> Fases
+              <span className="text-black">{num("fases")}</span> Fases
             </p>
             <h2 className="section-title">
               Dónde vamos. <span className="text-black/45">Lo que sigue.</span>
@@ -159,12 +230,95 @@ export default async function ClientPortal({ params }: { params: { token: string
           </div>
         </section>
 
+        {/* Reuniones */}
+        {meetings.length > 0 && (
+          <section id="reuniones" className="pb-24">
+            <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
+              <p className="eyebrow">
+                <span className="text-black">{num("reuniones")}</span> Reuniones
+              </p>
+              <h2 className="section-title">
+                Nos vemos. <span className="text-black/45">Aquí está el link.</span>
+              </h2>
+            </div>
+            <ul className="mt-14">
+              {[...meetings]
+                .sort((a, b) => b.date!.getTime() - a.date!.getTime())
+                .map((m) => {
+                  const past = m.date!.getTime() < now - 2 * 3600 * 1000;
+                  return (
+                    <li key={m.id} className={`grid gap-3 border-t border-black/10 py-6 md:grid-cols-[1fr_auto] md:items-center ${past ? "opacity-50" : ""}`}>
+                      <div className="min-w-0">
+                        <p className="text-[22px] font-medium leading-tight tracking-[-0.01em]">{m.title}</p>
+                        <p className="mt-1 text-[13px] text-black/55">
+                          {meetingDate(m.date!)}
+                          {m.note && ` · ${m.note}`}
+                        </p>
+                      </div>
+                      {past ? (
+                        <span className="text-[12px] text-black/50">Ya pasó</span>
+                      ) : (
+                        <a href={m.url} target="_blank" rel="noreferrer" className="pill-dark w-fit">
+                          Unirme <span aria-hidden>→</span>
+                        </a>
+                      )}
+                    </li>
+                  );
+                })}
+            </ul>
+          </section>
+        )}
+
+        {/* Entregas */}
+        {deliveries.length > 0 && (
+          <section id="entregas" className="pb-24">
+            <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
+              <p className="eyebrow">
+                <span className="text-black">{num("entregas")}</span> Entregas
+              </p>
+              <h2 className="section-title">
+                Lo que te hemos presentado. <span className="text-black/45">Siempre a la mano.</span>
+              </h2>
+            </div>
+            <div className="mt-14 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {deliveries.map((d) => {
+                const isNew = now - d.createdAt.getTime() < 7 * 86400000;
+                const isPdf = !!d.pathname || /\.pdf(\?|$)/i.test(d.url);
+                return (
+                  <a
+                    key={d.id}
+                    href={d.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group flex min-h-[220px] flex-col rounded-[22px] border border-black/10 p-5 hover:bg-black/[0.03]"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="eyebrow">{d.phase ? `Fase ${d.phase}${phaseName.get(d.phase) ? ` · ${phaseName.get(d.phase)}` : ""}` : "Entrega"}</span>
+                      {isNew && (
+                        <span className="rounded-full px-2 py-0.5 text-[11px] text-white" style={{ background: "var(--accent)" }}>
+                          Nueva
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-4 text-[24px] font-medium leading-tight tracking-[-0.02em]">{d.title}</p>
+                    {d.note && <p className="mt-2 text-[13px] text-black/60">{d.note}</p>}
+                    <div className="mt-auto flex items-center justify-between pt-6 text-[13px] text-black/55">
+                      <span>{shortDate(d.date ?? d.createdAt)}</span>
+                      <span className="group-hover:text-black">{isPdf ? "Ver PDF ↗" : "Abrir ↗"}</span>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
         {/* Pagos */}
         {payments.length > 0 && (
           <section id="pagos" className="rounded-[28px] px-6 py-16 text-[#f1efe9] sm:px-10" style={{ background: "#121210" }}>
             <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
               <p className="eyebrow" style={{ color: "rgb(241 239 233 / 0.5)" }}>
-                <span className="text-[#f1efe9]">03</span> Pagos
+                <span className="text-[#f1efe9]">{num("pagos")}</span> Pagos
               </p>
               <div>
                 <h2 className="section-title">
@@ -249,7 +403,7 @@ export default async function ClientPortal({ params }: { params: { token: string
         <section id="facturacion" className="py-24">
           <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
             <p className="eyebrow">
-              <span className="text-black">{payments.length > 0 ? "04" : "03"}</span> Facturación
+              <span className="text-black">{num("facturacion")}</span> Facturación
             </p>
             <h2 className="section-title">
               Factura o recibo. <span className="text-black/45">Como lo necesites.</span>
@@ -265,6 +419,40 @@ export default async function ClientPortal({ params }: { params: { token: string
               .map((d) => ({ id: d.id, name: d.name, url: d.url, createdAt: d.createdAt.toISOString() }))}
           />
         </section>
+
+        {/* Tu marca */}
+        {brandFiles.length > 0 && (
+          <section id="marca" className="mb-8 rounded-[28px] bg-[#121210] px-6 py-16 text-[#f1efe9] sm:px-10">
+            <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
+              <p className="eyebrow" style={{ color: "rgb(241 239 233 / 0.5)" }}>
+                <span className="text-[#f1efe9]">{num("marca")}</span> Tu marca
+              </p>
+              <h2 className="section-title">
+                Todo tu sistema. <span className="text-[#f1efe9]/50">Listo para usarse.</span>
+              </h2>
+            </div>
+            <ul className="mt-14">
+              {brandFiles.map((f) => (
+                <li key={f.id}>
+                  <a
+                    href={f.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group flex items-center justify-between gap-4 border-t border-white/15 py-5"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-[20px] leading-tight">{f.title}</p>
+                      {f.note && <p className="mt-1 text-[13px] text-[#f1efe9]/55">{f.note}</p>}
+                    </div>
+                    <span className="shrink-0 rounded-full bg-[#f1efe9] px-4 py-2 text-[13px] text-[#121210] group-hover:opacity-90">
+                      {f.pathname ? "Descargar ↓" : "Abrir ↗"}
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {/* Contacto */}
         <section id="contacto" className="grid gap-6 py-16 text-[13px] sm:grid-cols-2 lg:grid-cols-4">
