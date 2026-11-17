@@ -30,6 +30,10 @@ model Project {
   // una tabla con datos; es aleatorio (18 bytes) y se busca con índice
   portalToken    String?
   portalViewedAt DateTime?
+  // Precio completo del proyecto sin IVA (los pagos se reparten de aquí) y si
+  // al cliente se le cobra con IVA; el cliente solo ve el monto final
+  priceTotal     Float?
+  withIva        Boolean           @default(false)
   payments       Payment[]
   documents      ProjectDocument[]
 

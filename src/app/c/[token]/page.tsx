@@ -7,7 +7,7 @@ import CopyRows from "@/components/CopyRows";
 import { AUTH_COOKIE_NAME, verifySessionToken } from "@/lib/auth";
 import { getStudio } from "@/lib/quotesServer";
 import { QuoteContent, formatMoney, whatsappLink } from "@/lib/quotes";
-import { PortalPhase, computeProgress } from "@/lib/portal";
+import { PortalPhase, clientAmount, computeProgress } from "@/lib/portal";
 import { projectQuote } from "@/lib/portalServer";
 import { localTodayUTC } from "@/lib/portalDates";
 import PortalBilling from "./PortalBilling";
@@ -56,7 +56,8 @@ export default async function ClientPortal({ params }: { params: { token: string
   const line1 = c?.brandLine1 || project.name;
   const line2 = c?.brandLine1 ? c.brandLine2 : "";
 
-  const payments = project.payments;
+  // El cliente solo ve lo que paga: con IVA ya sumado si el proyecto lo lleva
+  const payments = project.payments.map((p) => ({ ...p, amount: clientAmount(p.amount, project.withIva) }));
   const paid = payments.filter((p) => p.paidAt).reduce((n, p) => n + p.amount, 0);
   const total = payments.reduce((n, p) => n + p.amount, 0);
   const pending = payments.filter((p) => !p.paidAt);
@@ -224,11 +225,11 @@ export default async function ClientPortal({ params }: { params: { token: string
                     </li>
                   );
                 })}
-                <li className="border-t border-white/15 pt-4 text-[12px] text-[#f1efe9]/45">Montos en MXN. Más IVA en caso de requerir factura.</li>
+                <li className="border-t border-white/15 pt-4 text-[12px] text-[#f1efe9]/45">{project.withIva ? "Montos en MXN, IVA incluido." : "Montos en MXN."}</li>
               </ul>
 
               <div className="space-y-4">
-                <BankDetails studio={studio} label={next?.label} amount={next?.amount} />
+                <BankDetails studio={studio} label={next?.label} amount={next?.amount} withIva={project.withIva} />
                 {next && (
                   <a href={waPaid} target="_blank" rel="noreferrer" className="pill-light w-full justify-center">
                     Ya hice mi pago · enviar comprobante <span aria-hidden>→</span>
@@ -323,7 +324,17 @@ function PhaseRow({ phase: ph }: { phase: PortalPhase }) {
   );
 }
 
-function BankDetails({ studio, label, amount }: { studio: Awaited<ReturnType<typeof getStudio>>; label?: string; amount?: number }) {
+function BankDetails({
+  studio,
+  label,
+  amount,
+  withIva,
+}: {
+  studio: Awaited<ReturnType<typeof getStudio>>;
+  label?: string;
+  amount?: number;
+  withIva?: boolean;
+}) {
   const b = studio.bank;
   const rows = [
     ["Banco", b.bankName],
@@ -341,7 +352,7 @@ function BankDetails({ studio, label, amount }: { studio: Awaited<ReturnType<typ
           <p className="text-[34px] font-medium tracking-[-0.03em]">
             {formatMoney(amount)} <span className="text-[14px] tracking-normal text-black/55">MXN</span>
           </p>
-          <p className="mb-3 text-[11px] text-black/55">Más IVA en caso de requerir factura.</p>
+          {withIva ? <p className="mb-3 text-[11px] text-black/55">IVA incluido.</p> : <div className="mb-3" />}
         </>
       ) : (
         <p className="eyebrow mb-3">Datos para transferencia</p>

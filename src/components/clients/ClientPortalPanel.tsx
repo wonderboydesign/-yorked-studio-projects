@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { uploadFile } from "@/lib/upload";
-import { PaymentRow, Progress } from "@/lib/portal";
+import { IVA_RATE, PaymentRow, Progress, clientAmount } from "@/lib/portal";
 import { formatMoney } from "@/lib/quotes";
 import { Button } from "../branding/ui";
 
@@ -20,6 +20,8 @@ interface PortalState {
     phases: { number: string; name: string; start: string; end: string; state: string; percent: number }[];
   };
   hasApprovedQuote: boolean;
+  priceTotal: number | null;
+  withIva: boolean;
   documents: PortalDocument[];
 }
 
@@ -75,6 +77,18 @@ export default function ClientPortalPanel({ projectId, notify, onClose }: { proj
     setBusy(false);
     if (res.ok) setS(await res.json());
     else notify("No se pudo actualizar el portal.", "error");
+  }
+
+  async function savePrice(fields: { priceTotal?: number | null; withIva?: boolean }) {
+    const res = await fetch(`/api/projects/${projectId}/portal`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "price", ...fields }),
+    });
+    if (res.ok) {
+      setS(await res.json());
+      notify(fields.priceTotal !== undefined ? "Precio guardado; los pagos pendientes se ajustaron" : "Guardado");
+    } else notify("No se pudo guardar el precio.", "error");
   }
 
   async function addPayment(fromQuote = false) {
@@ -254,6 +268,38 @@ export default function ClientPortalPanel({ projectId, notify, onClose }: { proj
               </p>
             </section>
 
+            {/* Precio (interno: el cliente solo ve lo que paga) */}
+            <section className="space-y-3">
+              <h3 className="text-base">Precio del proyecto</h3>
+              <div className="rounded-2xl bg-ink/[0.04] p-4 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+                <label className="block space-y-1">
+                  <span className="text-xs text-muted">Precio completo, sin IVA (MXN)</span>
+                  <input
+                    key={`price-${s.priceTotal ?? total}`}
+                    type="number"
+                    min={0}
+                    defaultValue={s.priceTotal ?? total}
+                    onBlur={(e) => {
+                      const v = Number(e.target.value);
+                      if (Number.isFinite(v) && v !== (s.priceTotal ?? total)) savePrice({ priceTotal: v });
+                    }}
+                    onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
+                    className="field w-full rounded-xl px-3 py-2 text-sm"
+                  />
+                </label>
+                <label className="flex items-center gap-2 text-sm pb-2 cursor-pointer select-none">
+                  <input type="checkbox" checked={s.withIva} onChange={(e) => savePrice({ withIva: e.target.checked })} />
+                  Cobrar con IVA ({Math.round(IVA_RATE * 100)}%)
+                </label>
+                <p className="sm:col-span-2 text-xs text-muted">
+                  El cliente paga{" "}
+                  <span className="text-ink">{formatMoney(clientAmount(s.priceTotal ?? total, s.withIva))}</span>
+                  {s.withIva ? " con IVA incluido" : " sin IVA"}. En su portal solo ve lo que tiene que pagar, sin desglose. Si
+                  cambias el precio, se reparte entre los pagos pendientes.
+                </p>
+              </div>
+            </section>
+
             {/* Pagos */}
             <section className="space-y-3">
               <div className="flex items-center justify-between gap-3">
@@ -278,9 +324,11 @@ export default function ClientPortalPanel({ projectId, notify, onClose }: { proj
                       aria-label="Concepto"
                     />
                     <input
+                      key={`${p.id}-${p.amount}`}
                       type="number"
                       min={0}
                       defaultValue={p.amount}
+                      title={s.withIva ? `El cliente paga ${formatMoney(clientAmount(p.amount, true))} con IVA` : undefined}
                       onBlur={(e) => Number(e.target.value) !== p.amount && patchPayment(p.id, { amount: Number(e.target.value) })}
                       className="field rounded-lg px-2.5 py-1.5 text-sm tabular-nums"
                       aria-label="Monto"
@@ -325,7 +373,10 @@ export default function ClientPortalPanel({ projectId, notify, onClose }: { proj
                 ))}
               </ul>
               <div className="flex justify-between items-center">
-                <p className="text-xs text-muted">Montos en MXN sin IVA. El cliente ve siempre tus datos de transferencia y el recibo de cada pago marcado como pagado.</p>
+                <p className="text-xs text-muted">
+                  Montos sin IVA.{s.withIva ? " El cliente los ve con IVA incluido." : ""} El cliente ve siempre tus datos de
+                  transferencia y el recibo de cada pago marcado como pagado.
+                </p>
                 <Button onClick={() => addPayment(false)}>+ Pago</Button>
               </div>
             </section>

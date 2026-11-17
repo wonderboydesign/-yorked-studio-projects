@@ -130,3 +130,33 @@ export function paymentsFromQuote(
   if (adv < 100) rows.push({ label: `Finiquito ${100 - adv}%`, amount: option.price - advance, dueDate: lastEnd, order: 2 });
   return rows;
 }
+
+export const IVA_RATE = 0.16;
+
+// Lo que el cliente paga: el monto del pago, con IVA si el proyecto lo lleva
+export function clientAmount(amount: number, withIva: boolean) {
+  return Math.round(amount * (withIva ? 1 + IVA_RATE : 1) * 100) / 100;
+}
+
+// Reparte un precio nuevo entre los pagos pendientes, en la misma proporción
+// que tenían (los pagados no se tocan). Montos en pesos enteros; el último
+// pendiente absorbe el redondeo.
+export function redistribute(
+  payments: { id: string; amount: number; paid: boolean }[],
+  total: number
+): { id: string; amount: number }[] {
+  const paidSum = payments.filter((p) => p.paid).reduce((n, p) => n + p.amount, 0);
+  const pending = payments.filter((p) => !p.paid);
+  if (pending.length === 0) return [];
+  const remaining = Math.max(0, total - paidSum);
+  const base = pending.reduce((n, p) => n + p.amount, 0);
+  let assigned = 0;
+  return pending.map((p, i) => {
+    const amount =
+      i === pending.length - 1
+        ? Math.round((remaining - assigned) * 100) / 100
+        : Math.round(base > 0 ? (remaining * p.amount) / base : remaining / pending.length);
+    assigned += amount;
+    return { id: p.id, amount };
+  });
+}

@@ -34,6 +34,11 @@ export async function ensurePayments(projectId: string) {
   const progress = await projectProgress(projectId);
   const rows = paymentsFromQuote(quote.content as unknown as QuoteContent, quote.approvedOption, quote.approvedAt, progress.end);
   await prisma.payment.createMany({ data: rows.map((r) => ({ ...r, projectId })) });
+  // El precio completo del proyecto parte de la propuesta
+  await prisma.project.updateMany({
+    where: { id: projectId, priceTotal: null },
+    data: { priceTotal: rows.reduce((n, r) => n + r.amount, 0) },
+  });
   return rows.length;
 }
 
