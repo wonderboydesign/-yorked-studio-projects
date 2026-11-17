@@ -6,6 +6,8 @@ const ALLOWED_EXTENSIONS = [
   "ai", "svg", "pdf", "jpg", "jpeg", "png", "webp", "gif",
   // Briefs y documentos de contexto del flujo de branding
   "doc", "docx", "txt", "md", "pptx", "key",
+  // Facturas (PDF + XML del CFDI) para el portal del cliente
+  "xml",
 ];
 const MAX_SIZE_BYTES = 50 * 1024 * 1024;
 

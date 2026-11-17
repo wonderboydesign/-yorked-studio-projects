@@ -8,15 +8,15 @@ datasource db {
 }
 
 model Project {
-  id             String          @id @default(cuid())
+  id             String            @id @default(cuid())
   name           String
   client         String?
-  color          String          @default("#1E4FFF")
+  color          String            @default("#1E4FFF")
   startDate      DateTime
   endDate        DateTime
   notes          String?
-  archived       Boolean         @default(false)
-  createdAt      DateTime        @default(now())
+  archived       Boolean           @default(false)
+  createdAt      DateTime          @default(now())
   tasks          Task[]
   // Flujo de branding (Brief → Concepto → Investigación → Moodboard →
   // Desarrollo → Presentación), opcional por proyecto
@@ -31,8 +31,28 @@ model Project {
   portalToken    String?
   portalViewedAt DateTime?
   payments       Payment[]
+  documents      ProjectDocument[]
 
   @@index([portalToken])
+}
+
+// Documento de facturación en el portal del cliente: la constancia de
+// situación fiscal que sube el cliente y las facturas (PDF/XML) que sube el
+// estudio. Los archivos viven en Vercel Blob.
+model ProjectDocument {
+  id          String   @id @default(cuid())
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId   String
+  kind        String // tax_certificate | invoice
+  name        String
+  url         String
+  pathname    String?
+  contentType String?
+  size        Int?
+  uploadedBy  String // client | studio
+  createdAt   DateTime @default(now())
+
+  @@index([projectId])
 }
 
 // Pago del proyecto que ve el cliente en su portal (anticipo, finiquito,

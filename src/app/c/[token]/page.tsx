@@ -9,6 +9,7 @@ import { QuoteContent, formatMoney, whatsappLink } from "@/lib/quotes";
 import { PortalPhase, computeProgress } from "@/lib/portal";
 import { projectQuote } from "@/lib/portalServer";
 import { localTodayUTC } from "@/lib/portalDates";
+import PortalBilling from "./PortalBilling";
 
 // La misma tipografía de las propuestas
 const helvetica = localFont({
@@ -36,6 +37,7 @@ export default async function ClientPortal({ params }: { params: { token: string
     include: {
       tasks: { select: { name: true, status: true, startDate: true, endDate: true, phase: true } },
       payments: { orderBy: [{ order: "asc" }, { createdAt: "asc" }] },
+      documents: { orderBy: { createdAt: "desc" } },
     },
   });
   if (!project) notFound();
@@ -77,6 +79,7 @@ export default async function ClientPortal({ params }: { params: { token: string
           <nav className="hidden gap-7 text-[13px] text-black/60 md:flex">
             <a href="#fases" className="hover:text-black">Fases</a>
             {payments.length > 0 && <a href="#pagos" className="hover:text-black">Pagos</a>}
+            <a href="#facturacion" className="hover:text-black">Facturación</a>
             <a href="#contacto" className="hover:text-black">Contacto</a>
           </nav>
           <a href={waHello} target="_blank" rel="noreferrer" className="pill-dark">
@@ -204,7 +207,12 @@ export default async function ClientPortal({ params }: { params: { token: string
                             : "Pendiente"}
                         </p>
                       </div>
-                      <div className="flex shrink-0 items-center gap-3">
+                      <div className="flex shrink-0 flex-wrap items-center justify-end gap-3">
+                        {p.paidAt && (
+                          <a href={`/c/${params.token}/recibo/${p.id}`} className="text-[12px] text-[#f1efe9]/60 underline-offset-4 hover:text-[#f1efe9] hover:underline">
+                            Recibo ↓
+                          </a>
+                        )}
                         <span className="text-[19px] font-medium">{formatMoney(p.amount)}</span>
                         <span
                           className={`rounded-full px-3 py-1 text-[12px] ${p.paidAt ? "bg-white/10 text-[#f1efe9]/80" : "bg-[#f1efe9] text-[#121210]"}`}
@@ -218,17 +226,38 @@ export default async function ClientPortal({ params }: { params: { token: string
                 <li className="border-t border-white/15 pt-4 text-[12px] text-[#f1efe9]/45">Montos en MXN. Más IVA en caso de requerir factura.</li>
               </ul>
 
-              {next && (
-                <div className="space-y-4">
-                  <BankDetails studio={studio} label={next.label} amount={next.amount} />
+              <div className="space-y-4">
+                <BankDetails studio={studio} label={next?.label} amount={next?.amount} />
+                {next && (
                   <a href={waPaid} target="_blank" rel="noreferrer" className="pill-light w-full justify-center">
                     Ya hice mi pago · enviar comprobante <span aria-hidden>→</span>
                   </a>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </section>
         )}
+
+        {/* Facturación */}
+        <section id="facturacion" className="py-24">
+          <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
+            <p className="eyebrow">
+              <span className="text-black">{payments.length > 0 ? "04" : "03"}</span> Facturación
+            </p>
+            <h2 className="section-title">
+              Factura o recibo. <span className="text-black/45">Como lo necesites.</span>
+            </h2>
+          </div>
+          <PortalBilling
+            token={params.token}
+            certificates={project.documents
+              .filter((d) => d.kind === "tax_certificate")
+              .map((d) => ({ id: d.id, name: d.name, url: d.url, createdAt: d.createdAt.toISOString() }))}
+            invoices={project.documents
+              .filter((d) => d.kind === "invoice")
+              .map((d) => ({ id: d.id, name: d.name, url: d.url, createdAt: d.createdAt.toISOString() }))}
+          />
+        </section>
 
         {/* Contacto */}
         <section id="contacto" className="grid gap-6 py-16 text-[13px] sm:grid-cols-2 lg:grid-cols-4">
@@ -293,7 +322,7 @@ function PhaseRow({ phase: ph }: { phase: PortalPhase }) {
   );
 }
 
-function BankDetails({ studio, label, amount }: { studio: Awaited<ReturnType<typeof getStudio>>; label: string; amount: number }) {
+function BankDetails({ studio, label, amount }: { studio: Awaited<ReturnType<typeof getStudio>>; label?: string; amount?: number }) {
   const b = studio.bank;
   const rows = [
     ["Banco", b.bankName],
@@ -305,11 +334,17 @@ function BankDetails({ studio, label, amount }: { studio: Awaited<ReturnType<typ
   if (rows.length <= 1) return null;
   return (
     <div className="rounded-[22px] bg-[#f1efe9] p-6 text-[#121210]">
-      <p className="eyebrow mb-1">Siguiente pago · {label}</p>
-      <p className="text-[34px] font-medium tracking-[-0.03em]">
-        {formatMoney(amount)} <span className="text-[14px] tracking-normal text-black/55">MXN</span>
-      </p>
-      <p className="mb-3 text-[11px] text-black/55">Más IVA en caso de requerir factura.</p>
+      {label && amount !== undefined ? (
+        <>
+          <p className="eyebrow mb-1">Siguiente pago · {label}</p>
+          <p className="text-[34px] font-medium tracking-[-0.03em]">
+            {formatMoney(amount)} <span className="text-[14px] tracking-normal text-black/55">MXN</span>
+          </p>
+          <p className="mb-3 text-[11px] text-black/55">Más IVA en caso de requerir factura.</p>
+        </>
+      ) : (
+        <p className="eyebrow mb-3">Datos para transferencia</p>
+      )}
       {rows.map(([k, v]) => (
         <div key={k} className="flex justify-between gap-4 border-t border-black/10 py-2.5 text-[14px]">
           <span className="text-black/55">{k}</span>
