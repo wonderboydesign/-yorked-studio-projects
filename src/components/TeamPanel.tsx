@@ -93,6 +93,22 @@ export default function TeamPanel({
         >
           + Usuario
         </button>
+
+        <div className="mt-8 pt-5 border-t border-line">
+          <p className="text-xs">Respaldo de datos</p>
+          <p className="text-xs text-muted mt-1">
+            Descarga un archivo con todos los proyectos, tareas, branding, clientes, cotizaciones y pagos. Guárdalo una vez al
+            mes en Drive o Dropbox, en una carpeta privada: incluye datos bancarios y de clientes. No lleva contraseñas, y las
+            fotos se quedan en la app (el archivo trae sus ligas).
+          </p>
+          <a
+            href="/api/backup"
+            download
+            className="inline-block mt-3 text-xs px-3 py-1.5 bg-button hover:bg-button-hover text-ink rounded-full"
+          >
+            Descargar respaldo
+          </a>
+        </div>
       </div>
 
       {userModal.open && (
