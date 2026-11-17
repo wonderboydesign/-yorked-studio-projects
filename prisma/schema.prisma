@@ -36,6 +36,7 @@ model Project {
   withIva        Boolean           @default(false)
   payments       Payment[]
   documents      ProjectDocument[]
+  links          PortalLink[]
 
   @@index([portalToken])
 }
@@ -57,6 +58,27 @@ model ProjectDocument {
   createdAt   DateTime @default(now())
 
   @@index([projectId])
+}
+
+// Lo que el estudio comparte en el portal del cliente:
+// - delivery: entregas (presentaciones en PDF subido o link), con su fase
+// - meeting: invitaciones a reunión (link de Meet/Zoom) con fecha y hora
+// - brand: descargables finales de la marca (link a carpeta o archivo)
+model PortalLink {
+  id        String    @id @default(cuid())
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  kind      String
+  title     String
+  url       String
+  // Si el archivo se subió a Vercel Blob (para borrarlo al quitarlo)
+  pathname  String?
+  note      String?
+  phase     String?
+  date      DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([projectId, kind])
 }
 
 // Pago del proyecto que ve el cliente en su portal (anticipo, finiquito,
