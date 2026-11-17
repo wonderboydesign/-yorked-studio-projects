@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { uploadFile } from "@/lib/upload";
 import { PaymentRow, Progress } from "@/lib/portal";
 import { formatMoney } from "@/lib/quotes";
 import { Button } from "../branding/ui";
@@ -19,6 +20,16 @@ interface PortalState {
     phases: { number: string; name: string; start: string; end: string; state: string; percent: number }[];
   };
   hasApprovedQuote: boolean;
+  documents: PortalDocument[];
+}
+
+interface PortalDocument {
+  id: string;
+  kind: "tax_certificate" | "invoice";
+  name: string;
+  url: string;
+  uploadedBy: "client" | "studio";
+  createdAt: string;
 }
 
 const day = (iso: string | null) => (iso ? iso.slice(0, 10) : "");
@@ -29,6 +40,8 @@ const STATE = { done: "✓ Terminada", active: "En curso", upcoming: "Por venir"
 export default function ClientPortalPanel({ projectId, notify, onClose }: { projectId: string; notify: Notify; onClose: () => void }) {
   const [s, setS] = useState<PortalState | null>(null);
   const [busy, setBusy] = useState(false);
+  const [uploadingInvoices, setUploadingInvoices] = useState(0);
+  const invoiceInput = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
     const res = await fetch(`/api/projects/${projectId}/portal`);
@@ -99,6 +112,41 @@ export default function ClientPortalPanel({ projectId, notify, onClose }: { proj
     setS((x) => (x ? { ...x, payments: x.payments.filter((p) => p.id !== id) } : x));
     await fetch(`/api/payments/${id}`, { method: "DELETE" });
   }
+
+  async function uploadInvoices(files: File[]) {
+    for (const file of files) {
+      setUploadingInvoices((n) => n + 1);
+      try {
+        const up = await uploadFile(file, ["pdf", "xml"]);
+        const res = await fetch(`/api/projects/${projectId}/documents`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ kind: "invoice", url: up.url, pathname: up.pathname, name: up.filename, contentType: up.contentType, size: file.size }),
+        });
+        if (!res.ok) throw new Error("No se pudo guardar la factura.");
+        const doc: PortalDocument = await res.json();
+        setS((x) => (x ? { ...x, documents: [doc, ...x.documents] } : x));
+      } catch (e) {
+        notify(e instanceof Error ? e.message : "No se pudo subir la factura.", "error");
+      } finally {
+        setUploadingInvoices((n) => n - 1);
+      }
+    }
+  }
+
+  async function deleteDocument(d: PortalDocument) {
+    if (!window.confirm(`¿Quitar "${d.name}"? El cliente ya no lo verá.`)) return;
+    setS((x) => (x ? { ...x, documents: x.documents.filter((y) => y.id !== d.id) } : x));
+    const res = await fetch(`/api/documents/${d.id}`, { method: "DELETE" });
+    if (!res.ok) {
+      notify("No se pudo quitar.", "error");
+      load();
+    }
+  }
+
+  const certificates = s?.documents.filter((d) => d.kind === "tax_certificate") ?? [];
+  const invoices = s?.documents.filter((d) => d.kind === "invoice") ?? [];
+  const shortDate = (iso: string) => new Date(iso).toLocaleDateString("es-MX", { day: "numeric", month: "short" });
 
   const total = s?.payments.reduce((n, p) => n + p.amount, 0) ?? 0;
   const paid = s?.payments.filter((p) => p.paidAt).reduce((n, p) => n + p.amount, 0) ?? 0;
@@ -264,6 +312,11 @@ export default function ClientPortalPanel({ projectId, notify, onClose }: { proj
                           />
                         </label>
                       )}
+                      {p.paidAt && s.portalToken && (
+                        <a href={`/c/${s.portalToken}/recibo/${p.id}`} target="_blank" rel="noreferrer" className="text-muted hover:text-ink">
+                          Recibo ↗
+                        </a>
+                      )}
                       <button onClick={() => deletePayment(p.id)} className="ml-auto text-muted hover:text-red-600">
                         Quitar
                       </button>
@@ -272,8 +325,72 @@ export default function ClientPortalPanel({ projectId, notify, onClose }: { proj
                 ))}
               </ul>
               <div className="flex justify-between items-center">
-                <p className="text-xs text-muted">Montos en MXN sin IVA. El cliente ve los datos de transferencia mientras haya algo pendiente.</p>
+                <p className="text-xs text-muted">Montos en MXN sin IVA. El cliente ve siempre tus datos de transferencia y el recibo de cada pago marcado como pagado.</p>
                 <Button onClick={() => addPayment(false)}>+ Pago</Button>
+              </div>
+            </section>
+
+            {/* Facturación */}
+            <section className="space-y-4">
+              <h3 className="text-base">Facturación</h3>
+              <div className="rounded-2xl bg-ink/[0.04] p-4">
+                <p className="text-sm">Constancia de situación fiscal</p>
+                {certificates.length === 0 ? (
+                  <p className="text-xs text-muted mt-1">
+                    El cliente aún no la sube. Si requiere factura, la sube desde su portal; si no, descarga el recibo de cada pago.
+                  </p>
+                ) : (
+                  <ul className="mt-2 text-sm divide-y divide-line">
+                    {certificates.map((d) => (
+                      <li key={d.id} className="flex items-center gap-3 py-2">
+                        <a href={d.url} target="_blank" rel="noreferrer" className="min-w-0 flex-1 truncate hover:underline">
+                          {d.name}
+                        </a>
+                        <span className="text-xs text-muted shrink-0">{shortDate(d.createdAt)}</span>
+                        <button onClick={() => deleteDocument(d)} className="text-xs text-muted hover:text-red-600 shrink-0">
+                          Quitar
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <div className="rounded-2xl bg-ink/[0.04] p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm">Facturas para el cliente</p>
+                  <Button onClick={() => invoiceInput.current?.click()} disabled={uploadingInvoices > 0}>
+                    {uploadingInvoices > 0 ? "Subiendo…" : "+ Subir factura (PDF/XML)"}
+                  </Button>
+                  <input
+                    ref={invoiceInput}
+                    type="file"
+                    multiple
+                    accept="application/pdf,.xml,text/xml,application/xml"
+                    className="hidden"
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files ?? []);
+                      if (files.length) uploadInvoices(files);
+                      e.target.value = "";
+                    }}
+                  />
+                </div>
+                {invoices.length === 0 ? (
+                  <p className="text-xs text-muted mt-1">Las que subas aparecen en el portal para que el cliente las descargue.</p>
+                ) : (
+                  <ul className="mt-2 text-sm divide-y divide-line">
+                    {invoices.map((d) => (
+                      <li key={d.id} className="flex items-center gap-3 py-2">
+                        <a href={d.url} target="_blank" rel="noreferrer" className="min-w-0 flex-1 truncate hover:underline">
+                          {d.name}
+                        </a>
+                        <span className="text-xs text-muted shrink-0">{shortDate(d.createdAt)}</span>
+                        <button onClick={() => deleteDocument(d)} className="text-xs text-muted hover:text-red-600 shrink-0">
+                          Quitar
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </section>
           </div>

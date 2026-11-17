@@ -3,6 +3,8 @@ import { upload } from "@vercel/blob/client";
 export const ALLOWED_EXTENSIONS = [
   "ai", "svg", "pdf", "jpg", "jpeg", "png", "webp", "gif",
   "doc", "docx", "txt", "md", "pptx", "key",
+  // Facturas (PDF + XML del CFDI) para el portal del cliente
+  "xml",
 ];
 export const IMAGE_EXTENSIONS = ["svg", "jpg", "jpeg", "png", "webp", "gif"];
 

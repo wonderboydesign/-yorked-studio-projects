@@ -54,3 +54,35 @@ export function paymentFields(body: Record<string, unknown>) {
   return data;
 }
 
+
+export const DOCUMENT_SELECT = {
+  id: true,
+  kind: true,
+  name: true,
+  url: true,
+  contentType: true,
+  size: true,
+  uploadedBy: true,
+  createdAt: true,
+} as const;
+
+// Solo archivos que viven en el almacenamiento de Vercel Blob
+export function isBlobUrl(url: unknown): url is string {
+  if (typeof url !== "string") return false;
+  try {
+    const u = new URL(url);
+    return u.protocol === "https:" && u.hostname.endsWith(".blob.vercel-storage.com");
+  } catch {
+    return false;
+  }
+}
+
+export const CLIENT_UPLOAD_EXTENSIONS = ["pdf", "jpg", "jpeg", "png"];
+export const CLIENT_UPLOAD_MAX_BYTES = 10 * 1024 * 1024;
+export const CLIENT_UPLOAD_MAX_FILES = 10;
+
+// Folio legible del recibo de un pago: R-2026-AB12CD
+export function receiptFolio(payment: { id: string; paidAt: Date | null; createdAt: Date }) {
+  const year = (payment.paidAt ?? payment.createdAt).getUTCFullYear();
+  return `R-${year}-${payment.id.slice(-6).toUpperCase()}`;
+}
