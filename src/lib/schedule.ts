@@ -1,5 +1,6 @@
 import { QuoteContent, QuotePhase } from "./quotes";
 import { addDays } from "./date";
+import { holidayName } from "./holidays";
 
 // Calendarizar un proyecto ganado: cada fase de la propuesta se vuelve una
 // tarea sin asignar, una tras otra, de lunes a viernes. Se usa igual en el
@@ -27,9 +28,12 @@ export function phasesForOption(content: QuoteContent, optionKey?: string | null
 
 const isWeekend = (d: Date) => d.getUTCDay() === 0 || d.getUTCDay() === 6;
 
-export function nextWeekday(d: Date): Date {
+// Día hábil: ni fin de semana ni festivo (ver src/lib/holidays.ts)
+export const isWorkday = (d: Date) => !isWeekend(d) && !holidayName(d);
+
+export function nextWorkday(d: Date): Date {
   let x = d;
-  while (isWeekend(x)) x = addDays(x, 1);
+  while (!isWorkday(x)) x = addDays(x, 1);
   return x;
 }
 
@@ -38,20 +42,28 @@ export interface PlannedPhase {
   weeks: number;
   start: Date;
   end: Date;
+  // Festivos que caen dentro de la fase (no cuentan como días de trabajo)
+  holidays: { date: Date; name: string }[];
 }
 
-// Fechas en medianoche UTC, como el resto de la app. Cada fase dura sus
-// semanas a partir de su inicio y termina en día hábil; la siguiente arranca
-// el siguiente día hábil.
+// Fechas en medianoche UTC, como el resto de la app. Cada semana son 5 días
+// hábiles: los fines de semana y festivos no cuentan, y una fase nunca
+// empieza ni termina en uno; si cae un festivo en medio, la fase se alarga
+// un día. La siguiente arranca el siguiente día hábil.
 export function planPhases(phases: QuotePhase[], weeks: number[], start: Date): PlannedPhase[] {
-  let cursor = nextWeekday(start);
+  let cursor = nextWorkday(start);
   return phases.map((phase, i) => {
     const w = Math.max(1, Math.min(52, Math.round(weeks[i] ?? parseWeeks(phase.duration))));
     const s = cursor;
-    let e = addDays(s, w * 7 - 1);
-    while (isWeekend(e)) e = addDays(e, -1);
-    cursor = nextWeekday(addDays(e, 1));
-    return { phase, weeks: w, start: s, end: e };
+    let e = s;
+    const holidays: PlannedPhase["holidays"] = [];
+    for (let worked = 1; worked < w * 5; ) {
+      e = addDays(e, 1);
+      if (isWorkday(e)) worked++;
+      else if (!isWeekend(e)) holidays.push({ date: e, name: holidayName(e)! });
+    }
+    cursor = nextWorkday(addDays(e, 1));
+    return { phase, weeks: w, start: s, end: e, holidays };
   });
 }
 
