@@ -36,6 +36,7 @@ export interface Prospect {
   lostReason: string | null;
   notes: string | null;
   projectId: string | null;
+  scheduledAt: string | null;
   createdAt: string;
   updatedAt: string;
   quotes?: QuoteSummary[];

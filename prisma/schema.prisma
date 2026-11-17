@@ -228,6 +228,8 @@ model Prospect {
   notes      String?
   project    Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
   projectId  String?
+  // Cuándo se mandaron las fases de la propuesta al calendario
+  scheduledAt DateTime?
   quotes     Quote[]
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt

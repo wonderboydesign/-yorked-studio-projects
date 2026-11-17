@@ -11,7 +11,7 @@ import StudioSettingsPanel from "./StudioSettingsPanel";
 type Notify = (message: string, tone?: "ok" | "error") => void;
 
 // Embudo comercial: prospecto → cotización → aprobada (ganado)
-export default function ClientsView({ notify }: { notify: Notify }) {
+export default function ClientsView({ notify, onDataChanged }: { notify: Notify; onDataChanged?: () => void }) {
   const [prospects, setProspects] = useState<Prospect[] | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
   const [editingQuoteId, setEditingQuoteId] = useState<string | null>(null);
@@ -46,6 +46,8 @@ export default function ClientsView({ notify }: { notify: Notify }) {
 
   async function moveTo(p: Prospect, stage: ProspectStage) {
     replace({ ...p, stage });
+    // Recién ganado: se abre para mandar sus fases al calendario
+    if (stage === "won" && p.stage !== "won" && !p.scheduledAt) setOpenId(p.id);
     const res = await fetch(`/api/prospects/${p.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -140,6 +142,7 @@ export default function ClientsView({ notify }: { notify: Notify }) {
           onClose={() => setOpenId(null)}
           onEditQuote={(id) => setEditingQuoteId(id)}
           onReload={load}
+          onScheduled={() => onDataChanged?.()}
         />
       )}
       {editingQuoteId && (
