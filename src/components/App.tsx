@@ -651,7 +651,7 @@ export default function App() {
                 onChangeStatus={changeTaskStatus}
               />
             )}
-            {view === "clients" && <ClientsView notify={notify} />}
+            {view === "clients" && <ClientsView notify={notify} onDataChanged={load} />}
             {view === "branding" && (
               <BrandingView
                 projects={activeProjects}

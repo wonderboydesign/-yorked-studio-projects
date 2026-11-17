@@ -110,6 +110,8 @@ También acepta `{ "items": [...] }`, y los nombres `image`/`url` para la imagen
 
 En el menú, **Clientes** es el embudo comercial: *Nuevo → Cotizado → En negociación → Ganado / Perdido* (las tarjetas se arrastran entre columnas).
 
+**Calendarizar un proyecto ganado:** al pasar un prospecto a *Ganado* (o cuando el cliente aprueba la propuesta), su panel muestra *Calendario del proyecto*: las fases de la opción aprobada se vuelven tareas sin asignar, una tras otra de lunes a viernes, con la duración de cada fase (se puede ajustar en semanas, quitar fases y elegir la fecha de arranque). Se crean en un proyecto nuevo con el nombre de la marca o en uno existente, con la descripción y los entregables de la fase como lista de pendientes en las notas.
+
 1. **+ Prospecto:** nombre de la marca y, en su ficha, contacto, giro, presupuesto y lo que necesita.
 2. **+ Nueva cotización:** parte de la plantilla de las propuestas del estudio (4 fases, notas legales, 50/50). Con **Sugerir**, Claude propone alcance, aplicaciones, tiempos y precio a partir de lo que necesita el prospecto y del tabulador (requiere `ANTHROPIC_API_KEY`). Todo se edita con vista previa en vivo.
 3. **Lista para enviar · copiar liga:** la propuesta queda en `/p/<código>`, una liga privada (no aparece en Google) que se le manda al cliente. Se ve cuántas veces la abrió y cuándo.

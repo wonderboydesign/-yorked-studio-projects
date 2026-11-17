@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { PROSPECT_STAGES, Prospect, ProspectStage, QUOTE_STATUS_LABELS } from "@/lib/quotes";
 import { Button, DeleteButton } from "../branding/ui";
+import ScheduleSection from "./ScheduleSection";
 
 type Notify = (message: string, tone?: "ok" | "error") => void;
 
@@ -35,6 +36,7 @@ export default function ProspectPanel({
   onClose,
   onEditQuote,
   onReload,
+  onScheduled,
 }: {
   prospect: Prospect;
   notify: Notify;
@@ -43,6 +45,7 @@ export default function ProspectPanel({
   onClose: () => void;
   onEditQuote: (quoteId: string) => void;
   onReload: () => void;
+  onScheduled?: (p: Prospect) => void;
 }) {
   const [draft, setDraft] = useState<Prospect>(prospect);
   useEffect(() => setDraft(prospect), [prospect]);
@@ -125,6 +128,17 @@ export default function ProspectPanel({
             onBlur={() => commit("lostReason")}
             placeholder="¿Por qué se perdió? (precio, tiempos, no respondió…)"
             className="field w-full rounded-xl px-4 py-2.5 text-sm"
+          />
+        )}
+
+        {prospect.stage === "won" && (
+          <ScheduleSection
+            prospect={prospect}
+            notify={notify}
+            onScheduled={(p) => {
+              onChange(p);
+              onScheduled?.(p);
+            }}
           />
         )}
 
