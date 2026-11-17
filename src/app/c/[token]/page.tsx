@@ -57,7 +57,11 @@ export default async function ClientPortal({ params }: { params: { token: string
   const line2 = c?.brandLine1 ? c.brandLine2 : "";
 
   // El cliente solo ve lo que paga: con IVA ya sumado si el proyecto lo lleva
-  const payments = project.payments.map((p) => ({ ...p, amount: clientAmount(p.amount, project.withIva) }));
+  // (project.withIva es el IVA general de antes, como respaldo)
+  const payments = project.payments.map((p) => {
+    const iva = p.withIva || project.withIva;
+    return { ...p, iva, amount: clientAmount(p.amount, iva) };
+  });
   const paid = payments.filter((p) => p.paidAt).reduce((n, p) => n + p.amount, 0);
   const total = payments.reduce((n, p) => n + p.amount, 0);
   const pending = payments.filter((p) => !p.paidAt);
@@ -207,6 +211,7 @@ export default async function ClientPortal({ params }: { params: { token: string
                             : p.dueDate
                             ? `${overdue ? "Venció" : "Vence"} el ${longDate(p.dueDate)}`
                             : "Pendiente"}
+                          {p.iva && " · IVA incluido"}
                         </p>
                       </div>
                       <div className="flex shrink-0 flex-wrap items-center justify-end gap-3">
@@ -225,11 +230,11 @@ export default async function ClientPortal({ params }: { params: { token: string
                     </li>
                   );
                 })}
-                <li className="border-t border-white/15 pt-4 text-[12px] text-[#f1efe9]/45">{project.withIva ? "Montos en MXN, IVA incluido." : "Montos en MXN."}</li>
+                <li className="border-t border-white/15 pt-4 text-[12px] text-[#f1efe9]/45">Montos en MXN.</li>
               </ul>
 
               <div className="space-y-4">
-                <BankDetails studio={studio} label={next?.label} amount={next?.amount} withIva={project.withIva} />
+                <BankDetails studio={studio} label={next?.label} amount={next?.amount} withIva={next?.iva} />
                 {next && (
                   <a href={waPaid} target="_blank" rel="noreferrer" className="pill-light w-full justify-center">
                     Ya hice mi pago · enviar comprobante <span aria-hidden>→</span>

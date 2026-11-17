@@ -42,7 +42,7 @@ export async function ensurePayments(projectId: string) {
   return rows.length;
 }
 
-export const PAYMENT_SELECT = { id: true, label: true, amount: true, dueDate: true, paidAt: true, order: true } as const;
+export const PAYMENT_SELECT = { id: true, label: true, amount: true, dueDate: true, paidAt: true, withIva: true, order: true } as const;
 
 const day = (v: unknown) => (typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v) ? new Date(`${v}T00:00:00Z`) : null);
 
@@ -56,6 +56,7 @@ export function paymentFields(body: Record<string, unknown>) {
   }
   if (body.dueDate !== undefined) data.dueDate = day(body.dueDate);
   if (body.paidAt !== undefined) data.paidAt = day(body.paidAt);
+  if (typeof body.withIva === "boolean") data.withIva = body.withIva;
   return data;
 }
 

@@ -35,7 +35,8 @@ export default async function Receipt({ params }: { params: { token: string; pay
   const prospect = project.prospects[0];
   const client = prospect?.contact ? `${prospect.contact} · ${prospect.brandName}` : project.client || project.name;
   const folio = receiptFolio(payment);
-  const amount = clientAmount(payment.amount, project.withIva);
+  const iva = payment.withIva || project.withIva;
+  const amount = clientAmount(payment.amount, iva);
 
   return (
     <div className={`${helvetica.variable} proposal min-h-screen print:bg-white`}>
@@ -78,7 +79,7 @@ export default async function Receipt({ params }: { params: { token: string; pay
           <div className="rounded-[18px] bg-[#f1efe9] p-6">
             <p className="eyebrow">Cantidad recibida</p>
             <p className="mt-2 text-[44px] font-medium leading-none tracking-[-0.03em]">
-              {formatMoney(amount)} <span className="text-[16px] tracking-normal text-black/55">MXN{project.withIva ? " · IVA incluido" : ""}</span>
+              {formatMoney(amount)} <span className="text-[16px] tracking-normal text-black/55">MXN{iva ? " · IVA incluido" : ""}</span>
             </p>
             <p className="mt-3 text-[14px]">{amountInWords(amount)}</p>
           </div>
