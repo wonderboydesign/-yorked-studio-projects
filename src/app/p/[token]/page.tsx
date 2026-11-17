@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import localFont from "next/font/local";
 import { prisma } from "@/lib/prisma";
+import CopyRows from "@/components/CopyRows";
 import { AUTH_COOKIE_NAME, verifySessionToken } from "@/lib/auth";
 import { getStudio } from "@/lib/quotesServer";
 import { QuoteContent, StudioWork, fillNote, formatMoney, formatMonthYear, whatsappLink, worksForQuote } from "@/lib/quotes";
@@ -504,12 +505,7 @@ function BankDetails({
         {formatMoney(amount)} <span className="text-[14px] tracking-normal text-black/55">MXN · {percent}%</span>
       </p>
       <p className="mb-3 text-[11px] text-black/55">Más IVA en caso de requerir factura.</p>
-      {rows.map(([k, v]) => (
-        <div key={k} className="flex justify-between gap-4 border-t border-black/10 py-2.5 text-[14px]">
-          <span className="text-black/55">{k}</span>
-          <span className="text-right font-medium tabular-nums">{v}</span>
-        </div>
-      ))}
+      <CopyRows rows={rows as [string, string][]} />
     </div>
   );
 }
