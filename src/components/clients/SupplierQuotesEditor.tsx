@@ -298,7 +298,7 @@ export default function SupplierQuotesEditor({
 
   async function save() {
     if (!draft || !draft.title.trim()) return notify("Ponle un título al documento.", "error");
-    if (draft.view === "pdf" && !draft.fileUrl) return notify("Sube el PDF que verá el cliente, o elige el diseño del portal.", "error");
+    if (draft.view === "pdf" && !draft.fileUrl) return notify("Sube el archivo (PDF o imagen) que verá el cliente, o elige el diseño del portal.", "error");
     setSaving(true);
     const isOptions = draft.kind === "options";
     const body = isOptions
@@ -382,7 +382,7 @@ export default function SupplierQuotesEditor({
               <div className="min-w-0 flex-1">
                 <p className="truncate">{q.title}</p>
                 <p className="text-xs text-muted truncate">
-                  {KIND_LABEL[q.kind]}{q.view === "pdf" ? " · PDF original" : ""} ·{" "}
+                  {KIND_LABEL[q.kind]}{q.view === "pdf" ? " · archivo original" : ""} ·{" "}
                   {q.kind === "options"
                     ? `${countProducts(cleanOptionsDoc(q.doc))} productos`
                     : `${formatMoney(supplierTotals(q.items, q.withIva).total)}${q.withIva ? " con IVA" : ""}${q.status === "approved" ? " · ✓ Aprobada por el cliente" : " · Esperando respuesta"}`}
@@ -459,7 +459,7 @@ export default function SupplierQuotesEditor({
             <div className="flex flex-wrap gap-2 text-xs">
               {([
                 ["design", "Diseño del portal"],
-                ["pdf", "Mi PDF tal cual"],
+                ["pdf", "Mi archivo tal cual"],
               ] as const).map(([v, text]) => (
                 <button
                   key={v}
@@ -473,12 +473,12 @@ export default function SupplierQuotesEditor({
             </div>
             <p className="text-xs text-muted">
               {draft.view === "pdf"
-                ? "El cliente ve tu archivo idéntico, con vista previa y botón de descargar. Los datos de abajo solo sirven para el total y las notas tuyas."
+                ? "El cliente ve tu archivo idéntico (PDF o imagen JPG, PNG o WebP), con vista previa y botón de descargar. Los datos de abajo solo sirven para el total y las notas tuyas."
                 : "Se arma con los datos de abajo, con el diseño del portal: se edita, se ve bien en celular y se puede aprobar."}
             </p>
             <div className="flex flex-wrap items-center gap-2">
               <Button onClick={() => officialFile.current?.click()} disabled={reading}>
-                {draft.fileUrl ? "Cambiar el PDF" : "Subir mi PDF"}
+                {draft.fileUrl ? "Cambiar el archivo" : "Subir mi archivo (PDF o imagen)"}
               </Button>
               {draft.fileUrl && (
                 <a href={draft.fileUrl} target="_blank" rel="noreferrer" className="text-xs text-muted hover:text-ink">
