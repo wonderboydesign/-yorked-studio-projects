@@ -107,12 +107,21 @@ export default function GanttView({
       .map((p) => ({ project: p, tasks: byProject[p.id] }));
   }, [tasks, projects]);
 
+  // Columna de nombres más angosta en celular, para que quepa la línea de tiempo
+  const [labelW, setLabelW] = useState(180);
+  useEffect(() => {
+    const update = () => setLabelW(window.innerWidth < 640 ? 112 : 180);
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const visibleChartWidth = el.clientWidth - 180;
+    const visibleChartWidth = el.clientWidth - labelW;
     el.scrollLeft = Math.max(0, todayOffset - visibleChartWidth / 2);
-  }, [zoom, todayOffset]);
+  }, [zoom, todayOffset, labelW]);
 
   function beginDrag(ev: React.PointerEvent<HTMLElement>, t: Task, mode: DragMode) {
     ev.stopPropagation();
@@ -181,10 +190,10 @@ export default function GanttView({
       </div>
 
       <div ref={scrollRef} className="inline-block max-w-full glass rounded-3xl overflow-x-auto">
-        <div style={{ width: totalWidth + 180 }}>
+        <div style={{ width: totalWidth + labelW }}>
           {/* Header */}
           <div className="flex sticky top-0 bg-surface z-10 border-b border-line">
-            <div className="w-[180px] shrink-0 border-r border-line sticky left-0 bg-surface z-20" />
+            <div className="shrink-0 border-r border-line sticky left-0 bg-surface z-20" style={{ width: labelW }} />
             <div style={{ width: totalWidth }}>
               <div className="flex border-b border-line">
                 {topRow.map((c, i) => (
@@ -218,11 +227,11 @@ className={`font-display text-xs text-muted text-center py-1 border-r border-lin
           <div className="relative">
             <div
               className="absolute top-0 bottom-0 w-px bg-accent/60 z-10"
-              style={{ left: 180 + todayOffset }}
+              style={{ left: labelW + todayOffset }}
             />
             {rows.map(({ project, tasks: projectTasks }) => (
               <div key={project.id} className="flex border-b border-line">
-                <div className="w-[180px] shrink-0 border-r border-line px-4 py-3 sticky left-0 bg-surface z-20">
+                <div className="shrink-0 border-r border-line px-3 sm:px-4 py-3 sticky left-0 bg-surface z-20" style={{ width: labelW }}>
                   <span className="inline-flex items-center gap-2 text-sm font-medium text-ink">
                     <span
                       className="h-2.5 w-2.5 rounded-full shrink-0"

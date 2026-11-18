@@ -13,12 +13,13 @@ export function SectionTitle({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="flex items-end justify-between gap-4 mb-5">
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-4 mb-5">
       <div className="min-w-0">
         <h3 className="text-lg text-ink">{title}</h3>
         {hint && <p className="text-sm text-muted mt-1 max-w-2xl">{hint}</p>}
       </div>
-      {action && <div className="shrink-0 flex items-center gap-2">{action}</div>}
+      {/* En celular el botón va debajo del texto para no apretarlo */}
+      {action && <div className="shrink-0 flex flex-wrap items-center gap-2">{action}</div>}
     </div>
   );
 }

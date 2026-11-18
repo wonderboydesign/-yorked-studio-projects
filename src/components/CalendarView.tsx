@@ -129,7 +129,7 @@ export default function CalendarView({
           return (
             <div
               key={i}
-              className={`border-r border-b border-ink/[0.06] ${cellHeight} p-1.5 ${
+              className={`min-w-0 overflow-hidden border-r border-b border-ink/[0.06] ${cellHeight} p-1 sm:p-1.5 ${
                 isToday && view !== "day" ? "bg-ink/[0.06]" : inMonth ? "" : "bg-ink/[0.015]"
               }`}
             >
@@ -148,9 +148,9 @@ export default function CalendarView({
                     <button
                       key={t.id}
                       onClick={() => onSelectTask(t)}
-className={`w-full text-left text-xs leading-tight px-1.5 py-0.5 rounded ${
-  t.status === "DONE" ? "line-through" : ""
-}`}
+className={`block w-full text-left leading-tight rounded ${
+  view === "month" ? "truncate whitespace-nowrap text-[10px] sm:text-xs px-1 sm:px-1.5 py-0.5" : "text-xs px-1.5 py-0.5"
+} ${t.status === "DONE" ? "line-through" : ""}`}
                       style={
                         t.status === "DONE"
                         ? { backgroundColor: "#E8E8E6", color: "#9C9A94" }
