@@ -104,6 +104,9 @@ model SupplierQuote {
   fileUrl    String?
   filePath   String?
   showFile   Boolean   @default(false)
+  // Qué ve el cliente: design = el documento con el diseño del portal;
+  // pdf = el archivo (PDF o imagen) que subió el estudio, tal cual
+  view       String    @default("design")
   // pending | approved
   status     String    @default("pending")
   approvedAt DateTime?

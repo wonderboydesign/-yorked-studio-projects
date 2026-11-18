@@ -77,6 +77,7 @@ export interface SupplierQuoteRow {
   fileUrl: string | null;
   filePath: string | null;
   showFile: boolean;
+  view: "design" | "pdf";
   status: "pending" | "approved";
   approvedAt: string | null;
   createdAt: string;
@@ -225,3 +226,13 @@ export function countProducts(doc: OptionsDoc) {
 }
 
 export const OPTIONS_PER_PAGE = 6;
+
+// Si el cliente ve el archivo del estudio tal cual (y hay archivo que mostrar)
+export function showsOriginal(q: { view?: string | null; fileUrl?: string | null }) {
+  return q.view === "pdf" && !!q.fileUrl;
+}
+
+// Para forzar la descarga de un archivo de Vercel Blob
+export function downloadUrl(url: string) {
+  return url + (url.includes("?") ? "&" : "?") + "download=1";
+}

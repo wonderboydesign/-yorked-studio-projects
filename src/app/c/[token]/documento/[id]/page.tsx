@@ -6,10 +6,11 @@ import { getStudio } from "@/lib/quotesServer";
 import { QuoteContent } from "@/lib/quotes";
 import { isDarkColor } from "@/lib/portal";
 import { projectQuote } from "@/lib/portalServer";
-import { cleanItems, cleanOptionsDoc, cleanQuoteDoc } from "@/lib/supplierQuotes";
+import { cleanItems, cleanOptionsDoc, cleanQuoteDoc, downloadUrl, showsOriginal } from "@/lib/supplierQuotes";
 import ApproveSupplierQuote from "../../ApproveSupplierQuote";
 import PrintButton from "../../recibo/[paymentId]/PrintButton";
 import { OptionsDocView, QuoteDocView } from "./DocViews";
+import OriginalView from "./OriginalView";
 
 const helvetica = localFont({
   src: "../../../../fonts/HelveticaNowDisplay-Regular.otf",
@@ -39,6 +40,8 @@ export default async function SupplierDocument({ params }: { params: { token: st
   const bankRows = ([["Banco", b.bankName], ["Titular", b.holder], ["Cuenta", b.account], ["CLABE", b.clabe], ...(b.showCard && b.card ? [["Tarjeta", b.card]] : [])] as [string, string][]).filter(([, v]) => v);
 
   const isOptions = q.kind === "options";
+  // Si el estudio eligió mostrar su archivo tal cual, se muestra ese
+  const original = showsOriginal(q);
   const quoteDoc = cleanQuoteDoc(q.doc);
   const optionsDoc = cleanOptionsDoc(q.doc);
   if (!quoteDoc.forName) quoteDoc.forName = forName;
@@ -61,11 +64,19 @@ export default async function SupplierDocument({ params }: { params: { token: st
               ) : (
                 <ApproveSupplierQuote token={params.token} id={q.id} title={q.title} />
               ))}
-            <PrintButton />
+            {original ? (
+              <a href={downloadUrl(q.fileUrl!)} className="pill-dark no-plus">
+                Descargar <span aria-hidden>↓</span>
+              </a>
+            ) : (
+              <PrintButton />
+            )}
           </div>
         </div>
 
-        {isOptions ? (
+        {original ? (
+          <OriginalView url={q.fileUrl!} title={q.title} />
+        ) : isOptions ? (
           <OptionsDocView title={q.title} date={date} doc={optionsDoc} />
         ) : (
           <QuoteDocView title={q.title} date={date} doc={quoteDoc} items={cleanItems(q.items)} withIva={q.withIva} bankRows={bankRows} />

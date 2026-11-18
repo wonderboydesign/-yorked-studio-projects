@@ -134,6 +134,7 @@ export function supplierQuoteFields(body: Record<string, unknown>) {
   if (body.validUntil !== undefined) data.validUntil = day(body.validUntil);
   if (typeof body.withIva === "boolean") data.withIva = body.withIva;
   if (typeof body.showFile === "boolean") data.showFile = body.showFile;
+  if (body.view === "pdf" || body.view === "design") data.view = body.view;
   if (body.fileUrl !== undefined) data.fileUrl = isBlobUrl(body.fileUrl) ? body.fileUrl : null;
   if (body.filePath !== undefined) data.filePath = str(body.filePath, 500) || null;
   return data;
