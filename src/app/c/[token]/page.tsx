@@ -285,15 +285,11 @@ export default async function ClientPortal({
             <div className="mt-14 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {deliveries.map((d) => {
                 const isNew = now - d.createdAt.getTime() < 7 * 86400000;
+                const hasLink = !!d.url;
                 const isPdf = !!d.pathname || /\.pdf(\?|$)/i.test(d.url);
-                return (
-                  <a
-                    key={d.id}
-                    href={d.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="group flex min-h-[220px] flex-col rounded-[22px] border border-black/10 p-5 hover:bg-black/[0.03]"
-                  >
+                const cls = "group flex min-h-[220px] flex-col rounded-[22px] border border-black/10 p-5";
+                const body = (
+                  <>
                     <div className="flex items-center justify-between gap-2">
                       <span className="eyebrow">{d.phase ? `Fase ${d.phase}${phaseName.get(d.phase) ? ` · ${phaseName.get(d.phase)}` : ""}` : "Entrega"}</span>
                       {isNew && (
@@ -306,9 +302,19 @@ export default async function ClientPortal({
                     {d.note && <p className="mt-2 text-[13px] text-black/60">{d.note}</p>}
                     <div className="mt-auto flex items-center justify-between pt-6 text-[13px] text-black/55">
                       <span>{shortDate(d.date ?? d.createdAt)}</span>
-                      <span className="group-hover:text-black">{isPdf ? "Ver PDF ↗" : "Abrir ↗"}</span>
+                      {hasLink && <span className="group-hover:text-black">{isPdf ? "Ver PDF ↗" : "Abrir ↗"}</span>}
                     </div>
+                  </>
+                );
+                // Sin link, la entrega es solo informativa (no se abre)
+                return hasLink ? (
+                  <a key={d.id} href={d.url} target="_blank" rel="noreferrer" className={`${cls} hover:bg-black/[0.03]`}>
+                    {body}
                   </a>
+                ) : (
+                  <div key={d.id} className={cls}>
+                    {body}
+                  </div>
                 );
               })}
             </div>
