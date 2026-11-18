@@ -13,7 +13,7 @@ import { localTodayUTC } from "@/lib/portalDates";
 import PortalBilling from "./PortalBilling";
 import PortalNav from "./PortalNav";
 import ApproveSupplierQuote from "./ApproveSupplierQuote";
-import { cleanItems, cleanOptionsDoc, cleanQuoteDoc, countProducts, supplierTotals } from "@/lib/supplierQuotes";
+import { cleanItems, cleanOptionsDoc, cleanQuoteDoc, countProducts, showsOriginal, supplierTotals } from "@/lib/supplierQuotes";
 
 // La misma tipografía de las propuestas
 const helvetica = localFont({
@@ -337,6 +337,7 @@ export default async function ClientPortal({
                 const od = isOptions ? cleanOptionsDoc(q.doc) : null;
                 const nProducts = od ? countProducts(od) : 0;
                 const subtitle = isOptions ? od!.subtitle : cleanQuoteDoc(q.doc).subtitle;
+                const original = showsOriginal(q);
                 const expired = !isOptions && !!q.validUntil && q.validUntil < today && q.status !== "approved";
                 return (
                   <article key={q.id} className="flex min-w-0 flex-col rounded-[22px] border border-black/10 p-5 sm:p-6">
@@ -351,7 +352,9 @@ export default async function ClientPortal({
                     <h3 className="mt-3 text-[26px] font-medium leading-tight tracking-[-0.02em]">{q.title}</h3>
                     {subtitle && <p className="mt-2 text-[14px] leading-snug text-black/60">{subtitle}</p>}
                     <div className="mt-5 flex items-baseline justify-between gap-4 border-t border-black/20 pt-3">
-                      {isOptions ? (
+                      {original && (isOptions ? nProducts === 0 : items.length === 0) ? (
+                        <span className="text-[15px]">Documento en PDF</span>
+                      ) : isOptions ? (
                         <span className="text-[15px]">
                           {nProducts} {nProducts === 1 ? "producto" : "productos"} en {od!.categories.length} {od!.categories.length === 1 ? "categoría" : "categorías"}
                         </span>
@@ -369,11 +372,11 @@ export default async function ClientPortal({
                     )}
                     <div className="mt-auto flex flex-wrap items-center gap-3 pt-6">
                       <a href={`/c/${params.token}/documento/${q.id}`} className="pill-dark">
-                        {isOptions ? "Ver opciones" : "Ver cotización"} <span aria-hidden>→</span>
+                        {original ? "Ver documento" : isOptions ? "Ver opciones" : "Ver cotización"} <span aria-hidden>→</span>
                       </a>
                       {!isOptions && q.status === "approved" && <p className="text-[13px]">Aprobada el {longDate(q.approvedAt ?? q.createdAt)}.</p>}
                       {!isOptions && q.status !== "approved" && !expired && <ApproveSupplierQuote token={params.token} id={q.id} title={q.title} />}
-                      {q.showFile && q.fileUrl && (
+                      {q.showFile && q.fileUrl && !original && (
                         <a href={q.fileUrl} target="_blank" rel="noreferrer" className="text-[13px] text-black/60 hover:text-black">
                           Documento original ↗
                         </a>

@@ -58,6 +58,8 @@ interface Draft {
   fileUrl: string | null;
   filePath: string | null;
   showFile: boolean;
+  // Qué ve el cliente: el diseño del portal o el archivo del estudio tal cual
+  view: "design" | "pdf";
 }
 
 const rowsToText = (rows: { label: string; value: string }[]) => rows.map((r) => `${r.label} | ${r.value}`).join("\n");
@@ -92,6 +94,7 @@ function emptyDraft(kind: SupplierKind): Draft {
     fileUrl: null,
     filePath: null,
     showFile: false,
+    view: "design",
   };
 }
 
@@ -114,6 +117,7 @@ function fromRow(q: SupplierQuoteRow): Draft {
       fileUrl: q.fileUrl,
       filePath: q.filePath,
       showFile: q.showFile,
+      view: q.view ?? "design",
     };
   }
   const { sections, ...quote } = cleanQuoteDoc(q.doc);
@@ -131,6 +135,7 @@ function fromRow(q: SupplierQuoteRow): Draft {
     fileUrl: q.fileUrl,
     filePath: q.filePath,
     showFile: q.showFile,
+    view: q.view ?? "design",
   };
 }
 
@@ -162,6 +167,7 @@ export default function SupplierQuotesEditor({
   const [uploadingImg, setUploadingImg] = useState<string | null>(null);
   const file = useRef<HTMLInputElement>(null);
   const imgFile = useRef<HTMLInputElement>(null);
+  const officialFile = useRef<HTMLInputElement>(null);
   const imgTarget = useRef<[number, number] | null>(null);
 
   const set = (patch: Partial<Draft>) => setDraft((d) => (d ? { ...d, ...patch } : d));
@@ -261,6 +267,20 @@ export default function SupplierQuotesEditor({
     }
   }
 
+  // Sube el archivo que el cliente verá tal cual (sin pasar por Claude)
+  async function uploadOfficial(f: File) {
+    try {
+      setReading(true);
+      const up = await uploadFile(f, ["pdf", "jpg", "jpeg", "png", "webp"]);
+      set({ fileUrl: up.url, filePath: up.pathname, view: "pdf" });
+      notify("Archivo subido; el cliente lo verá tal cual");
+    } catch (e) {
+      notify(e instanceof Error ? e.message : "No se pudo subir.", "error");
+    } finally {
+      setReading(false);
+    }
+  }
+
   async function uploadProductImage(f: File) {
     const t = imgTarget.current;
     if (!t) return;
@@ -278,6 +298,7 @@ export default function SupplierQuotesEditor({
 
   async function save() {
     if (!draft || !draft.title.trim()) return notify("Ponle un título al documento.", "error");
+    if (draft.view === "pdf" && !draft.fileUrl) return notify("Sube el PDF que verá el cliente, o elige el diseño del portal.", "error");
     setSaving(true);
     const isOptions = draft.kind === "options";
     const body = isOptions
@@ -296,6 +317,7 @@ export default function SupplierQuotesEditor({
           fileUrl: draft.fileUrl,
           filePath: draft.filePath,
           showFile: draft.showFile,
+          view: draft.view,
         }
       : {
           kind: "quote",
@@ -309,6 +331,7 @@ export default function SupplierQuotesEditor({
           fileUrl: draft.fileUrl,
           filePath: draft.filePath,
           showFile: draft.showFile,
+          view: draft.view,
         };
     const res = await fetch(draft.id ? `/api/supplier-quotes/${draft.id}` : `/api/projects/${projectId}/supplier-quotes`, {
       method: draft.id ? "PATCH" : "POST",
@@ -359,7 +382,7 @@ export default function SupplierQuotesEditor({
               <div className="min-w-0 flex-1">
                 <p className="truncate">{q.title}</p>
                 <p className="text-xs text-muted truncate">
-                  {KIND_LABEL[q.kind]} ·{" "}
+                  {KIND_LABEL[q.kind]}{q.view === "pdf" ? " · PDF original" : ""} ·{" "}
                   {q.kind === "options"
                     ? `${countProducts(cleanOptionsDoc(q.doc))} productos`
                     : `${formatMoney(supplierTotals(q.items, q.withIva).total)}${q.withIva ? " con IVA" : ""}${q.status === "approved" ? " · ✓ Aprobada por el cliente" : " · Esperando respuesta"}`}
@@ -424,6 +447,52 @@ export default function SupplierQuotesEditor({
                 onChange={(e) => {
                   const f = e.target.files?.[0];
                   if (f) attach(f);
+                  e.target.value = "";
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Qué ve el cliente */}
+          <div className="rounded-xl bg-ink/[0.04] p-3 space-y-2">
+            <p className="text-sm">Qué ve el cliente</p>
+            <div className="flex flex-wrap gap-2 text-xs">
+              {([
+                ["design", "Diseño del portal"],
+                ["pdf", "Mi PDF tal cual"],
+              ] as const).map(([v, text]) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => (v === "pdf" && !draft.fileUrl ? officialFile.current?.click() : set({ view: v }))}
+                  className={`px-3 py-1.5 rounded-full ${draft.view === v ? "bg-ink text-paper" : "bg-button hover:bg-button-hover text-ink"}`}
+                >
+                  {text}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-muted">
+              {draft.view === "pdf"
+                ? "El cliente ve tu archivo idéntico, con vista previa y botón de descargar. Los datos de abajo solo sirven para el total y las notas tuyas."
+                : "Se arma con los datos de abajo, con el diseño del portal: se edita, se ve bien en celular y se puede aprobar."}
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button onClick={() => officialFile.current?.click()} disabled={reading}>
+                {draft.fileUrl ? "Cambiar el PDF" : "Subir mi PDF"}
+              </Button>
+              {draft.fileUrl && (
+                <a href={draft.fileUrl} target="_blank" rel="noreferrer" className="text-xs text-muted hover:text-ink">
+                  Ver archivo subido ↗
+                </a>
+              )}
+              <input
+                ref={officialFile}
+                type="file"
+                accept="application/pdf,image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) uploadOfficial(f);
                   e.target.value = "";
                 }}
               />
@@ -654,7 +723,7 @@ export default function SupplierQuotesEditor({
 
           <textarea value={draft.notes} onChange={(e) => set({ notes: e.target.value })} rows={2} placeholder="Notas internas para ti (el cliente no las ve)" className="field w-full rounded-lg px-2.5 py-2 text-sm resize-y" />
 
-          {draft.fileUrl && (
+          {draft.fileUrl && draft.view !== "pdf" && (
             <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
               <input type="checkbox" checked={draft.showFile} onChange={(e) => set({ showFile: e.target.checked })} />
               Mostrar el archivo original del proveedor al cliente
