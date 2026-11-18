@@ -1,7 +1,7 @@
 import { randomBytes } from "crypto";
 import { prisma } from "./prisma";
 import { QuoteContent } from "./quotes";
-import { cleanItems } from "./supplierQuotes";
+import { cleanItems, cleanOptionsDoc, cleanQuoteDoc } from "./supplierQuotes";
 import { computeProgress, paymentsFromQuote } from "./portal";
 import { localTodayUTC } from "./portalDates";
 
@@ -125,6 +125,9 @@ export function supplierQuoteFields(body: Record<string, unknown>) {
   const title = str(body.title, 160);
   if (title) data.title = title;
   if (body.supplier !== undefined) data.supplier = str(body.supplier, 160) || null;
+  const kind = body.kind === "options" ? "options" : body.kind === "quote" ? "quote" : undefined;
+  if (kind) data.kind = kind;
+  if (body.doc !== undefined) data.doc = kind === "options" ? cleanOptionsDoc(body.doc) : cleanQuoteDoc(body.doc);
   if (body.items !== undefined) data.items = cleanItems(body.items);
   if (body.notes !== undefined) data.notes = str(body.notes, 2000) || null;
   if (body.validUntil !== undefined) data.validUntil = day(body.validUntil);

@@ -91,7 +91,12 @@ model SupplierQuote {
   projectId  String
   title      String
   supplier   String?
-  // [{ description, quantity, unitPrice }] en MXN sin IVA
+  // quote = cotización con desglose y condiciones; options = catálogo de
+  // opciones de productos para elegir (ver src/lib/supplierQuotes.ts)
+  kind       String    @default("quote")
+  // Contenido del documento según el formato (QuoteDoc u OptionsDoc)
+  doc        Json?
+  // [{ description, detail, quantity, unitPrice }] en MXN sin IVA
   items      Json
   notes      String?
   validUntil DateTime?

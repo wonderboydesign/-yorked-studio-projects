@@ -13,7 +13,7 @@ import { localTodayUTC } from "@/lib/portalDates";
 import PortalBilling from "./PortalBilling";
 import PortalNav from "./PortalNav";
 import ApproveSupplierQuote from "./ApproveSupplierQuote";
-import { SupplierItem, supplierTotals } from "@/lib/supplierQuotes";
+import { cleanItems, cleanOptionsDoc, cleanQuoteDoc, countProducts, supplierTotals } from "@/lib/supplierQuotes";
 
 // La misma tipografía de las propuestas
 const helvetica = localFont({
@@ -315,62 +315,61 @@ export default async function ClientPortal({
           </section>
         )}
 
-        {/* Cotizaciones de proveedores */}
+        {/* Cotizaciones y opciones de proveedores */}
         {project.supplierQuotes.length > 0 && (
           <section id="cotizaciones" className="pb-24">
-            <SectionHead n={num("cotizaciones")} title="Cotizaciones" tagline="Producción e impresión que gestionamos para tu marca." />
+            <SectionHead n={num("cotizaciones")} title="Cotizaciones" tagline="Producción, impresión y opciones que gestionamos para tu marca." />
             <div className="mt-14 grid gap-3 lg:grid-cols-2">
               {project.supplierQuotes.map((q) => {
-                const items = (q.items ?? []) as unknown as SupplierItem[];
+                const isOptions = q.kind === "options";
+                const items = cleanItems(q.items);
                 const t = supplierTotals(items, q.withIva);
-                const expired = !!q.validUntil && q.validUntil < today && q.status !== "approved";
+                const od = isOptions ? cleanOptionsDoc(q.doc) : null;
+                const nProducts = od ? countProducts(od) : 0;
+                const subtitle = isOptions ? od!.subtitle : cleanQuoteDoc(q.doc).subtitle;
+                const expired = !isOptions && !!q.validUntil && q.validUntil < today && q.status !== "approved";
                 return (
                   <article key={q.id} className="flex min-w-0 flex-col rounded-[22px] border border-black/10 p-5 sm:p-6">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="eyebrow">Cotización</span>
-                      <span
-                        className={`rounded-full px-2.5 py-0.5 text-[12px] ${q.status === "approved" ? "bg-black text-[#f1efe9]" : "border border-black/15"}`}
-                      >
-                        {q.status === "approved" ? "✓ Aprobada" : expired ? "Vencida" : "Por aprobar"}
-                      </span>
+                      <span className="eyebrow">{isOptions ? "Opciones" : "Cotización"}</span>
+                      {!isOptions && (
+                        <span className={`rounded-full px-2.5 py-0.5 text-[12px] ${q.status === "approved" ? "bg-black text-[#f1efe9]" : "border border-black/15"}`}>
+                          {q.status === "approved" ? "✓ Aprobada" : expired ? "Vencida" : "Por aprobar"}
+                        </span>
+                      )}
                     </div>
                     <h3 className="mt-3 text-[26px] font-medium leading-tight tracking-[-0.02em]">{q.title}</h3>
-                    <ul className="mt-5 text-[14px]">
-                      {items.map((it, i) => (
-                        <li key={i} className="flex items-start justify-between gap-4 border-t border-black/10 py-2.5">
-                          <span className="min-w-0">
-                            {it.description}
-                            <span className="block text-[12px] text-black/50">
-                              {it.quantity.toLocaleString("es-MX")} × {formatMoney(it.unitPrice)}
-                            </span>
-                          </span>
-                          <span className="shrink-0 font-medium">{formatMoney(it.quantity * it.unitPrice)}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <div className="flex items-baseline justify-between gap-4 border-t border-black/20 pt-3">
-                      <span className="text-[13px] text-black/55">Total{q.withIva ? " · IVA incluido" : ""}</span>
-                      <span className="text-[28px] font-medium tracking-[-0.02em]">{formatMoney(t.total)}</span>
+                    {subtitle && <p className="mt-2 text-[14px] leading-snug text-black/60">{subtitle}</p>}
+                    <div className="mt-5 flex items-baseline justify-between gap-4 border-t border-black/20 pt-3">
+                      {isOptions ? (
+                        <span className="text-[15px]">
+                          {nProducts} {nProducts === 1 ? "producto" : "productos"} en {od!.categories.length} {od!.categories.length === 1 ? "categoría" : "categorías"}
+                        </span>
+                      ) : (
+                        <>
+                          <span className="text-[13px] text-black/55">Total{q.withIva ? " con IVA" : ""}</span>
+                          <span className="text-[28px] font-medium tracking-[-0.02em]">{formatMoney(t.total)}</span>
+                        </>
+                      )}
                     </div>
-                    {q.notes && <p className="mt-3 text-[13px] leading-relaxed text-black/60">{q.notes}</p>}
-                    {q.validUntil && q.status !== "approved" && (
+                    {!isOptions && q.validUntil && q.status !== "approved" && (
                       <p className="mt-2 text-[12px] text-black/50">
                         {expired ? "Venció" : "Vigente hasta"} el {longDate(q.validUntil)}
                       </p>
                     )}
                     <div className="mt-auto flex flex-wrap items-center gap-3 pt-6">
-                      {q.status === "approved" ? (
-                        <p className="text-[13px]">Aprobada el {longDate(q.approvedAt ?? q.createdAt)}. Te avisamos cuando esté lista.</p>
-                      ) : (
-                        !expired && <ApproveSupplierQuote token={params.token} id={q.id} title={q.title} />
-                      )}
+                      <a href={`/c/${params.token}/documento/${q.id}`} className="pill-dark">
+                        {isOptions ? "Ver opciones" : "Ver cotización"} <span aria-hidden>→</span>
+                      </a>
+                      {!isOptions && q.status === "approved" && <p className="text-[13px]">Aprobada el {longDate(q.approvedAt ?? q.createdAt)}.</p>}
+                      {!isOptions && q.status !== "approved" && !expired && <ApproveSupplierQuote token={params.token} id={q.id} title={q.title} />}
                       {q.showFile && q.fileUrl && (
                         <a href={q.fileUrl} target="_blank" rel="noreferrer" className="text-[13px] text-black/60 hover:text-black">
-                          Ver documento original ↗
+                          Documento original ↗
                         </a>
                       )}
                       <a
-                        href={whatsappLink(studio.whatsapp, `Hola, tengo una duda sobre la cotización "${q.title}" de ${project.name}.`)}
+                        href={whatsappLink(studio.whatsapp, `Hola, tengo una duda sobre "${q.title}" de ${project.name}.`)}
                         target="_blank"
                         rel="noreferrer"
                         className="text-[13px] text-black/60 hover:text-black"
