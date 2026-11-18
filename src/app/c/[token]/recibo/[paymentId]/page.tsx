@@ -7,7 +7,7 @@ import { formatMoney } from "@/lib/quotes";
 import { amountInWords } from "@/lib/moneyWords";
 import { projectQuote, receiptFolio } from "@/lib/portalServer";
 import { QuoteContent } from "@/lib/quotes";
-import { clientAmount } from "@/lib/portal";
+import { clientAmount, isDarkColor } from "@/lib/portal";
 import PrintButton from "./PrintButton";
 
 const helvetica = localFont({
@@ -23,7 +23,14 @@ const longDate = (d: Date) => d.toLocaleDateString("es-MX", { day: "numeric", mo
 
 // Recibo de un pago ya hecho, para clientes que no requieren factura. Se
 // abre desde el portal y se guarda como PDF con el botón (imprimir).
-export default async function Receipt({ params }: { params: { token: string; paymentId: string } }) {
+export default async function Receipt({
+  params,
+  searchParams,
+}: {
+  params: { token: string; paymentId: string };
+  searchParams?: { estilo?: string };
+}) {
+  const lab = searchParams?.estilo !== "editorial";
   const project = await prisma.project.findFirst({
     where: { portalToken: params.token },
     include: { prospects: { orderBy: { updatedAt: "desc" }, take: 1 } },
@@ -50,10 +57,13 @@ export default async function Receipt({ params }: { params: { token: string; pay
   const accent = c?.accent ?? project.color;
 
   return (
-    <div className={`${helvetica.variable} proposal min-h-screen print:bg-white`}>
+    <div
+      className={`${helvetica.variable} proposal min-h-screen print:bg-white${lab ? " portal-lab" : ""}`}
+      style={{ ["--accent" as string]: accent, ["--accent-text" as string]: isDarkColor(accent) ? "#ffffff" : "#111111" }}
+    >
       <div className="mx-auto max-w-[780px] px-5 py-10 print:p-0">
         <div className="mb-6 flex justify-end gap-2 print:hidden">
-          <a href={`/c/${params.token}#pagos`} className="pill-light">
+          <a href={`/c/${params.token}#pagos`} className="pill-outline no-plus">
             ← Volver al portal
           </a>
           <PrintButton />
