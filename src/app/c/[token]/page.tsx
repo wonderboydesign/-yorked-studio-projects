@@ -302,7 +302,11 @@ export default async function ClientPortal({
                     {d.note && <p className="mt-2 text-[13px] text-black/60">{d.note}</p>}
                     <div className="mt-auto flex items-center justify-between pt-6 text-[13px] text-black/55">
                       <span>{shortDate(d.date ?? d.createdAt)}</span>
-                      {hasLink && <span className="group-hover:text-black">{isPdf ? "Ver PDF ↗" : "Abrir ↗"}</span>}
+                      {hasLink && (
+                        <span className="pill-dark no-plus">
+                          {isPdf ? "Abrir PDF" : "Abrir"} <span aria-hidden>↗</span>
+                        </span>
+                      )}
                     </div>
                   </>
                 );
