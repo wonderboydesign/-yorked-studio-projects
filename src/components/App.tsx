@@ -367,13 +367,16 @@ export default function App() {
             <button
               onClick={() => setMyTasksOnly((v) => !v)}
               disabled={!currentUser}
+              aria-pressed={myTasksOnly}
+              title={myTasksOnly ? "Estás viendo solo tus tareas" : "Ver solo las tareas asignadas a ti"}
               className={`text-sm px-4 py-2 rounded-xl whitespace-nowrap transition-colors disabled:opacity-40 ${
                 myTasksOnly
                   ? "bg-accent text-accent-fg"
                   : "glass glass-hover text-ink"
               }`}
             >
-              Mis tareas
+              {/* Alterna: viendo tus tareas ofrece "Ver todas"; viendo todas ofrece "Mis tareas" */}
+              {myTasksOnly ? "Ver todas las tareas" : "Mis tareas"}
             </button>
             <button
               onClick={() => setTeamPanelOpen(true)}
