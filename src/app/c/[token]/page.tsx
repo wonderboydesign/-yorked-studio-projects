@@ -7,7 +7,7 @@ import CopyRows from "@/components/CopyRows";
 import { AUTH_COOKIE_NAME, verifySessionToken } from "@/lib/auth";
 import { getStudio } from "@/lib/quotesServer";
 import { QuoteContent, formatMoney, whatsappLink } from "@/lib/quotes";
-import { PortalPhase, clientAmount, computeProgress } from "@/lib/portal";
+import { PortalPhase, clientAmount, computeProgress, isDarkColor } from "@/lib/portal";
 import { projectQuote } from "@/lib/portalServer";
 import { localTodayUTC } from "@/lib/portalDates";
 import PortalBilling from "./PortalBilling";
@@ -628,10 +628,3 @@ function SectionHead({ n, title, tagline, dark }: { n: string; title: string; ta
   );
 }
 
-function isDarkColor(hex: string) {
-  const h = hex.replace("#", "");
-  const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h.slice(0, 6);
-  const [r, g, b] = [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16));
-  if ([r, g, b].some((n) => Number.isNaN(n))) return true;
-  return 0.299 * r + 0.587 * g + 0.114 * b < 150;
-}

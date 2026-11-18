@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import CopyRows from "@/components/CopyRows";
 import { AUTH_COOKIE_NAME, verifySessionToken } from "@/lib/auth";
 import { getStudio } from "@/lib/quotesServer";
+import { isDarkColor } from "@/lib/portal";
 import { QuoteContent, StudioWork, fillNote, formatMoney, formatMonthYear, whatsappLink, worksForQuote } from "@/lib/quotes";
 import ApproveForm from "./ApproveForm";
 import WorkCarousel from "./WorkCarousel";
@@ -28,7 +29,15 @@ export async function generateMetadata({ params }: { params: { token: string } }
   };
 }
 
-export default async function ProposalPage({ params }: { params: { token: string } }) {
+export default async function ProposalPage({
+  params,
+  searchParams,
+}: {
+  params: { token: string };
+  searchParams?: { estilo?: string };
+}) {
+  // Mismo estilo que el portal del cliente; ?estilo=editorial muestra el anterior
+  const lab = searchParams?.estilo !== "editorial";
   const quote = await prisma.quote.findUnique({ where: { token: params.token } });
   if (!quote) notFound();
 
@@ -64,11 +73,15 @@ export default async function ProposalPage({ params }: { params: { token: string
 
   return (
     <div
-      className={`${helvetica.variable} proposal min-h-screen`}
-      style={{ ["--accent" as string]: c.accent, ["--dark" as string]: c.dark }}
+      className={`${helvetica.variable} proposal min-h-screen${lab ? " portal-lab" : ""}`}
+      style={{
+        ["--accent" as string]: c.accent,
+        ["--dark" as string]: c.dark,
+        ["--accent-text" as string]: isDarkColor(c.accent) ? "#ffffff" : "#111111",
+      }}
     >
       {/* Barra superior */}
-      <header className="sticky top-0 z-30 border-b border-black/10 bg-[#f1efe9]/85 backdrop-blur">
+      <header className="pt-header sticky top-0 z-30 border-b border-black/10 bg-[#f1efe9]/85 backdrop-blur">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-4 px-5 py-3 sm:px-6">
           <span className="text-[15px] font-medium tracking-tight">
             {studio.brandMark}
@@ -88,11 +101,11 @@ export default async function ProposalPage({ params }: { params: { token: string
 
       <main className="mx-auto max-w-[1440px] px-5 sm:px-6">
         {/* 01 · Portada */}
-        <section className="flex min-h-[calc(100svh-57px)] flex-col pb-6 pt-10">
+        <section id="inicio" className="flex min-h-[calc(100svh-57px)] flex-col pb-6 pt-10">
           <p className="eyebrow">
             <span className="text-black">01</span> <span className="dot" /> Propuesta · {c.service} · {month} · Confidencial
           </p>
-          <h1 className="mt-6 text-[clamp(72px,15vw,216px)] font-medium leading-[0.86] tracking-[-0.055em]">
+          <h1 className="pt-hero-title mt-6 text-[clamp(72px,15vw,216px)] font-medium leading-[0.86] tracking-[-0.055em]">
             {c.brandLine1}
             <br />
             <span style={{ color: "var(--accent)" }}>{c.brandLine2}</span>

@@ -161,3 +161,12 @@ export function redistribute(
     return { id: p.id, amount };
   });
 }
+
+// Texto de los botones sobre el color de acento: blanco si es oscuro, negro si es claro
+export function isDarkColor(hex: string) {
+  const h = (hex ?? "").replace("#", "");
+  const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h.slice(0, 6);
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16));
+  if ([r, g, b].some((n) => Number.isNaN(n))) return true;
+  return 0.299 * r + 0.587 * g + 0.114 * b < 150;
+}

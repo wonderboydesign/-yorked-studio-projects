@@ -592,3 +592,29 @@ select:focus-visible,
   background: #ffffff !important;
   color: #111111 !important;
 }
+
+/* Propuesta y recibo en el mismo estilo "laboratorio" */
+.portal-lab .section-title {
+  font-size: clamp(36px, 4.6vw, 64px);
+  line-height: 1;
+  letter-spacing: -0.035em;
+}
+.portal-lab [class*="bg-[#e7e4db]"],
+.portal-lab [class*="bg-[#f1efe9]"][class*="rounded"] {
+  background: #f5f5f5 !important;
+}
+.portal-lab [class*="border-black/10"][class*="rounded"] {
+  border-color: transparent !important;
+  background: #f5f5f5;
+}
+.portal-lab [class*="bg-white"][class*="rounded"] {
+  background: #ffffff !important;
+}
+.portal-lab .pill-outline {
+  background: transparent !important;
+  border: 1px solid #111111 !important;
+  color: #111111 !important;
+}
+.portal-lab .no-plus::before {
+  content: none !important;
+}
