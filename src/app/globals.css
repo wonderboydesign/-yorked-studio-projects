@@ -618,3 +618,102 @@ select:focus-visible,
 .portal-lab .no-plus::before {
   content: none !important;
 }
+
+/* ─── Documentos de proveedores (cotización y opciones) ─── */
+.doc {
+  background: #ececec !important;
+}
+.doc-page {
+  position: relative;
+  background: #ffffff;
+  color: #111111;
+  padding: 40px 40px 56px;
+}
+.doc-page + .doc-page {
+  margin-top: 20px;
+}
+.doc-dark {
+  background: #111111;
+  color: #ffffff;
+}
+.doc-foot {
+  position: absolute;
+  left: 40px;
+  bottom: 22px;
+}
+.doc-gray {
+  background: #f3f3f3;
+  color: #111111;
+  border-radius: 0 !important;
+}
+.doc-black {
+  background: #111111;
+  color: #ffffff;
+  border-radius: 0 !important;
+}
+.doc-dark .doc-black {
+  background: #1d1d1d;
+}
+.doc-tag {
+  background: var(--accent);
+  color: var(--accent-text, #ffffff);
+  padding: 3px 8px;
+  border-radius: 0 !important;
+}
+.doc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #111111;
+  color: #ffffff;
+  padding: 8px 12px;
+  font-size: 12px;
+  border-radius: 0 !important;
+}
+@media (max-width: 639px) {
+  .doc-page {
+    padding: 24px 20px 52px;
+  }
+  .doc-foot {
+    left: 20px;
+  }
+}
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  html,
+  body,
+  .doc {
+    background: #ffffff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .doc-page {
+    margin: 0 !important;
+    min-height: 296mm;
+    max-height: 296mm;
+    overflow: hidden;
+    padding: 12mm 14mm 16mm;
+    break-after: page;
+    break-inside: auto;
+  }
+  .doc-page:last-child {
+    break-after: auto;
+  }
+  .doc-foot {
+    left: 14mm;
+    bottom: 6mm;
+  }
+  .doc-gray,
+  .doc-black,
+  .doc-tag,
+  .doc-btn {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .doc article {
+    break-inside: avoid;
+  }
+}
