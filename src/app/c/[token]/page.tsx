@@ -359,7 +359,7 @@ export default async function ClientPortal({ params }: { params: { token: string
               </div>
             </div>
 
-            <div className="mt-14 grid gap-10 lg:grid-cols-[3fr_2fr]">
+            <div className="mt-14 grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
               <ul>
                 {payments.map((p) => {
                   const overdue = !p.paidAt && p.dueDate && p.dueDate < today;
