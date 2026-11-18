@@ -7,6 +7,8 @@ import { formatMoney } from "@/lib/quotes";
 import { Button } from "../branding/ui";
 import PortalLinksEditor, { PortalLinkRow } from "./PortalLinksEditor";
 import PhaseBuilder from "./PhaseBuilder";
+import SupplierQuotesEditor from "./SupplierQuotesEditor";
+import { SupplierQuoteRow } from "@/lib/supplierQuotes";
 
 type Notify = (message: string, tone?: "ok" | "error") => void;
 
@@ -26,6 +28,7 @@ interface PortalState {
   documents: PortalDocument[];
   links: PortalLinkRow[];
   quoteToken: string | null;
+  supplierQuotes: SupplierQuoteRow[];
 }
 
 interface PortalDocument {
@@ -121,7 +124,7 @@ export default function ClientPortalPanel({
     const res = await fetch(`/api/projects/${projectId}/payments`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(fromQuote ? { fromQuote: true } : { label: "Pago adicional", amount: 0 }),
+      body: JSON.stringify(fromQuote ? { fromQuote: true } : { label: `Pago ${(s?.payments.length ?? 0) + 1}`, amount: 0 }),
     });
     if (!res.ok) {
       const b = await res.json().catch(() => null);
@@ -327,6 +330,13 @@ export default function ClientPortalPanel({
             </section>
 
             <PortalLinksEditor kind="delivery" projectId={projectId} links={s.links} phases={phaseOptions} notify={notify} onChange={setLinks} />
+
+            <SupplierQuotesEditor
+              projectId={projectId}
+              quotes={s.supplierQuotes}
+              notify={notify}
+              onChange={(supplierQuotes) => setS((x) => (x ? { ...x, supplierQuotes } : x))}
+            />
 
             {/* Precio (interno: el cliente solo ve lo que paga) */}
             <section className="space-y-3">

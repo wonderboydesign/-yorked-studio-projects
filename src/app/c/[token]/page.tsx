@@ -11,6 +11,9 @@ import { PortalPhase, clientAmount, computeProgress } from "@/lib/portal";
 import { projectQuote } from "@/lib/portalServer";
 import { localTodayUTC } from "@/lib/portalDates";
 import PortalBilling from "./PortalBilling";
+import PortalNav from "./PortalNav";
+import ApproveSupplierQuote from "./ApproveSupplierQuote";
+import { SupplierItem, supplierTotals } from "@/lib/supplierQuotes";
 
 // La misma tipografía de las propuestas
 const helvetica = localFont({
@@ -52,6 +55,7 @@ export default async function ClientPortal({ params }: { params: { token: string
       payments: { orderBy: [{ order: "asc" }, { createdAt: "asc" }] },
       documents: { orderBy: { createdAt: "desc" } },
       links: { orderBy: [{ date: "desc" }, { createdAt: "desc" }] },
+      supplierQuotes: { orderBy: { createdAt: "desc" } },
     },
   });
   if (!project) notFound();
@@ -99,11 +103,22 @@ export default async function ClientPortal({ params }: { params: { token: string
     "fases",
     meetings.length > 0 && "reuniones",
     deliveries.length > 0 && "entregas",
+    project.supplierQuotes.length > 0 && "cotizaciones",
     payments.length > 0 && "pagos",
     "facturacion",
     brandFiles.length > 0 && "marca",
   ].filter(Boolean) as string[];
   const num = (id: string) => String(order.indexOf(id) + 2).padStart(2, "0");
+  const NAV_LABELS: Record<string, string> = {
+    fases: "Fases",
+    reuniones: "Reuniones",
+    entregas: "Entregas",
+    cotizaciones: "Cotizaciones",
+    pagos: "Pagos",
+    facturacion: "Facturas y recibos",
+    marca: "Tu marca",
+  };
+  const navItems = [{ id: "inicio", label: "Inicio" }, ...order.map((id) => ({ id, label: NAV_LABELS[id] })), { id: "contacto", label: "Contacto" }];
 
   const waHello = whatsappLink(studio.whatsapp, `Hola, tengo una duda sobre el proyecto de ${project.name}.`);
 
@@ -118,23 +133,17 @@ export default async function ClientPortal({ params }: { params: { token: string
             {studio.brandMark}
             <sup className="text-[9px]">®</sup>
           </span>
-          <nav className="hidden gap-7 text-[13px] text-black/60 md:flex">
-            <a href="#fases" className="hover:text-black">Fases</a>
-            {deliveries.length > 0 && <a href="#entregas" className="hover:text-black">Entregas</a>}
-            {payments.length > 0 && <a href="#pagos" className="hover:text-black">Pagos</a>}
-            <a href="#facturacion" className="hover:text-black">Facturación</a>
-            {brandFiles.length > 0 && <a href="#marca" className="hover:text-black">Tu marca</a>}
-            <a href="#contacto" className="hover:text-black">Contacto</a>
-          </nav>
+          <PortalNav variant="desktop" items={navItems} />
           <a href={waHello} target="_blank" rel="noreferrer" className="pill-dark">
             Escríbenos <span aria-hidden>→</span>
           </a>
         </div>
+        <PortalNav variant="mobile" items={navItems} />
       </header>
 
       <main className="mx-auto max-w-[1440px] px-5 sm:px-6">
         {/* Avance */}
-        <section className="flex min-h-[calc(100svh-57px)] flex-col pb-6 pt-10">
+        <section id="inicio" className="flex min-h-[calc(100svh-57px)] flex-col pb-6 pt-10">
           <p className="eyebrow">
             <span className="text-black">01</span> <span className="dot" /> Portal del proyecto · Actualizado al {longDate(today)}
           </p>
@@ -211,22 +220,7 @@ export default async function ClientPortal({ params }: { params: { token: string
 
         {/* Fases */}
         <section id="fases" className="py-24">
-          <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
-            <p className="eyebrow">
-              <span className="text-black">{num("fases")}</span> Fases
-            </p>
-            <h2 className="section-title">
-              {allDone ? (
-                <>
-                  Así lo hicimos. <span className="text-black/45">Paso a paso.</span>
-                </>
-              ) : (
-                <>
-                  Dónde vamos. <span className="text-black/45">Lo que sigue.</span>
-                </>
-              )}
-            </h2>
-          </div>
+          <SectionHead n={num("fases")} title="Fases del proyecto" tagline={allDone ? "Así lo hicimos, paso a paso." : "Dónde vamos y lo que sigue."} />
           <div className="mt-16">
             {progress.phases.length === 0 ? (
               <p className="border-t border-black/10 py-10 text-[15px] text-black/55">
@@ -241,14 +235,7 @@ export default async function ClientPortal({ params }: { params: { token: string
         {/* Reuniones */}
         {meetings.length > 0 && (
           <section id="reuniones" className="pb-24">
-            <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
-              <p className="eyebrow">
-                <span className="text-black">{num("reuniones")}</span> Reuniones
-              </p>
-              <h2 className="section-title">
-                Nos vemos. <span className="text-black/45">Aquí está el link.</span>
-              </h2>
-            </div>
+            <SectionHead n={num("reuniones")} title="Reuniones" tagline="Fecha, hora y link para unirte." />
             <ul className="mt-14">
               {[...meetings]
                 .sort((a, b) => b.date!.getTime() - a.date!.getTime())
@@ -280,14 +267,7 @@ export default async function ClientPortal({ params }: { params: { token: string
         {/* Entregas */}
         {deliveries.length > 0 && (
           <section id="entregas" className="pb-24">
-            <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
-              <p className="eyebrow">
-                <span className="text-black">{num("entregas")}</span> Entregas
-              </p>
-              <h2 className="section-title">
-                Lo que te hemos presentado. <span className="text-black/45">Siempre a la mano.</span>
-              </h2>
-            </div>
+            <SectionHead n={num("entregas")} title="Entregas" tagline="Lo que te hemos presentado, siempre a la mano." />
             <div className="mt-14 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {deliveries.map((d) => {
                 const isNew = now - d.createdAt.getTime() < 7 * 86400000;
@@ -321,25 +301,88 @@ export default async function ClientPortal({ params }: { params: { token: string
           </section>
         )}
 
+        {/* Cotizaciones de proveedores */}
+        {project.supplierQuotes.length > 0 && (
+          <section id="cotizaciones" className="pb-24">
+            <SectionHead n={num("cotizaciones")} title="Cotizaciones" tagline="Producción e impresión que gestionamos para tu marca." />
+            <div className="mt-14 grid gap-3 lg:grid-cols-2">
+              {project.supplierQuotes.map((q) => {
+                const items = (q.items ?? []) as unknown as SupplierItem[];
+                const t = supplierTotals(items, q.withIva);
+                const expired = !!q.validUntil && q.validUntil < today && q.status !== "approved";
+                return (
+                  <article key={q.id} className="flex min-w-0 flex-col rounded-[22px] border border-black/10 p-5 sm:p-6">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="eyebrow">Cotización</span>
+                      <span
+                        className={`rounded-full px-2.5 py-0.5 text-[12px] ${q.status === "approved" ? "bg-black text-[#f1efe9]" : "border border-black/15"}`}
+                      >
+                        {q.status === "approved" ? "✓ Aprobada" : expired ? "Vencida" : "Por aprobar"}
+                      </span>
+                    </div>
+                    <h3 className="mt-3 text-[26px] font-medium leading-tight tracking-[-0.02em]">{q.title}</h3>
+                    <ul className="mt-5 text-[14px]">
+                      {items.map((it, i) => (
+                        <li key={i} className="flex items-start justify-between gap-4 border-t border-black/10 py-2.5">
+                          <span className="min-w-0">
+                            {it.description}
+                            <span className="block text-[12px] text-black/50">
+                              {it.quantity.toLocaleString("es-MX")} × {formatMoney(it.unitPrice)}
+                            </span>
+                          </span>
+                          <span className="shrink-0 font-medium">{formatMoney(it.quantity * it.unitPrice)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="flex items-baseline justify-between gap-4 border-t border-black/20 pt-3">
+                      <span className="text-[13px] text-black/55">Total{q.withIva ? " · IVA incluido" : ""}</span>
+                      <span className="text-[28px] font-medium tracking-[-0.02em]">{formatMoney(t.total)}</span>
+                    </div>
+                    {q.notes && <p className="mt-3 text-[13px] leading-relaxed text-black/60">{q.notes}</p>}
+                    {q.validUntil && q.status !== "approved" && (
+                      <p className="mt-2 text-[12px] text-black/50">
+                        {expired ? "Venció" : "Vigente hasta"} el {longDate(q.validUntil)}
+                      </p>
+                    )}
+                    <div className="mt-auto flex flex-wrap items-center gap-3 pt-6">
+                      {q.status === "approved" ? (
+                        <p className="text-[13px]">Aprobada el {longDate(q.approvedAt ?? q.createdAt)}. Te avisamos cuando esté lista.</p>
+                      ) : (
+                        !expired && <ApproveSupplierQuote token={params.token} id={q.id} title={q.title} />
+                      )}
+                      {q.showFile && q.fileUrl && (
+                        <a href={q.fileUrl} target="_blank" rel="noreferrer" className="text-[13px] text-black/60 hover:text-black">
+                          Ver documento original ↗
+                        </a>
+                      )}
+                      <a
+                        href={whatsappLink(studio.whatsapp, `Hola, tengo una duda sobre la cotización "${q.title}" de ${project.name}.`)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[13px] text-black/60 hover:text-black"
+                      >
+                        Tengo dudas ↗
+                      </a>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
         {/* Pagos */}
         {payments.length > 0 && (
           <section id="pagos" className="rounded-[28px] px-6 py-16 text-[#f1efe9] sm:px-10" style={{ background: "#121210" }}>
+            <SectionHead
+              dark
+              n={num("pagos")}
+              title="Pagos del proyecto"
+              tagline={pending.length === 0 ? "Todo al corriente. Gracias." : "Lo que llevas pagado y lo que sigue."}
+            />
             <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
-              <p className="eyebrow" style={{ color: "rgb(241 239 233 / 0.5)" }}>
-                <span className="text-[#f1efe9]">{num("pagos")}</span> Pagos
-              </p>
+              <div className="hidden lg:block" />
               <div>
-                <h2 className="section-title">
-                  {pending.length === 0 ? (
-                    <>
-                      Todo al corriente. <span className="text-[#f1efe9]/50">Gracias.</span>
-                    </>
-                  ) : (
-                    <>
-                      Tus pagos. <span className="text-[#f1efe9]/50">Claros desde el inicio.</span>
-                    </>
-                  )}
-                </h2>
                 <div className="mt-10 grid grid-cols-2 gap-6 border-t border-white/15 pt-6 text-[13px] sm:grid-cols-3">
                   <div>
                     <p className="text-[#f1efe9]/50">Total</p>
@@ -375,13 +418,16 @@ export default async function ClientPortal({ params }: { params: { token: string
                             : "Pendiente"}
                           {p.iva && " · IVA incluido"}
                         </p>
-                      </div>
-                      <div className="flex shrink-0 flex-wrap items-center justify-end gap-3">
                         {p.paidAt && (
-                          <a href={`/c/${params.token}/recibo/${p.id}`} className="text-[12px] text-[#f1efe9]/60 underline-offset-4 hover:text-[#f1efe9] hover:underline">
-                            Recibo ↓
+                          <a
+                            href={`/c/${params.token}/recibo/${p.id}`}
+                            className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#f1efe9] px-3 py-1.5 text-[12px] text-[#121210] hover:opacity-90"
+                          >
+                            Descargar recibo <span aria-hidden>↓</span>
                           </a>
                         )}
+                      </div>
+                      <div className="flex shrink-0 flex-wrap items-center justify-end gap-3">
                         <span className="text-[19px] font-medium">{formatMoney(p.amount)}</span>
                         <span
                           className={`rounded-full px-3 py-1 text-[12px] ${p.paidAt ? "bg-white/10 text-[#f1efe9]/80" : "bg-[#f1efe9] text-[#121210]"}`}
@@ -409,16 +455,12 @@ export default async function ClientPortal({ params }: { params: { token: string
 
         {/* Facturación */}
         <section id="facturacion" className="py-24">
-          <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
-            <p className="eyebrow">
-              <span className="text-black">{num("facturacion")}</span> Facturación
-            </p>
-            <h2 className="section-title">
-              Factura o recibo. <span className="text-black/45">Como lo necesites.</span>
-            </h2>
-          </div>
+          <SectionHead n={num("facturacion")} title="Facturas y recibos" tagline="Descarga tus recibos o sube tu constancia si requieres factura." />
           <PortalBilling
             token={params.token}
+            receipts={payments
+              .filter((p) => p.paidAt)
+              .map((p) => ({ id: p.id, label: p.label, amount: formatMoney(p.amount), paidAt: p.paidAt!.toISOString(), url: `/c/${params.token}/recibo/${p.id}` }))}
             certificates={project.documents
               .filter((d) => d.kind === "tax_certificate")
               .map((d) => ({ id: d.id, name: d.name, url: d.url, createdAt: d.createdAt.toISOString() }))}
@@ -431,14 +473,7 @@ export default async function ClientPortal({ params }: { params: { token: string
         {/* Tu marca */}
         {brandFiles.length > 0 && (
           <section id="marca" className="mb-8 rounded-[28px] bg-[#121210] px-6 py-16 text-[#f1efe9] sm:px-10">
-            <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
-              <p className="eyebrow" style={{ color: "rgb(241 239 233 / 0.5)" }}>
-                <span className="text-[#f1efe9]">{num("marca")}</span> Tu marca
-              </p>
-              <h2 className="section-title">
-                Todo tu sistema. <span className="text-[#f1efe9]/50">Listo para usarse.</span>
-              </h2>
-            </div>
+            <SectionHead dark n={num("marca")} title="Tu marca" tagline="Todos tus archivos finales, listos para usarse." />
             <ul className="mt-14">
               {brandFiles.map((f) => (
                 <li key={f.id}>
@@ -559,6 +594,22 @@ function BankDetails({
         <p className="eyebrow mb-3">Datos para transferencia</p>
       )}
       <CopyRows rows={rows as [string, string][]} />
+    </div>
+  );
+}
+
+// Encabezado de sección: número y nombre claro de la sección (para que el
+// cliente sepa dónde está) y una frase de apoyo más pequeña
+function SectionHead({ n, title, tagline, dark }: { n: string; title: string; tagline: string; dark?: boolean }) {
+  return (
+    <div className="grid gap-3 lg:grid-cols-[1fr_2fr] lg:gap-8">
+      <p className="eyebrow" style={dark ? { color: "rgb(241 239 233 / 0.5)" } : undefined}>
+        <span className={dark ? "text-[#f1efe9]" : "text-black"}>{n}</span> Sección
+      </p>
+      <div>
+        <h2 className="text-[clamp(40px,6vw,84px)] font-medium leading-[0.95] tracking-[-0.045em]">{title}</h2>
+        <p className={`mt-3 max-w-xl text-[clamp(17px,1.6vw,22px)] leading-snug ${dark ? "text-[#f1efe9]/55" : "text-black/50"}`}>{tagline}</p>
+      </div>
     </div>
   );
 }

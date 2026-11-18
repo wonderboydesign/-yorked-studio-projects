@@ -1,6 +1,7 @@
 import { randomBytes } from "crypto";
 import { prisma } from "./prisma";
 import { QuoteContent } from "./quotes";
+import { cleanItems } from "./supplierQuotes";
 import { computeProgress, paymentsFromQuote } from "./portal";
 import { localTodayUTC } from "./portalDates";
 
@@ -114,5 +115,22 @@ export function linkFields(body: Record<string, unknown>) {
     const d = typeof body.date === "string" && body.date ? new Date(body.date) : null;
     data.date = d && !Number.isNaN(d.getTime()) ? d : null;
   }
+  return data;
+}
+
+// Campos editables de una cotización de proveedor que llegan del panel
+export function supplierQuoteFields(body: Record<string, unknown>) {
+  const data: Record<string, unknown> = {};
+  const str = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : undefined);
+  const title = str(body.title, 160);
+  if (title) data.title = title;
+  if (body.supplier !== undefined) data.supplier = str(body.supplier, 160) || null;
+  if (body.items !== undefined) data.items = cleanItems(body.items);
+  if (body.notes !== undefined) data.notes = str(body.notes, 2000) || null;
+  if (body.validUntil !== undefined) data.validUntil = day(body.validUntil);
+  if (typeof body.withIva === "boolean") data.withIva = body.withIva;
+  if (typeof body.showFile === "boolean") data.showFile = body.showFile;
+  if (body.fileUrl !== undefined) data.fileUrl = isBlobUrl(body.fileUrl) ? body.fileUrl : null;
+  if (body.filePath !== undefined) data.filePath = str(body.filePath, 500) || null;
   return data;
 }

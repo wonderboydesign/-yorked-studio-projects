@@ -20,10 +20,12 @@ export default function PortalBilling({
   token,
   certificates,
   invoices,
+  receipts = [],
 }: {
   token: string;
   certificates: PortalDoc[];
   invoices: PortalDoc[];
+  receipts?: { id: string; label: string; amount: string; paidAt: string; url: string }[];
 }) {
   const router = useRouter();
   const input = useRef<HTMLInputElement>(null);
@@ -57,7 +59,30 @@ export default function PortalBilling({
   }
 
   return (
-    <div className="mt-14 grid gap-3 lg:grid-cols-2">
+    <div className={`mt-14 grid grid-cols-[minmax(0,1fr)] gap-3 ${receipts.length ? "lg:grid-cols-3" : "lg:grid-cols-2"}`}>
+      {/* Recibos de lo ya pagado (sin factura) */}
+      {receipts.length > 0 && (
+        <div className="flex flex-col rounded-[22px] bg-[#121210] p-6 text-[#f1efe9]">
+          <p className="eyebrow" style={{ color: "rgb(241 239 233 / 0.5)" }}>Sin factura</p>
+          <h3 className="mt-3 text-[26px] font-medium leading-tight tracking-[-0.02em]">Tus recibos</h3>
+          <ul className="mt-4">
+            {receipts.map((r) => (
+              <li key={r.id}>
+                <a href={r.url} className="flex items-center justify-between gap-3 border-t border-white/15 py-3 text-[14px] hover:opacity-80">
+                  <span className="min-w-0">
+                    <span className="block truncate">{r.label}</span>
+                    <span className="block text-[12px] text-[#f1efe9]/55">
+                      {r.amount} · {new Date(r.paidAt).toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })}
+                    </span>
+                  </span>
+                  <span className="shrink-0 rounded-full bg-[#f1efe9] px-3 py-1 text-[12px] text-[#121210]">Descargar ↓</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {/* Constancia */}
       <div className="flex flex-col rounded-[22px] border border-black/10 p-6">
         <p className="eyebrow">¿Requieres factura?</p>

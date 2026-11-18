@@ -37,6 +37,7 @@ model Project {
   payments       Payment[]
   documents      ProjectDocument[]
   links          PortalLink[]
+  supplierQuotes SupplierQuote[]
 
   @@index([portalToken])
 }
@@ -79,6 +80,31 @@ model PortalLink {
   createdAt DateTime  @default(now())
 
   @@index([projectId, kind])
+}
+
+// Cotización de un proveedor (imprenta, producción, rotulación…) que el
+// estudio le presenta al cliente en su portal. El proveedor y el archivo
+// original son internos salvo que se decida mostrarlos.
+model SupplierQuote {
+  id         String    @id @default(cuid())
+  project    Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId  String
+  title      String
+  supplier   String?
+  // [{ description, quantity, unitPrice }] en MXN sin IVA
+  items      Json
+  notes      String?
+  validUntil DateTime?
+  withIva    Boolean   @default(false)
+  fileUrl    String?
+  filePath   String?
+  showFile   Boolean   @default(false)
+  // pending | approved
+  status     String    @default("pending")
+  approvedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([projectId])
 }
 
 // Pago del proyecto que ve el cliente en su portal (anticipo, finiquito,
