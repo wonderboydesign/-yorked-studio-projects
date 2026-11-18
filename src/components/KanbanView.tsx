@@ -23,7 +23,7 @@ export default function KanbanView({
       {STATUS_ORDER.map((status) => {
         const columnTasks = tasks.filter((t) => t.status === status);
         return (
-          <div key={status} className="min-h-[320px] rounded-3xl bg-ink/[0.025] p-3">
+          <div key={status} className="min-h-[120px] sm:min-h-[320px] rounded-3xl bg-ink/[0.025] p-3">
             <div
               className="flex items-center justify-between px-3 pt-2 pb-4"
             >

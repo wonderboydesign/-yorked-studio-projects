@@ -104,7 +104,7 @@ export default function DashboardView({
     return (
       <button
         onClick={() => onSelectTask(t)}
-        className="w-full flex items-start justify-between gap-3 py-3 text-left hover:bg-ink/[0.03] px-3 -mx-3 rounded-xl transition-colors"
+        className="w-full flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1.5 sm:gap-3 py-3 text-left hover:bg-ink/[0.03] px-3 -mx-3 rounded-xl transition-colors"
       >
         <div className="min-w-0 flex items-start gap-2">
           <span
@@ -116,7 +116,8 @@ export default function DashboardView({
             <span className="text-xs text-muted truncate hidden sm:block">{project?.name}</span>
           </div>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        {/* En celular, fecha y estado van debajo del nombre para no apretarlo */}
+        <div className="flex items-center gap-2 shrink-0 pl-4 sm:pl-0">
           {showDate && (
             <span className="text-xs text-muted whitespace-nowrap">
               {capMonth(formatLong(parseDate(t.endDate)))}

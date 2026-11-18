@@ -220,7 +220,7 @@ export default function ScheduleSection({
 function Shell({ children, action }: { children: React.ReactNode; action?: React.ReactNode }) {
   return (
     <section className="space-y-3 rounded-3xl border border-line p-5">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
         <h3 className="text-lg">Calendario del proyecto</h3>
         {action}
       </div>

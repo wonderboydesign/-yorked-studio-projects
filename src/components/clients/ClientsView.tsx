@@ -97,7 +97,7 @@ export default function ClientsView({
             <section
               key={stage.key}
               style={a.style}
-              className={`glass rounded-3xl p-3 min-h-[300px] hero-pad flex flex-col min-w-0 ${a.className}`}
+              className={`glass rounded-3xl p-3 min-h-[140px] sm:min-h-[300px] hero-pad flex flex-col min-w-0 ${a.className}`}
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => {
                 const id = e.dataTransfer.getData("text/prospect");

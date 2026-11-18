@@ -70,7 +70,7 @@ function ProjectPicker({
               key={p.id}
               onClick={() => onSelect(p.id)}
               style={a.style}
-              className={`group text-left glass glass-hover rounded-3xl p-8 min-h-[240px] flex flex-col ${a.className}`}
+              className={`group text-left glass glass-hover rounded-3xl p-6 sm:p-8 min-h-[150px] sm:min-h-[240px] flex flex-col ${a.className}`}
             >
               <div className="mt-auto flex items-end justify-between gap-4">
                 <div className="min-w-0">
@@ -97,7 +97,7 @@ function ProjectPicker({
           {visibleStages(true).map((s, i) => {
             const a = appear(i + projects.length);
             return (
-              <li key={s.key} style={a.style} className={`glass rounded-3xl p-6 flex flex-col min-h-[240px] ${a.className}`}>
+              <li key={s.key} style={a.style} className={`glass rounded-3xl p-6 flex flex-col min-h-[180px] sm:min-h-[240px] ${a.className}`}>
                 <span className="text-sm text-muted">
                   {s.number}
                   {s.optional && " · Opcional"}

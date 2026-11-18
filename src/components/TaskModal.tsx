@@ -525,7 +525,7 @@ export default function TaskModal({
           }}
           placeholder="Escribe el nombre de la tarea"
           autoFocus={!isEdit}
-          className="w-full bg-transparent text-ink text-2xl font-medium tracking-tight placeholder:text-muted outline-none rounded-xl"
+          className="w-full bg-transparent text-ink text-lg sm:text-2xl font-medium tracking-tight placeholder:text-muted outline-none rounded-xl"
         />
       </div>
 

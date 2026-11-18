@@ -74,7 +74,51 @@ export default function ListView({
   const headCell = "px-4 py-4 font-normal text-xs";
 
   return (
-    <div className="glass rounded-3xl px-4 sm:px-8 pt-2 pb-6 overflow-x-auto">
+    <>
+    {/* Celular: tarjetas; al tocar se abre la tarea con todas sus acciones */}
+    <div className="sm:hidden space-y-6">
+      {groups.map(({ status, items }) => (
+        <section key={status} className="glass rounded-3xl p-4">
+          <h3 className="inline-flex items-center gap-2 text-base text-ink mb-2">
+            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: STATUS_COLORS[status] }} aria-hidden="true" />
+            {STATUS_LABELS[status]}
+            <span className="text-muted">{items.length}</span>
+          </h3>
+          <ul className="divide-y divide-line">
+            {items.map((t) => {
+              const project = projectMap[t.projectId];
+              const tone = dueTone(t.endDate, t.status);
+              const dot = DUE_DOT_CLASS[tone];
+              return (
+                <li key={t.id}>
+                  <button type="button" onClick={() => onSelectTask(t)} className="w-full text-left py-3 flex items-start gap-3">
+                    <span className="mt-1.5 h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: project?.color }} aria-hidden="true" />
+                    <span className="min-w-0 flex-1">
+                      <span className={`block text-sm text-ink ${t.status === "DONE" ? "line-through text-muted" : ""}`}>{t.name}</span>
+                      <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted">
+                        <span style={{ color: project?.color }}>{project?.name}</span>
+                        <span>·</span>
+                        <span className={`inline-flex items-center gap-1 ${DUE_TEXT_CLASS[tone]}`}>
+                          {dot && <span className={`h-1.5 w-1.5 rounded-full ${dot}`} aria-hidden="true" />}
+                          {capMonth(formatLong(parseDate(t.startDate)))} → {capMonth(formatLong(parseDate(t.endDate)))}
+                        </span>
+                      </span>
+                    </span>
+                    {t.assignees && t.assignees.length > 0 && (
+                      <span className="shrink-0">
+                        <AvatarStack users={t.assignees} size={20} />
+                      </span>
+                    )}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ))}
+    </div>
+
+    <div className="hidden sm:block glass rounded-3xl px-4 sm:px-8 pt-2 pb-6 overflow-x-auto">
     <table className="w-full text-sm border-collapse">
       <thead>
         <tr className="text-left text-muted border-b border-ink/10">
@@ -253,5 +297,6 @@ export default function ListView({
       ))}
     </table>
     </div>
+    </>
   );
 }
