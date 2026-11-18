@@ -47,7 +47,16 @@ export async function generateMetadata({ params }: { params: { token: string } }
   };
 }
 
-export default async function ClientPortal({ params }: { params: { token: string } }) {
+export default async function ClientPortal({
+  params,
+  searchParams,
+}: {
+  params: { token: string };
+  searchParams?: { estilo?: string };
+}) {
+  // Prueba de estética: ?estilo=lab aplica el tema "laboratorio" (blanco,
+  // esquinas rectas, botones lila). Sin el parámetro, el portal de siempre.
+  const lab = searchParams?.estilo === "lab";
   const project = await prisma.project.findFirst({
     where: { portalToken: params.token },
     include: {
@@ -124,10 +133,10 @@ export default async function ClientPortal({ params }: { params: { token: string
 
   return (
     <div
-      className={`${helvetica.variable} proposal min-h-screen`}
+      className={`${helvetica.variable} proposal min-h-screen${lab ? " portal-lab" : ""}`}
       style={{ ["--accent" as string]: accent, ["--dark" as string]: dark }}
     >
-      <header className="sticky top-0 z-30 border-b border-black/10 bg-[#f1efe9]/85 backdrop-blur">
+      <header className="pt-header sticky top-0 z-30 border-b border-black/10 bg-[#f1efe9]/85 backdrop-blur">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-4 px-5 py-3 sm:px-6">
           <span className="text-[15px] font-medium tracking-tight">
             {studio.brandMark}
@@ -147,7 +156,7 @@ export default async function ClientPortal({ params }: { params: { token: string
           <p className="eyebrow">
             <span className="text-black">01</span> <span className="dot" /> Portal del proyecto · Actualizado al {longDate(today)}
           </p>
-          <h1 className="mt-6 text-[clamp(64px,13vw,196px)] font-medium leading-[0.86] tracking-[-0.055em]">
+          <h1 className="pt-hero-title mt-6 text-[clamp(64px,13vw,196px)] font-medium leading-[0.86] tracking-[-0.055em]">
             {line1}
             {line2 && (
               <>
@@ -192,7 +201,7 @@ export default async function ClientPortal({ params }: { params: { token: string
 
           <div className="mt-auto pt-12">
             <div className="flex flex-wrap items-end justify-between gap-6">
-              <p className="text-[clamp(72px,12vw,168px)] font-medium leading-none tracking-[-0.05em] tabular-nums">
+              <p className="pt-percent text-[clamp(72px,12vw,168px)] font-medium leading-none tracking-[-0.05em] tabular-nums">
                 {progress.percent}
                 <span className="text-[0.4em] text-black/40">%</span>
               </p>
@@ -602,13 +611,13 @@ function BankDetails({
 // cliente sepa dónde está) y una frase de apoyo más pequeña
 function SectionHead({ n, title, tagline, dark }: { n: string; title: string; tagline: string; dark?: boolean }) {
   return (
-    <div className="grid gap-3 lg:grid-cols-[1fr_2fr] lg:gap-8">
-      <p className="eyebrow" style={dark ? { color: "rgb(241 239 233 / 0.5)" } : undefined}>
+    <div className="pt-head grid gap-3 lg:grid-cols-[1fr_2fr] lg:gap-8">
+      <p className="pt-head-n eyebrow" style={dark ? { color: "rgb(241 239 233 / 0.5)" } : undefined}>
         <span className={dark ? "text-[#f1efe9]" : "text-black"}>{n}</span> Sección
       </p>
       <div>
-        <h2 className="text-[clamp(40px,6vw,84px)] font-medium leading-[0.95] tracking-[-0.045em]">{title}</h2>
-        <p className={`mt-3 max-w-xl text-[clamp(17px,1.6vw,22px)] leading-snug ${dark ? "text-[#f1efe9]/55" : "text-black/50"}`}>{tagline}</p>
+        <h2 className="pt-head-title text-[clamp(40px,6vw,84px)] font-medium leading-[0.95] tracking-[-0.045em]">{title}</h2>
+        <p className={`pt-head-tag mt-3 max-w-xl text-[clamp(17px,1.6vw,22px)] leading-snug ${dark ? "text-[#f1efe9]/55" : "text-black/50"}`}>{tagline}</p>
       </div>
     </div>
   );

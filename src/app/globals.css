@@ -481,3 +481,107 @@ select:focus-visible,
 .proposal section[id] {
   scroll-margin-top: 112px;
 }
+
+/* ─── Portal del cliente · tema de prueba "laboratorio" (?estilo=lab) ───
+   Blanco y gris muy claro, secciones negras, esquinas rectas, títulos en
+   peso medio a tamaño moderado, separadores finos y botones lila. */
+.portal-lab {
+  --lab-cta: #c7a6ff;
+  background-color: #ffffff;
+  color: #111111;
+  letter-spacing: -0.015em;
+}
+.portal-lab [class*="rounded"],
+.portal-lab .pill-dark,
+.portal-lab .pill-light,
+.portal-lab .pill-outline {
+  border-radius: 0 !important;
+}
+.portal-lab .pt-header {
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom-color: transparent;
+}
+.portal-lab .eyebrow {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 13px;
+  color: rgb(17 17 17 / 0.5);
+}
+.portal-lab .dot {
+  display: none;
+}
+/* Inicio: panel gris a todo lo ancho, título moderado */
+.portal-lab #inicio {
+  background: #f2f2f2;
+  margin-left: -1.25rem;
+  margin-right: -1.25rem;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+@media (min-width: 640px) {
+  .portal-lab #inicio {
+    margin-left: -1.5rem;
+    margin-right: -1.5rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+.portal-lab .pt-hero-title {
+  font-size: clamp(48px, 7.5vw, 112px);
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+}
+.portal-lab .pt-percent {
+  font-size: clamp(64px, 9vw, 128px);
+}
+/* Encabezados de sección: línea fina arriba, título a la izquierda y la
+   frase a la derecha */
+.portal-lab .pt-head {
+  border-top: 1px solid #111111;
+  padding-top: 1.5rem;
+}
+.portal-lab #pagos .pt-head,
+.portal-lab #marca .pt-head {
+  border-top-color: rgb(255 255 255 / 0.35);
+}
+.portal-lab .pt-head-title {
+  font-size: clamp(36px, 4.6vw, 64px);
+  line-height: 1;
+  letter-spacing: -0.035em;
+}
+.portal-lab .pt-head-tag {
+  font-size: clamp(17px, 1.5vw, 21px);
+  color: inherit;
+  opacity: 0.85;
+}
+/* Tarjetas: gris muy claro en lugar de borde */
+.portal-lab [class*="rounded-[22px]"][class*="border-black/10"] {
+  background: #f5f5f5;
+  border-color: transparent !important;
+}
+.portal-lab #pagos,
+.portal-lab #marca {
+  background: #111111 !important;
+}
+/* Botones: rectángulo lila con texto oscuro */
+.portal-lab .pill-dark,
+.portal-lab .pill-light {
+  background: var(--lab-cta) !important;
+  color: #111111 !important;
+  border-color: transparent !important;
+  padding: 0.7rem 1rem;
+}
+.portal-lab .pill-dark::before,
+.portal-lab .pill-light::before {
+  content: "+";
+  margin-right: 0.15rem;
+  font-weight: 400;
+}
+.portal-lab .pt-header .pill-dark::before {
+  content: none;
+}
+.portal-lab [class*="uppercase"] {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 13px;
+}
