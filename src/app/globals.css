@@ -482,11 +482,12 @@ select:focus-visible,
   scroll-margin-top: 112px;
 }
 
-/* ─── Portal del cliente · tema de prueba "laboratorio" (?estilo=lab) ───
+/* ─── Portal del cliente · estilo "laboratorio" (el principal) ───
    Blanco y gris muy claro, secciones negras, esquinas rectas, títulos en
-   peso medio a tamaño moderado, separadores finos y botones lila. */
+   peso medio a tamaño moderado, separadores finos y botones en el color de
+   acento del proyecto. ?estilo=editorial muestra el diseño anterior. */
 .portal-lab {
-  --lab-cta: #c7a6ff;
+  --lab-cta: var(--accent);
   background-color: #ffffff;
   color: #111111;
   letter-spacing: -0.015em;
@@ -567,7 +568,7 @@ select:focus-visible,
 .portal-lab .pill-dark,
 .portal-lab .pill-light {
   background: var(--lab-cta) !important;
-  color: #111111 !important;
+  color: var(--accent-text, #111111) !important;
   border-color: transparent !important;
   padding: 0.7rem 1rem;
 }
@@ -584,4 +585,10 @@ select:focus-visible,
   text-transform: none;
   letter-spacing: 0;
   font-size: 13px;
+}
+/* Sobre fondos del color del proyecto, el botón va en blanco para verse */
+.portal-lab [style*="var(--accent)"] .pill-dark,
+.portal-lab [style*="var(--accent)"] .pill-light {
+  background: #ffffff !important;
+  color: #111111 !important;
 }

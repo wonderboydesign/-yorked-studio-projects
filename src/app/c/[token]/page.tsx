@@ -54,9 +54,9 @@ export default async function ClientPortal({
   params: { token: string };
   searchParams?: { estilo?: string };
 }) {
-  // Prueba de estética: ?estilo=lab aplica el tema "laboratorio" (blanco,
-  // esquinas rectas, botones lila). Sin el parámetro, el portal de siempre.
-  const lab = searchParams?.estilo === "lab";
+  // Estilo del portal: "laboratorio" (blanco, esquinas rectas, botones en el
+  // color del proyecto). ?estilo=editorial muestra el diseño anterior.
+  const lab = searchParams?.estilo !== "editorial";
   const project = await prisma.project.findFirst({
     where: { portalToken: params.token },
     include: {
@@ -134,7 +134,12 @@ export default async function ClientPortal({
   return (
     <div
       className={`${helvetica.variable} proposal min-h-screen${lab ? " portal-lab" : ""}`}
-      style={{ ["--accent" as string]: accent, ["--dark" as string]: dark }}
+      style={{
+        ["--accent" as string]: accent,
+        ["--dark" as string]: dark,
+        // Texto de los botones: blanco sobre acentos oscuros, negro sobre claros
+        ["--accent-text" as string]: isDarkColor(accent) ? "#ffffff" : "#111111",
+      }}
     >
       <header className="pt-header sticky top-0 z-30 border-b border-black/10 bg-[#f1efe9]/85 backdrop-blur">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-4 px-5 py-3 sm:px-6">
@@ -621,4 +626,12 @@ function SectionHead({ n, title, tagline, dark }: { n: string; title: string; ta
       </div>
     </div>
   );
+}
+
+function isDarkColor(hex: string) {
+  const h = hex.replace("#", "");
+  const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h.slice(0, 6);
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16));
+  if ([r, g, b].some((n) => Number.isNaN(n))) return true;
+  return 0.299 * r + 0.587 * g + 0.114 * b < 150;
 }
