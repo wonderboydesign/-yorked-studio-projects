@@ -476,3 +476,8 @@ select:focus-visible,
 .proposal .pill-outline:hover {
   opacity: 0.85;
 }
+
+/* Portal del cliente: que la barra fija no tape el título al saltar a una sección */
+.proposal section[id] {
+  scroll-margin-top: 112px;
+}

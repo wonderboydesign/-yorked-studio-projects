@@ -354,8 +354,12 @@ export function fillNote(text: string, c: QuoteContent) {
     .replace(/\{balancePercent\}/g, String(100 - c.advancePercent));
 }
 
+// $25,000 · con centavos solo cuando los hay: $3.20
 export function formatMoney(n: number) {
-  return `$${Math.round(n).toLocaleString("en-US")}`;
+  const cents = Math.abs(n - Math.round(n)) > 0.004;
+  const value = cents ? Math.round(n * 100) / 100 : Math.round(n);
+  const digits = cents ? 2 : 0;
+  return "$" + value.toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits });
 }
 
 export function formatMonthYear(iso: string) {
