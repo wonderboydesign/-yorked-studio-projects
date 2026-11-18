@@ -32,7 +32,7 @@ const COPY: Record<LinkKind, { title: string; hint: string; namePh: string; urlP
     title: "Entregas",
     hint: "Cada presentación o avance que le mandas: sube el PDF (exportado desde Branding → Presentación) o pega un link de Drive, Figma…",
     namePh: "Presentación de concepto",
-    urlPh: "https://… (o sube el PDF)",
+    urlPh: "Link (opcional) o sube el PDF",
     add: "Agregar entrega",
     upload: "Subir PDF",
     empty: "Aún no hay entregas.",
@@ -111,7 +111,8 @@ export default function PortalLinksEditor({
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!title.trim() || !url.trim()) return;
+    // Las entregas pueden ir sin link
+    if (!title.trim() || (kind !== "delivery" && !url.trim())) return;
     if (kind === "meeting" && !date) return notify("Pon la fecha y hora de la reunión.", "error");
     setBusy(true);
     await create({ title: title.trim(), url: url.trim() });
@@ -159,13 +160,17 @@ export default function PortalLinksEditor({
             return (
               <li key={l.id} className={`flex items-center gap-3 py-2.5 ${past ? "opacity-50" : ""}`}>
                 <div className="min-w-0 flex-1">
-                  <a href={l.url} target="_blank" rel="noreferrer" className="block truncate hover:underline">
-                    {l.title}
-                  </a>
+                  {l.url ? (
+                    <a href={l.url} target="_blank" rel="noreferrer" className="block truncate hover:underline">
+                      {l.title}
+                    </a>
+                  ) : (
+                    <span className="block truncate">{l.title}</span>
+                  )}
                   <p className="text-xs text-muted truncate">
                     {kind === "meeting" && l.date && when(l.date)}
                     {kind === "delivery" && (l.phase ? `Fase ${l.phase} · ` : "") + new Date(l.createdAt).toLocaleDateString("es-MX", { day: "numeric", month: "short" })}
-                    {kind !== "meeting" && (l.pathname ? " · archivo" : " · link")}
+                    {kind !== "meeting" && (l.pathname ? " · archivo" : l.url ? " · link" : " · sin link")}
                     {l.note && ` · ${l.note}`}
                   </p>
                 </div>
@@ -220,7 +225,7 @@ export default function PortalLinksEditor({
               />
             </>
           )}
-          <Button type="submit" tone="primary" disabled={busy || !title.trim() || !url.trim()}>
+          <Button type="submit" tone="primary" disabled={busy || !title.trim() || (kind !== "delivery" && !url.trim())}>
             {copy.add}
           </Button>
         </div>

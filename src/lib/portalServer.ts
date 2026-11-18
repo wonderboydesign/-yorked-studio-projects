@@ -106,7 +106,8 @@ export function linkFields(body: Record<string, unknown>) {
   if (title) data.title = title;
   if (body.url !== undefined) {
     const url = str(body.url, 2000) ?? "";
-    if (/^https?:\/\/\S+$/i.test(url)) data.url = url;
+    // Vacío es válido (una entrega sin link); lo demás debe ser http(s)
+    if (url === "" || /^https?:\/\/\S+$/i.test(url)) data.url = url;
   }
   if (body.pathname !== undefined) data.pathname = str(body.pathname, 500) || null;
   if (body.note !== undefined) data.note = str(body.note, 1000) || null;
