@@ -82,7 +82,58 @@ export default function PortalLinksEditor({
   const [phase, setPhase] = useState("");
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
+  // Si hay algo en edición, el formulario guarda cambios en lugar de agregar
+  const [editing, setEditing] = useState<PortalLinkRow | null>(null);
   const file = useRef<HTMLInputElement>(null);
+  const form = useRef<HTMLFormElement>(null);
+
+  function resetForm() {
+    setEditing(null);
+    setTitle("");
+    setUrl("");
+    setDate("");
+    setPhase("");
+    setNote("");
+  }
+
+  function startEdit(l: PortalLinkRow) {
+    setEditing(l);
+    setTitle(l.title);
+    setUrl(l.url);
+    setNote(l.note ?? "");
+    setPhase(l.phase ?? "");
+    setDate(toLocalInput(l.date));
+    setTimeout(() => form.current?.scrollIntoView({ block: "nearest", behavior: "smooth" }), 50);
+  }
+
+  // Guarda los cambios de lo que ya está publicado. Si se escribe un link
+  // nuevo donde había un archivo subido, el archivo anterior se borra.
+  async function saveEdit(extra?: { url: string; pathname: string }) {
+    if (!editing) return false;
+    const newUrl = extra?.url ?? url.trim();
+    const body: Record<string, unknown> = {
+      title: title.trim() || editing.title,
+      url: newUrl,
+      note,
+      ...(extra ? { pathname: extra.pathname } : newUrl !== editing.url ? { pathname: "" } : {}),
+      ...(kind === "delivery" ? { phase } : {}),
+      ...(kind === "meeting" && date ? { date: new Date(date).toISOString() } : {}),
+    };
+    const res = await fetch(`/api/links/${editing.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      notify((await res.json().catch(() => null))?.error ?? "No se pudo guardar.", "error");
+      return false;
+    }
+    const updated: PortalLinkRow = await res.json();
+    onChange(links.map((x) => (x.id === updated.id ? updated : x)));
+    notify("Cambios guardados");
+    resetForm();
+    return true;
+  }
 
   async function create(fields: { title: string; url: string; pathname?: string }) {
     const res = await fetch(`/api/projects/${projectId}/links`, {
@@ -115,12 +166,24 @@ export default function PortalLinksEditor({
     if (!title.trim() || (kind !== "delivery" && !url.trim())) return;
     if (kind === "meeting" && !date) return notify("Pon la fecha y hora de la reunión.", "error");
     setBusy(true);
-    await create({ title: title.trim(), url: url.trim() });
+    if (editing) await saveEdit();
+    else await create({ title: title.trim(), url: url.trim() });
     setBusy(false);
   }
 
   async function uploadFiles(files: File[]) {
     setBusy(true);
+    // Al editar, el archivo nuevo reemplaza al anterior (solo el primero)
+    if (editing) {
+      try {
+        const up = await uploadFile(files[0]);
+        await saveEdit({ url: up.url, pathname: up.pathname });
+      } catch (e) {
+        notify(e instanceof Error ? e.message : `No se pudo subir "${files[0].name}".`, "error");
+      }
+      setBusy(false);
+      return;
+    }
     for (const f of files) {
       try {
         const up = await uploadFile(f);
@@ -134,6 +197,7 @@ export default function PortalLinksEditor({
 
   async function remove(l: PortalLinkRow) {
     if (!window.confirm(`¿Quitar "${l.title}" del portal?`)) return;
+    if (editing?.id === l.id) resetForm();
     onChange(links.filter((x) => x.id !== l.id));
     await fetch(`/api/links/${l.id}`, { method: "DELETE" });
   }
@@ -158,7 +222,7 @@ export default function PortalLinksEditor({
           {sorted.map((l) => {
             const past = kind === "meeting" && l.date && new Date(l.date).getTime() < now - 2 * 3600 * 1000;
             return (
-              <li key={l.id} className={`flex items-center gap-3 py-2.5 ${past ? "opacity-50" : ""}`}>
+              <li key={l.id} className={`flex items-center gap-3 py-2.5 ${past ? "opacity-50" : ""} ${editing?.id === l.id ? "bg-ink/[0.05] -mx-4 px-4" : ""}`}>
                 <div className="min-w-0 flex-1">
                   {l.url ? (
                     <a href={l.url} target="_blank" rel="noreferrer" className="block truncate hover:underline">
@@ -174,6 +238,9 @@ export default function PortalLinksEditor({
                     {l.note && ` · ${l.note}`}
                   </p>
                 </div>
+                <button onClick={() => startEdit(l)} className="text-xs text-muted hover:text-ink shrink-0">
+                  Editar
+                </button>
                 <button onClick={() => remove(l)} className="text-xs text-muted hover:text-red-600 shrink-0">
                   Quitar
                 </button>
@@ -183,7 +250,12 @@ export default function PortalLinksEditor({
         </ul>
       )}
 
-      <form onSubmit={submit} className="field rounded-2xl p-3 space-y-2">
+      <form ref={form} onSubmit={submit} className="field rounded-2xl p-3 space-y-2">
+        {editing && (
+          <p className="text-xs text-muted">
+            Editando “{editing.title}”. {copy.upload ? "Puedes cambiar el link o subir un archivo nuevo que lo reemplaza." : ""}
+          </p>
+        )}
         <div className="grid gap-2 sm:grid-cols-2">
           <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={copy.namePh} className="field rounded-lg px-2.5 py-1.5 text-sm" aria-label="Título" />
           {kind === "meeting" ? (
@@ -214,7 +286,7 @@ export default function PortalLinksEditor({
               <input
                 ref={file}
                 type="file"
-                multiple={kind === "brand"}
+                multiple={kind === "brand" && !editing}
                 accept={kind === "delivery" ? "application/pdf" : undefined}
                 className="hidden"
                 onChange={(e) => {
@@ -225,8 +297,13 @@ export default function PortalLinksEditor({
               />
             </>
           )}
+          {editing && (
+            <Button tone="ghost" onClick={resetForm} disabled={busy}>
+              Cancelar edición
+            </Button>
+          )}
           <Button type="submit" tone="primary" disabled={busy || !title.trim() || (kind !== "delivery" && !url.trim())}>
-            {copy.add}
+            {editing ? "Guardar cambios" : copy.add}
           </Button>
         </div>
       </form>
