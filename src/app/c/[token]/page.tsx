@@ -353,7 +353,7 @@ export default async function ClientPortal({
                     {subtitle && <p className="mt-2 text-[14px] leading-snug text-black/60">{subtitle}</p>}
                     <div className="mt-5 flex items-baseline justify-between gap-4 border-t border-black/20 pt-3">
                       {original && (isOptions ? nProducts === 0 : items.length === 0) ? (
-                        <span className="text-[15px]">Documento en PDF</span>
+                        <span className="text-[15px]">Documento original</span>
                       ) : isOptions ? (
                         <span className="text-[15px]">
                           {nProducts} {nProducts === 1 ? "producto" : "productos"} en {od!.categories.length} {od!.categories.length === 1 ? "categoría" : "categorías"}
