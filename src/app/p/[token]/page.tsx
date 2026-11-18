@@ -399,7 +399,7 @@ export default async function ProposalPage({ params }: { params: { token: string
           </h2>
 
           {approved ? (
-            <div className="mt-10 grid gap-8 lg:grid-cols-2">
+            <div className="mt-10 grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-2">
               <div>
                 <p className="max-w-md text-[17px] leading-snug">
                   {quote.approvedName ? `${quote.approvedName.split(" ")[0]}, recibimos` : "Recibimos"} tu aprobación de{" "}

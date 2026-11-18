@@ -25,10 +25,11 @@ export default function CopyRows({ rows }: { rows: [string, string][] }) {
   return (
     <div>
       {rows.map(([k, v]) => (
-        <div key={k} className="flex items-center justify-between gap-3 border-t border-black/10 py-2">
-          <span className="text-[14px] text-black/55">{k}</span>
-          <span className="flex min-w-0 items-center gap-2">
-            <span className="truncate text-right text-[14px] font-medium">{v}</span>
+        // Etiqueta y botón arriba, el dato completo abajo: así un titular largo
+        // o la CLABE nunca empujan el recuadro fuera de la pantalla
+        <div key={k} className="border-t border-black/10 py-2.5">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-[13px] text-black/55">{k}</span>
             <button
               type="button"
               onClick={() => copy(k, clean(k, v))}
@@ -39,7 +40,8 @@ export default function CopyRows({ rows }: { rows: [string, string][] }) {
             >
               {copied === k ? "✓ Copiado" : "Copiar"}
             </button>
-          </span>
+          </div>
+          <p className="mt-0.5 text-[15px] font-medium leading-snug break-words [overflow-wrap:anywhere]">{v}</p>
         </div>
       ))}
       <button
