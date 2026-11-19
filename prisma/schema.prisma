@@ -8,36 +8,40 @@ datasource db {
 }
 
 model Project {
-  id             String            @id @default(cuid())
-  name           String
-  client         String?
-  color          String            @default("#1E4FFF")
-  startDate      DateTime
-  endDate        DateTime
-  notes          String?
-  archived       Boolean           @default(false)
-  createdAt      DateTime          @default(now())
-  tasks          Task[]
+  id               String            @id @default(cuid())
+  name             String
+  client           String?
+  color            String            @default("#1E4FFF")
+  startDate        DateTime
+  endDate          DateTime
+  notes            String?
+  archived         Boolean           @default(false)
+  createdAt        DateTime          @default(now())
+  tasks            Task[]
   // Flujo de branding (Brief → Concepto → Investigación → Moodboard →
   // Desarrollo → Presentación), opcional por proyecto
-  brand          BrandWorkspace?
-  brandItems     BrandItem[]
-  moodboards     Moodboard[]
-  presentations  Presentation[]
-  prospects      Prospect[]
+  brand            BrandWorkspace?
+  brandItems       BrandItem[]
+  moodboards       Moodboard[]
+  presentations    Presentation[]
+  prospects        Prospect[]
   // Portal del cliente: liga privada /c/<portalToken> con avance y pagos
   // Sin @unique para que el build (prisma db push) no pida confirmación en
   // una tabla con datos; es aleatorio (18 bytes) y se busca con índice
-  portalToken    String?
-  portalViewedAt DateTime?
+  portalToken      String?
+  portalViewedAt   DateTime?
   // Precio completo del proyecto sin IVA (los pagos se reparten de aquí) y si
   // al cliente se le cobra con IVA; el cliente solo ve el monto final
-  priceTotal     Float?
-  withIva        Boolean           @default(false)
-  payments       Payment[]
-  documents      ProjectDocument[]
-  links          PortalLink[]
-  supplierQuotes SupplierQuote[]
+  priceTotal       Float?
+  // Ajuste manual y opcional de lo que ve el cliente: si están vacíos, el
+  // avance y la fecha de entrega se calculan solos con las tareas
+  progressOverride Int?
+  estimatedEnd     DateTime?
+  withIva          Boolean           @default(false)
+  payments         Payment[]
+  documents        ProjectDocument[]
+  links            PortalLink[]
+  supplierQuotes   SupplierQuote[]
 
   @@index([portalToken])
 }
