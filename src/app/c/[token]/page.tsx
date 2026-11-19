@@ -76,7 +76,14 @@ export default async function ClientPortal({
   const [studio, quote] = await Promise.all([getStudio(), projectQuote(project.id)]);
   const c = quote?.content as unknown as QuoteContent | undefined;
   const today = localTodayUTC();
-  const progress = computeProgress(project.tasks, today);
+  // El cálculo automático con las tareas; si el estudio fijó a mano el
+  // porcentaje o la fecha de entrega, se muestra eso (solo esos dos datos)
+  const auto = computeProgress(project.tasks, today);
+  const progress = {
+    ...auto,
+    percent: project.progressOverride ?? auto.percent,
+    end: project.estimatedEnd ?? auto.end,
+  };
   const accent = c?.accent ?? project.color;
   const dark = c?.dark ?? "#121210";
   const line1 = c?.brandLine1 || project.name;

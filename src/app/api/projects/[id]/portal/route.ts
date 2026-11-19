@@ -14,7 +14,7 @@ async function state(projectId: string) {
   }
   const project = await prisma.project.findUnique({
     where: { id: projectId },
-    select: { id: true, name: true, portalToken: true, portalViewedAt: true, priceTotal: true },
+    select: { id: true, name: true, portalToken: true, portalViewedAt: true, priceTotal: true, progressOverride: true, estimatedEnd: true },
   });
   if (!project) return null;
   const [payments, progress, quote, documents, links, supplierQuotes] = await Promise.all([
@@ -56,6 +56,24 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     await ensurePayments(params.id);
   } else if (action === "regenerate") {
     await prisma.project.update({ where: { id: params.id }, data: { portalToken: newPortalToken() } });
+  } else if (action === "progress") {
+    // Ajuste manual: porcentaje (0–100) y/o fecha estimada de entrega. null
+    // los quita y vuelve al cálculo automático.
+    const data: { progressOverride?: number | null; estimatedEnd?: Date | null } = {};
+    if (body.progressOverride === null) data.progressOverride = null;
+    else if (body.progressOverride !== undefined) {
+      const n = Math.round(Number(body.progressOverride));
+      if (!Number.isFinite(n) || n < 0 || n > 100) return NextResponse.json({ error: "El porcentaje va de 0 a 100" }, { status: 400 });
+      data.progressOverride = n;
+    }
+    if (body.estimatedEnd === null) data.estimatedEnd = null;
+    else if (body.estimatedEnd !== undefined) {
+      if (typeof body.estimatedEnd !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(body.estimatedEnd)) {
+        return NextResponse.json({ error: "Fecha no válida" }, { status: 400 });
+      }
+      data.estimatedEnd = new Date(`${body.estimatedEnd}T00:00:00Z`);
+    }
+    await prisma.project.update({ where: { id: params.id }, data });
   } else if (action === "price") {
     // Precio completo (sin IVA): interno; el cliente solo ve lo que paga. Si
     // cambia, se reparte entre los pagos pendientes (el IVA va por pago).

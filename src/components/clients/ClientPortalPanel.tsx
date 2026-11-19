@@ -25,6 +25,8 @@ interface PortalState {
   };
   hasApprovedQuote: boolean;
   priceTotal: number | null;
+  progressOverride: number | null;
+  estimatedEnd: string | null;
   documents: PortalDocument[];
   links: PortalLinkRow[];
   quoteToken: string | null;
@@ -93,6 +95,20 @@ export default function ClientPortalPanel({
     setBusy(false);
     if (res.ok) setS(await res.json());
     else notify("No se pudo actualizar el portal.", "error");
+  }
+
+  // Ajuste manual del avance y la fecha de entrega (null = volver al automático)
+  async function saveManual(fields: { progressOverride?: number | null; estimatedEnd?: string | null }) {
+    const res = await fetch(`/api/projects/${projectId}/portal`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "progress", ...fields }),
+    });
+    if (res.ok) {
+      setS(await res.json());
+      onDataChanged?.();
+      notify("Guardado");
+    } else notify((await res.json().catch(() => null))?.error ?? "No se pudo guardar.", "error");
   }
 
   async function savePrice(fields: { priceTotal?: number | null }) {
@@ -286,10 +302,10 @@ export default function ClientPortalPanel({
             <section className="space-y-3">
               <div className="flex items-baseline justify-between">
                 <h3 className="text-base">Avance que ve el cliente</h3>
-                <span className="text-3xl tracking-[-0.02em] tabular-nums">{s.progress.percent}%</span>
+                <span className="text-3xl tracking-[-0.02em] tabular-nums">{s.progressOverride ?? s.progress.percent}%</span>
               </div>
               <div className="h-1.5 overflow-hidden rounded-full bg-ink/10">
-                <div className="h-full rounded-full bg-accent" style={{ width: `${s.progress.percent}%` }} />
+                <div className="h-full rounded-full bg-accent" style={{ width: `${s.progressOverride ?? s.progress.percent}%` }} />
               </div>
               {s.progress.phases.length === 0 ? (
                 <PhaseBuilder
@@ -316,10 +332,64 @@ export default function ClientPortalPanel({
                   ))}
                 </ul>
               )}
+              {/* Ajuste manual (opcional): vacío = cálculo automático con las tareas */}
+              <div className="rounded-2xl bg-ink/[0.04] p-3 space-y-2">
+                <p className="text-sm">Ajuste manual (opcional)</p>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <label className="block space-y-1">
+                    <span className="text-[11px] text-muted">Porcentaje que ve el cliente</span>
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        key={`pct-${s.progressOverride ?? "auto"}`}
+                        type="number"
+                        min={0}
+                        max={100}
+                        defaultValue={s.progressOverride ?? ""}
+                        placeholder={`Automático: ${s.progress.percent}`}
+                        onBlur={(e) => {
+                          const v = e.target.value.trim();
+                          if (v === "" && s.progressOverride !== null) saveManual({ progressOverride: null });
+                          else if (v !== "" && Number(v) !== s.progressOverride) saveManual({ progressOverride: Number(v) });
+                        }}
+                        onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
+                        className="field w-full rounded-lg px-2.5 py-1.5 text-sm"
+                      />
+                      <span className="text-sm text-muted">%</span>
+                    </div>
+                  </label>
+                  <label className="block space-y-1">
+                    <span className="text-[11px] text-muted">Fecha estimada de entrega</span>
+                    <input
+                      key={`end-${s.estimatedEnd ?? "auto"}`}
+                      type="date"
+                      defaultValue={s.estimatedEnd?.slice(0, 10) ?? ""}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        if (v === "" && s.estimatedEnd) saveManual({ estimatedEnd: null });
+                        else if (v && v !== s.estimatedEnd?.slice(0, 10)) saveManual({ estimatedEnd: v });
+                      }}
+                      className="field w-full rounded-lg px-2.5 py-1.5 text-sm"
+                    />
+                  </label>
+                </div>
+                <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted">
+                  <span>
+                    Automático hoy: {s.progress.percent}%
+                    {s.progress.end &&
+                      ` · entrega ${new Date(s.progress.end).toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" })}`}
+                  </span>
+                  {(s.progressOverride !== null || s.estimatedEnd) && (
+                    <button onClick={() => saveManual({ progressOverride: null, estimatedEnd: null })} className="hover:text-ink">
+                      Volver al automático
+                    </button>
+                  )}
+                </div>
+              </div>
+
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <p className="text-xs text-muted max-w-md">
-                  Se actualiza solo con el estado de las tareas: al marcar una fase como terminada, sube el avance. Las fases en
-                  curso avanzan según los días que llevan.
+                  Por defecto se actualiza solo con el estado de las tareas: al marcar una fase como terminada, sube el avance.
+                  Las fases en curso avanzan según los días que llevan. La fecha es la de fin de la última tarea.
                 </p>
                 {s.progress.phases.some((p) => p.state !== "done") && (
                   <Button tone="ghost" onClick={completeAll}>
