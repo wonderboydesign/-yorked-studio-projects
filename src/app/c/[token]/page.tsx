@@ -165,6 +165,10 @@ export default async function ClientPortal({
       <main className="mx-auto max-w-[1440px] px-5 sm:px-6">
         {/* Avance */}
         <section id="inicio" className="flex min-h-[calc(100svh-57px)] flex-col pb-6 pt-10">
+          {project.logoUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={project.logoUrl} alt={project.name} className="mb-8 h-14 w-auto max-w-[220px] object-contain object-left sm:h-16" />
+          )}
           <p className="eyebrow">
             <span className="text-black">01</span> <span className="dot" /> Portal del proyecto · Actualizado al {longDate(today)}
           </p>

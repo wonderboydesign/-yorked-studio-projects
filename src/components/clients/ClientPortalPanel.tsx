@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { uploadFile } from "@/lib/upload";
+import { IMAGE_EXTENSIONS, shrinkImage, uploadFile } from "@/lib/upload";
 import { PaymentRow, Progress, clientAmount } from "@/lib/portal";
 import { formatMoney } from "@/lib/quotes";
 import { Button } from "../branding/ui";
@@ -25,6 +25,7 @@ interface PortalState {
   };
   hasApprovedQuote: boolean;
   priceTotal: number | null;
+  logoUrl: string | null;
   progressOverride: number | null;
   creditBalance: number | null;
   creditNote: string | null;
@@ -124,6 +125,23 @@ export default function ClientPortalPanel({
       setS(await res.json());
       notify("Saldo a favor guardado");
     } else notify((await res.json().catch(() => null))?.error ?? "No se pudo guardar.", "error");
+  }
+
+  async function saveLogo(file: File | null) {
+    try {
+      const logoUrl = file ? (await uploadFile(await shrinkImage(file, 600), IMAGE_EXTENSIONS)).url : null;
+      const res = await fetch(`/api/projects/${projectId}/portal`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "logo", logoUrl }),
+      });
+      if (!res.ok) throw new Error((await res.json().catch(() => null))?.error ?? "No se pudo guardar el logotipo.");
+      setS(await res.json());
+      onDataChanged?.();
+      notify(file ? "Logotipo guardado" : "Logotipo quitado");
+    } catch (err) {
+      notify(err instanceof Error ? err.message : "No se pudo subir el logotipo.", "error");
+    }
   }
 
   async function savePrice(fields: { priceTotal?: number | null }) {
@@ -235,9 +253,45 @@ export default function ClientPortalPanel({
     <div className="fixed inset-0 z-50 bg-black/20 backdrop-blur-[2px] flex items-center justify-center p-4" onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} className="glass-overlay rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between px-8 pt-6 pb-4">
-          <div className="min-w-0">
-            <p className="text-sm text-muted">Portal del cliente</p>
-            <h2 className="text-xl truncate">{s?.name ?? "…"}</h2>
+          <div className="flex min-w-0 items-center gap-3">
+            {s && (
+              <div className="group relative shrink-0">
+                <label
+                  title={s.logoUrl ? "Cambiar logotipo" : "Agregar logotipo del cliente"}
+                  className="flex h-12 w-12 cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-ink/[0.06] text-[10px] text-muted hover:bg-ink/10"
+                >
+                  {s.logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={s.logoUrl} alt="" className="h-full w-full object-contain p-1" />
+                  ) : (
+                    "Logo"
+                  )}
+                  <input
+                    type="file"
+                    accept=".svg,.jpg,.jpeg,.png,.webp,.gif"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      e.target.value = "";
+                      if (f) saveLogo(f);
+                    }}
+                  />
+                </label>
+                {s.logoUrl && (
+                  <button
+                    onClick={() => saveLogo(null)}
+                    title="Quitar logotipo"
+                    className="absolute -right-1.5 -top-1.5 hidden h-5 w-5 items-center justify-center rounded-full bg-ink text-[11px] text-white group-hover:flex"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            )}
+            <div className="min-w-0">
+              <p className="text-sm text-muted">Portal del cliente</p>
+              <h2 className="text-xl truncate">{s?.name ?? "…"}</h2>
+            </div>
           </div>
           <Button tone="ghost" onClick={onClose}>
             Cerrar
