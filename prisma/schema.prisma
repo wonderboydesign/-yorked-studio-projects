@@ -12,6 +12,8 @@ model Project {
   name             String
   client           String?
   color            String            @default("#1E4FFF")
+  // Logotipo del cliente (archivo en Vercel Blob), opcional
+  logoUrl          String?
   startDate        DateTime
   endDate          DateTime
   notes            String?
