@@ -14,7 +14,7 @@ async function state(projectId: string) {
   }
   const project = await prisma.project.findUnique({
     where: { id: projectId },
-    select: { id: true, name: true, portalToken: true, portalViewedAt: true, priceTotal: true, logoUrl: true, progressOverride: true, creditBalance: true, creditNote: true, creditVisible: true, estimatedEnd: true },
+    select: { id: true, name: true, portalToken: true, portalViewedAt: true, priceTotal: true, logoUrl: true, showName: true, progressOverride: true, creditBalance: true, creditNote: true, creditVisible: true, estimatedEnd: true },
   });
   if (!project) return null;
   const [payments, progress, quote, documents, links, supplierQuotes] = await Promise.all([
@@ -78,6 +78,9 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     // Logotipo del cliente: un archivo ya subido a Blob, o null para quitarlo
     if (body.logoUrl !== null && !isBlobUrl(body.logoUrl)) return NextResponse.json({ error: "Archivo no válido" }, { status: 400 });
     await prisma.project.update({ where: { id: params.id }, data: { logoUrl: body.logoUrl } });
+  } else if (action === "showName") {
+    if (typeof body.showName !== "boolean") return NextResponse.json({ error: "Valor no válido" }, { status: 400 });
+    await prisma.project.update({ where: { id: params.id }, data: { showName: body.showName } });
   } else if (action === "credit") {
       const data: { creditBalance?: number | null; creditNote?: string | null; creditVisible?: boolean } = {};
       if (body.creditBalance === null) data.creditBalance = null;

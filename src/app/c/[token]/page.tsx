@@ -177,7 +177,7 @@ export default async function ClientPortal({
                 alt={project.name}
                 className="h-[180px] w-auto max-w-full object-contain object-left sm:h-[280px] lg:h-[380px]"
               />
-              <h1 className="mt-8 text-[clamp(15px,1.7vw,22px)] font-medium leading-tight tracking-[-0.02em]">
+              <h1 className={project.showName ? "mt-8 text-[clamp(15px,1.7vw,22px)] font-medium leading-tight tracking-[-0.02em]" : "sr-only"}>
                 {line1}
                 {line2 && (
                   <>

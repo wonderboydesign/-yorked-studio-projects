@@ -14,6 +14,8 @@ model Project {
   color            String            @default("#1E4FFF")
   // Logotipo del cliente (archivo en Vercel Blob), opcional
   logoUrl          String?
+  // Con logotipo, mostrar o no el nombre del cliente en el portal
+  showName         Boolean           @default(true)
   startDate        DateTime
   endDate          DateTime
   notes            String?

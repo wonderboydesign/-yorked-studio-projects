@@ -26,6 +26,7 @@ interface PortalState {
   hasApprovedQuote: boolean;
   priceTotal: number | null;
   logoUrl: string | null;
+  showName: boolean;
   progressOverride: number | null;
   creditBalance: number | null;
   creditNote: string | null;
@@ -142,6 +143,18 @@ export default function ClientPortalPanel({
     } catch (err) {
       notify(err instanceof Error ? err.message : "No se pudo subir el logotipo.", "error");
     }
+  }
+
+  async function saveShowName(showName: boolean) {
+    const res = await fetch(`/api/projects/${projectId}/portal`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "showName", showName }),
+    });
+    if (res.ok) {
+      setS(await res.json());
+      notify(showName ? "Nombre visible en el portal" : "Nombre oculto en el portal");
+    } else notify("No se pudo guardar.", "error");
   }
 
   async function savePrice(fields: { priceTotal?: number | null }) {
@@ -291,6 +304,15 @@ export default function ClientPortalPanel({
             <div className="min-w-0">
               <p className="text-sm text-muted">Portal del cliente</p>
               <h2 className="text-xl truncate">{s?.name ?? "…"}</h2>
+              {s && (
+                <label
+                  title={s.logoUrl ? "" : "Primero agrega el logotipo"}
+                  className={`mt-1 flex items-center gap-1.5 text-xs ${s.logoUrl ? "cursor-pointer text-muted" : "text-muted/50"}`}
+                >
+                  <input type="checkbox" disabled={!s.logoUrl} checked={s.showName} onChange={(e) => saveShowName(e.target.checked)} />
+                  Mostrar el nombre en el portal
+                </label>
+              )}
             </div>
           </div>
           <Button tone="ghost" onClick={onClose}>
