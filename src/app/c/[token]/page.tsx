@@ -432,6 +432,13 @@ export default async function ClientPortal({
                     </p>
                   </div>
                 </div>
+                {project.creditVisible && (project.creditBalance ?? 0) > 0 && (
+                  <div className="mt-8 border-t border-white/15 pt-6 text-[13px]">
+                    <p className="text-[#f1efe9]/50">Saldo a favor</p>
+                    <p className="mt-1 text-[24px] font-medium tracking-[-0.02em]">{formatMoney(project.creditBalance!)}</p>
+                    <p className="mt-1 text-[#f1efe9]/60">{project.creditNote || "Disponible para tus próximos proyectos."}</p>
+                  </div>
+                )}
               </div>
             </div>
 

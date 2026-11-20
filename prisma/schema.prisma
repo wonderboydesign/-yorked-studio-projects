@@ -37,6 +37,11 @@ model Project {
   // avance y la fecha de entrega se calculan solos con las tareas
   progressOverride Int?
   estimatedEnd     DateTime?
+  // Saldo a favor opcional del cliente para proyectos futuros (interno; se
+  // puede mostrar en su portal)
+  creditBalance    Float?
+  creditNote       String?
+  creditVisible    Boolean           @default(true)
   withIva          Boolean           @default(false)
   payments         Payment[]
   documents        ProjectDocument[]
