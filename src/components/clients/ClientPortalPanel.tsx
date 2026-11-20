@@ -129,7 +129,7 @@ export default function ClientPortalPanel({
 
   async function saveLogo(file: File | null) {
     try {
-      const logoUrl = file ? (await uploadFile(await shrinkImage(file, 600), IMAGE_EXTENSIONS)).url : null;
+      const logoUrl = file ? (await uploadFile(await shrinkImage(file, 1200), IMAGE_EXTENSIONS)).url : null;
       const res = await fetch(`/api/projects/${projectId}/portal`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

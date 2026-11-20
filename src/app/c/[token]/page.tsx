@@ -165,22 +165,39 @@ export default async function ClientPortal({
       <main className="mx-auto max-w-[1440px] px-5 sm:px-6">
         {/* Avance */}
         <section id="inicio" className="flex min-h-[calc(100svh-57px)] flex-col pb-6 pt-10">
-          {project.logoUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={project.logoUrl} alt={project.name} className="mb-8 h-14 w-auto max-w-[220px] object-contain object-left sm:h-16" />
-          )}
           <p className="eyebrow">
             <span className="text-black">01</span> <span className="dot" /> Portal del proyecto · Actualizado al {longDate(today)}
           </p>
-          <h1 className="pt-hero-title mt-6 text-[clamp(64px,13vw,196px)] font-medium leading-[0.86] tracking-[-0.055em]">
-            {line1}
-            {line2 && (
-              <>
-                <br />
-                <span style={{ color: "var(--accent)" }}>{line2}</span>
-              </>
-            )}
-          </h1>
+          {project.logoUrl ? (
+            // Con logotipo: el logo es la imagen principal, centrado, y el nombre queda pequeño debajo
+            <div className="flex flex-1 flex-col items-center justify-center py-10 text-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={project.logoUrl}
+                alt={project.name}
+                className="h-[140px] w-auto max-w-[85%] object-contain sm:h-[220px] lg:h-[300px]"
+              />
+              <h1 className="mt-8 text-[clamp(18px,2.2vw,28px)] font-medium leading-tight tracking-[-0.02em]">
+                {line1}
+                {line2 && (
+                  <>
+                    {" "}
+                    <span style={{ color: "var(--accent)" }}>{line2}</span>
+                  </>
+                )}
+              </h1>
+            </div>
+          ) : (
+            <h1 className="pt-hero-title mt-6 text-[clamp(64px,13vw,196px)] font-medium leading-[0.86] tracking-[-0.055em]">
+              {line1}
+              {line2 && (
+                <>
+                  <br />
+                  <span style={{ color: "var(--accent)" }}>{line2}</span>
+                </>
+              )}
+            </h1>
+          )}
 
           {/* Accesos rápidos: propuesta, próxima reunión y descargables */}
           {(proposalUrl || nextMeeting || brandFiles.length > 0) && (
