@@ -14,7 +14,7 @@ async function state(projectId: string) {
   }
   const project = await prisma.project.findUnique({
     where: { id: projectId },
-    select: { id: true, name: true, portalToken: true, portalViewedAt: true, priceTotal: true, progressOverride: true, estimatedEnd: true },
+    select: { id: true, name: true, portalToken: true, portalViewedAt: true, priceTotal: true, progressOverride: true, creditBalance: true, creditNote: true, creditVisible: true, estimatedEnd: true },
   });
   if (!project) return null;
   const [payments, progress, quote, documents, links, supplierQuotes] = await Promise.all([
@@ -74,7 +74,18 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       data.estimatedEnd = new Date(`${body.estimatedEnd}T00:00:00Z`);
     }
     await prisma.project.update({ where: { id: params.id }, data });
-  } else if (action === "price") {
+  } else if (action === "credit") {
+      const data: { creditBalance?: number | null; creditNote?: string | null; creditVisible?: boolean } = {};
+      if (body.creditBalance === null) data.creditBalance = null;
+      else if (body.creditBalance !== undefined) {
+        const n = Math.round(Number(body.creditBalance) * 100) / 100;
+        if (!Number.isFinite(n) || n < 0) return NextResponse.json({ error: "El saldo a favor no es válido" }, { status: 400 });
+        data.creditBalance = n === 0 ? null : n;
+      }
+      if (body.creditNote !== undefined) data.creditNote = typeof body.creditNote === "string" && body.creditNote.trim() ? body.creditNote.trim().slice(0, 300) : null;
+      if (typeof body.creditVisible === "boolean") data.creditVisible = body.creditVisible;
+      await prisma.project.update({ where: { id: params.id }, data });
+    } else if (action === "price") {
     // Precio completo (sin IVA): interno; el cliente solo ve lo que paga. Si
     // cambia, se reparte entre los pagos pendientes (el IVA va por pago).
     const data: { priceTotal?: number | null } = {};

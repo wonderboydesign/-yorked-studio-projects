@@ -26,6 +26,9 @@ interface PortalState {
   hasApprovedQuote: boolean;
   priceTotal: number | null;
   progressOverride: number | null;
+  creditBalance: number | null;
+  creditNote: string | null;
+  creditVisible: boolean;
   estimatedEnd: string | null;
   documents: PortalDocument[];
   links: PortalLinkRow[];
@@ -108,6 +111,18 @@ export default function ClientPortalPanel({
       setS(await res.json());
       onDataChanged?.();
       notify("Guardado");
+    } else notify((await res.json().catch(() => null))?.error ?? "No se pudo guardar.", "error");
+  }
+
+  async function saveCredit(fields: { creditBalance?: number | null; creditNote?: string | null; creditVisible?: boolean }) {
+    const res = await fetch(`/api/projects/${projectId}/portal`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "credit", ...fields }),
+    });
+    if (res.ok) {
+      setS(await res.json());
+      notify("Saldo a favor guardado");
     } else notify((await res.json().catch(() => null))?.error ?? "No se pudo guardar.", "error");
   }
 
@@ -431,6 +446,48 @@ export default function ClientPortalPanel({
                   Se reparte entre los pagos pendientes y no cambia con el IVA. Activa <span className="text-ink">+ IVA</span> en
                   el pago que lo lleve: el cliente lo ve con IVA incluido, sin desglose. En total paga{" "}
                   <span className="text-ink">{formatMoney(clientTotal)}</span>.
+                </p>
+              </div>
+            </section>
+
+            {/* Saldo a favor (opcional): solo para clientes que dejan saldo para proyectos futuros */}
+            <section className="space-y-3">
+              <h3 className="text-base">Saldo a favor (opcional)</h3>
+              <div className="rounded-2xl bg-ink/[0.04] p-4 space-y-3">
+                <label className="block space-y-1">
+                  <span className="text-xs text-muted">Monto que el cliente dejó a favor (MXN)</span>
+                  <input
+                    key={`credit-${s.creditBalance ?? ""}`}
+                    type="number"
+                    min={0}
+                    placeholder="Sin saldo a favor"
+                    defaultValue={s.creditBalance ?? ""}
+                    onBlur={(e) => {
+                      const v = e.target.value;
+                      if (v === "" && s.creditBalance !== null) saveCredit({ creditBalance: null });
+                      else if (v !== "" && Number(v) !== (s.creditBalance ?? 0)) saveCredit({ creditBalance: Number(v) });
+                    }}
+                    onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
+                    className="field w-full rounded-xl px-3 py-2 text-sm"
+                  />
+                </label>
+                <label className="block space-y-1">
+                  <span className="text-xs text-muted">Nota (ej. "Sobrante del anticipo, se aplica al siguiente proyecto")</span>
+                  <input
+                    key={`creditnote-${s.creditNote ?? ""}`}
+                    defaultValue={s.creditNote ?? ""}
+                    maxLength={300}
+                    onBlur={(e) => e.target.value.trim() !== (s.creditNote ?? "") && saveCredit({ creditNote: e.target.value })}
+                    onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
+                    className="field w-full rounded-xl px-3 py-2 text-sm"
+                  />
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" checked={s.creditVisible} onChange={(e) => saveCredit({ creditVisible: e.target.checked })} />
+                  Mostrarlo al cliente en su portal
+                </label>
+                <p className="text-xs text-muted">
+                  Es solo un registro: no cambia el precio ni los pagos de este proyecto. Déjalo vacío si el cliente no tiene saldo a favor.
                 </p>
               </div>
             </section>
