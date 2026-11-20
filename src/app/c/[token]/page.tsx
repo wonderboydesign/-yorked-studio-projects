@@ -169,15 +169,15 @@ export default async function ClientPortal({
             <span className="text-black">01</span> <span className="dot" /> Portal del proyecto · Actualizado al {longDate(today)}
           </p>
           {project.logoUrl ? (
-            // Con logotipo: el logo es la imagen principal, centrado, y el nombre queda pequeño debajo
-            <div className="flex flex-1 flex-col items-center justify-center py-10 text-center">
+            // Con logotipo: el logo es la imagen principal, a la izquierda, y el nombre queda pequeño debajo
+            <div className="flex flex-1 flex-col items-start justify-center py-10 text-left">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={project.logoUrl}
                 alt={project.name}
-                className="h-[140px] w-auto max-w-[85%] object-contain sm:h-[220px] lg:h-[300px]"
+                className="h-[180px] w-auto max-w-full object-contain object-left sm:h-[280px] lg:h-[380px]"
               />
-              <h1 className="mt-8 text-[clamp(18px,2.2vw,28px)] font-medium leading-tight tracking-[-0.02em]">
+              <h1 className="mt-8 text-[clamp(15px,1.7vw,22px)] font-medium leading-tight tracking-[-0.02em]">
                 {line1}
                 {line2 && (
                   <>
