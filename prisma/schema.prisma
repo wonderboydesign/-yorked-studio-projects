@@ -401,6 +401,9 @@ model Quote {
   approvedOption String?
   approvedName   String?
   approvedEmail  String?
+  // ¿Requiere factura? (se elige al aprobar; suma IVA al anticipo)
+  wantsInvoice    Boolean?
+  invoiceChosenAt DateTime?
   receiptUrl     String?
   receiptName    String?
   receiptAt      DateTime?
