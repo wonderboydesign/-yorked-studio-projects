@@ -51,6 +51,9 @@ export interface QuoteSummary {
   lastViewedAt: string | null;
   approvedAt: string | null;
   approvedOption: string | null;
+  // Comprobante del anticipo que sube el cliente desde la propuesta
+  receiptUrl: string | null;
+  receiptAt: string | null;
   createdAt: string;
   updatedAt: string;
 }

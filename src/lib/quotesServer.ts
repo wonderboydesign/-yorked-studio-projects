@@ -96,6 +96,8 @@ export const QUOTE_SUMMARY_SELECT = {
   lastViewedAt: true,
   approvedAt: true,
   approvedOption: true,
+  receiptUrl: true,
+  receiptAt: true,
   createdAt: true,
   updatedAt: true,
 } as const;

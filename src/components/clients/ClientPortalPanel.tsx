@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { PORTAL_SECTIONS, RETAINER_HIDDEN } from "@/lib/portalSections";
 import { IMAGE_EXTENSIONS, shrinkImage, uploadFile } from "@/lib/upload";
 import { PaymentRow, Progress, clientAmount } from "@/lib/portal";
 import { formatMoney } from "@/lib/quotes";
@@ -27,6 +28,8 @@ interface PortalState {
   priceTotal: number | null;
   logoUrl: string | null;
   showName: boolean;
+  portalMode: string;
+  portalHidden: string[];
   progressOverride: number | null;
   creditBalance: number | null;
   creditNote: string | null;
@@ -35,6 +38,7 @@ interface PortalState {
   documents: PortalDocument[];
   links: PortalLinkRow[];
   quoteToken: string | null;
+  quoteReceipt: { url: string; at: string | null } | null;
   supplierQuotes: SupplierQuoteRow[];
 }
 
@@ -155,6 +159,18 @@ export default function ClientPortalPanel({
       setS(await res.json());
       notify(showName ? "Nombre visible en el portal" : "Nombre oculto en el portal");
     } else notify("No se pudo guardar.", "error");
+  }
+
+  async function saveSections(mode: "project" | "retainer", hidden: string[]) {
+    const res = await fetch(`/api/projects/${projectId}/portal`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "sections", mode, hidden }),
+    });
+    if (res.ok) {
+      setS(await res.json());
+      notify("Portal actualizado");
+    } else notify((await res.json().catch(() => null))?.error ?? "No se pudo guardar.", "error");
   }
 
   async function savePrice(fields: { priceTotal?: number | null }) {
@@ -372,6 +388,68 @@ export default function ClientPortalPanel({
               )}
             </section>
 
+            {/* Tipo de portal y secciones visibles */}
+            <section className="space-y-3">
+              <h3 className="text-base">Tipo de portal</h3>
+              <div className="rounded-2xl bg-ink/[0.04] p-4 space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  {([
+                    ["project", "Proyecto", "Con avance, fases y pagos"],
+                    ["retainer", "Retainer", "Contenido continuo: “Lo nuevo”"],
+                  ] as const).map(([key, label, hint]) => (
+                    <button
+                      key={key}
+                      onClick={() => s.portalMode !== key && saveSections(key, key === "retainer" ? RETAINER_HIDDEN : [])}
+                      className={`rounded-xl px-4 py-2 text-left text-sm ${s.portalMode === key ? "bg-ink text-white" : "bg-ink/[0.06] hover:bg-ink/10"}`}
+                    >
+                      <span className="block">{label}</span>
+                      <span className={`block text-[11px] ${s.portalMode === key ? "text-white/70" : "text-muted"}`}>{hint}</span>
+                    </button>
+                  ))}
+                </div>
+                <div>
+                  <p className="mb-2 text-xs text-muted">Qué ve el cliente en su portal</p>
+                  <div className="grid gap-x-4 gap-y-1.5 sm:grid-cols-2">
+                    {PORTAL_SECTIONS.map((sec) => {
+                      const visible = !s.portalHidden.includes(sec.id);
+                      return (
+                        <label key={sec.id} title={sec.hint} className="flex items-center gap-2 text-sm">
+                          <input
+                            type="checkbox"
+                            checked={visible}
+                            onChange={() =>
+                              saveSections(
+                                s.portalMode as "project" | "retainer",
+                                visible ? [...s.portalHidden, sec.id] : s.portalHidden.filter((x) => x !== sec.id)
+                              )
+                            }
+                          />
+                          {sec.label}
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+                {s.portalMode === "retainer" && s.portalToken && (
+                  <div className="flex flex-wrap items-center gap-3 border-t border-ink/10 pt-3">
+                    <a
+                      href={`https://wa.me/?text=${encodeURIComponent(`Hola, subí contenido nuevo a tu portal: ${url}`)}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded-xl bg-ink px-4 py-2 text-sm text-white"
+                    >
+                      Avisar al cliente por WhatsApp
+                    </a>
+                    <span className="text-xs text-muted">Abre WhatsApp con el mensaje y la liga; eliges el contacto.</span>
+                  </div>
+                )}
+                <p className="text-xs text-muted">
+                  En un retainer, las entregas se muestran como <span className="text-ink">Lo nuevo</span>: lo más reciente arriba, agrupado por mes, con la
+                  etiqueta “Nueva” la primera semana. Súbelas en <span className="text-ink">Entregas</span> más abajo.
+                </p>
+              </div>
+            </section>
+
             {/* Propuesta */}
             <section className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-ink/[0.04] px-4 py-3">
               <div className="min-w-0">
@@ -384,6 +462,16 @@ export default function ClientPortalPanel({
                 <a href={`/p/${s.quoteToken}`} target="_blank" rel="noreferrer" className="text-sm text-muted hover:text-ink shrink-0">
                   Ver propuesta ↗
                 </a>
+              )}
+              {s.quoteReceipt && (
+                <p className="w-full text-xs text-green-700">
+                  ✓ El cliente subió el comprobante del anticipo
+                  {s.quoteReceipt.at && ` el ${new Date(s.quoteReceipt.at).toLocaleDateString("es-MX", { day: "numeric", month: "long" })}`} ·{" "}
+                  <a href={s.quoteReceipt.url} target="_blank" rel="noreferrer" className="underline">
+                    Ver comprobante
+                  </a>
+                  . Confirma el pago abajo cuando lo veas en tu banco.
+                </p>
               )}
             </section>
 

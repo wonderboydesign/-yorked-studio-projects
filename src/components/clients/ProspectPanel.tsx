@@ -196,6 +196,15 @@ export default function ProspectPanel({
                       {new Date(q.createdAt).toLocaleDateString("es-MX", { day: "numeric", month: "short" })}
                     </span>
                   </div>
+                  {q.receiptUrl && (
+                    <p className="mt-1 text-xs text-green-700">
+                      ✓ Comprobante de anticipo recibido
+                      {q.receiptAt && ` el ${new Date(q.receiptAt).toLocaleDateString("es-MX", { day: "numeric", month: "short" })}`} ·{" "}
+                      <a href={q.receiptUrl} target="_blank" rel="noreferrer" className="underline">
+                        Ver
+                      </a>
+                    </p>
+                  )}
                   <p className="text-xs text-muted mt-1">
                     {q.viewCount > 0
                       ? `La abrió ${q.viewCount} ${q.viewCount === 1 ? "vez" : "veces"} · última: ${new Date(q.lastViewedAt!).toLocaleString("es-MX", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })}`

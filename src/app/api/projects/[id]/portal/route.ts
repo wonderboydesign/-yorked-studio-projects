@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { redistribute } from "@/lib/portal";
+import { PORTAL_SECTION_IDS } from "@/lib/portalSections";
 import { DOCUMENT_SELECT, isBlobUrl, LINK_SELECT, PAYMENT_SELECT, ensurePayments, newPortalToken, projectProgress, projectQuote } from "@/lib/portalServer";
 
 async function state(projectId: string) {
@@ -14,7 +15,7 @@ async function state(projectId: string) {
   }
   const project = await prisma.project.findUnique({
     where: { id: projectId },
-    select: { id: true, name: true, portalToken: true, portalViewedAt: true, priceTotal: true, logoUrl: true, showName: true, progressOverride: true, creditBalance: true, creditNote: true, creditVisible: true, estimatedEnd: true },
+    select: { id: true, name: true, portalToken: true, portalViewedAt: true, priceTotal: true, logoUrl: true, showName: true, portalMode: true, portalHidden: true, progressOverride: true, creditBalance: true, creditNote: true, creditVisible: true, estimatedEnd: true },
   });
   if (!project) return null;
   const [payments, progress, quote, documents, links, supplierQuotes] = await Promise.all([
@@ -35,6 +36,7 @@ async function state(projectId: string) {
     hasApprovedQuote: quote?.status === "approved",
     // La propuesta que el cliente puede abrir (no los borradores)
     quoteToken: quote && quote.status !== "draft" ? quote.token : null,
+    quoteReceipt: quote?.receiptUrl ? { url: quote.receiptUrl, at: quote.receiptAt } : null,
   };
 }
 
@@ -78,6 +80,14 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     // Logotipo del cliente: un archivo ya subido a Blob, o null para quitarlo
     if (body.logoUrl !== null && !isBlobUrl(body.logoUrl)) return NextResponse.json({ error: "Archivo no válido" }, { status: 400 });
     await prisma.project.update({ where: { id: params.id }, data: { logoUrl: body.logoUrl } });
+  } else if (action === "sections") {
+    // Tipo de portal y secciones ocultas
+    const mode = body.mode === "retainer" ? "retainer" : "project";
+    if (!Array.isArray(body.hidden) || !body.hidden.every((x: unknown) => typeof x === "string" && PORTAL_SECTION_IDS.includes(x))) {
+      return NextResponse.json({ error: "Secciones no válidas" }, { status: 400 });
+    }
+    const hidden = Array.from(new Set<string>(body.hidden));
+    await prisma.project.update({ where: { id: params.id }, data: { portalMode: mode, portalHidden: hidden } });
   } else if (action === "showName") {
     if (typeof body.showName !== "boolean") return NextResponse.json({ error: "Valor no válido" }, { status: 400 });
     await prisma.project.update({ where: { id: params.id }, data: { showName: body.showName } });

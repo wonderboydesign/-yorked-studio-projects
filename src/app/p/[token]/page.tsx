@@ -9,6 +9,7 @@ import { getStudio } from "@/lib/quotesServer";
 import { isDarkColor } from "@/lib/portal";
 import { QuoteContent, StudioWork, fillNote, formatMoney, formatMonthYear, whatsappLink, worksForQuote } from "@/lib/quotes";
 import ApproveForm from "./ApproveForm";
+import ReceiptUpload from "./ReceiptUpload";
 import WorkCarousel from "./WorkCarousel";
 
 // La tipografía de las propuestas del estudio
@@ -420,17 +421,26 @@ export default async function ProposalPage({
                   {quote.approvedAt?.toLocaleDateString("es-MX", { day: "numeric", month: "long" })}. Con el anticipo
                   apartamos tu lugar en la agenda y arrancamos con el briefing.
                 </p>
-                <a
-                  href={whatsappLink(
-                    studio.whatsapp,
-                    `Hola, aprobé la propuesta de ${c.brandName} (${chosen.name}). Te envío el comprobante del anticipo.`
-                  )}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="pill-light mt-8 inline-flex !bg-[#f1efe9]"
-                >
-                  Enviar comprobante por WhatsApp <span aria-hidden>→</span>
-                </a>
+                <ReceiptUpload
+                  token={quote.token}
+                  initialUrl={quote.receiptUrl}
+                  initialAt={quote.receiptAt ? quote.receiptAt.toISOString() : null}
+                />
+                <p className="mt-6 text-[13px] text-[#f1efe9]/60">
+                  ¿Prefieres mandarlo por WhatsApp?{" "}
+                  <a
+                    href={whatsappLink(
+                      studio.whatsapp,
+                      `Hola, aprobé la propuesta de ${c.brandName} (${chosen.name}). Te envío el comprobante del anticipo.`
+                    )}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="underline"
+                  >
+                    Escríbenos
+                  </a>
+                  .
+                </p>
               </div>
               <BankDetails studio={studio} amount={(chosen.price * c.advancePercent) / 100} percent={c.advancePercent} />
             </div>
