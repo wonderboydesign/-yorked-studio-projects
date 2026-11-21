@@ -371,6 +371,13 @@ export function formatMonthYear(iso: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+// Liga del perfil de Instagram a partir de "@usuario", "usuario" o una URL
+export function instagramUrl(handle: string) {
+  const h = handle.trim();
+  if (/^https?:\/\//i.test(h)) return h;
+  return `https://www.instagram.com/${h.replace(/^@/, "").replace(/^\/+|\/+$/g, "")}/`;
+}
+
 export function whatsappLink(phone: string, text: string) {
   return `https://wa.me/${phone.replace(/\D/g, "")}?text=${encodeURIComponent(text)}`;
 }

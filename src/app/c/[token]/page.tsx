@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import WelcomeRibbon from "./WelcomeRibbon";
 import BriefForm from "./BriefForm";
 import { BriefAnswers, BriefQuestion } from "@/lib/brief";
 import { InvoiceChoice, MethodChoice } from "./PaymentChoices";
@@ -10,7 +11,7 @@ import { prisma } from "@/lib/prisma";
 import CopyRows from "@/components/CopyRows";
 import { AUTH_COOKIE_NAME, verifySessionToken } from "@/lib/auth";
 import { getStudio } from "@/lib/quotesServer";
-import { QuoteContent, formatMoney, whatsappLink } from "@/lib/quotes";
+import { QuoteContent, formatMoney, instagramUrl, whatsappLink } from "@/lib/quotes";
 import { PortalPhase, clientAmount, computeProgress, accentInk, isDarkColor, readableDark } from "@/lib/portal";
 import { projectQuote } from "@/lib/portalServer";
 import { localTodayUTC } from "@/lib/portalDates";
@@ -220,6 +221,12 @@ export default async function ClientPortal({
         ["--accent-text" as string]: isDarkColor(accent) ? "#ffffff" : "#111111",
       }}
     >
+      <WelcomeRibbon
+        token={params.token}
+        name={(project.client ?? "").trim() || (quote?.approvedName ?? "").trim()}
+        thanks={quote?.status === "approved"}
+        preview={isStudio}
+      />
       <header className="pt-header sticky top-0 z-30 border-b border-black/10 bg-[#f1efe9]/85 backdrop-blur">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-4 px-5 py-3 sm:px-6">
           <span className="flex items-center gap-2.5 text-[15px] font-medium tracking-tight">
@@ -677,9 +684,9 @@ export default async function ClientPortal({
           <div>
             <p className="eyebrow mb-2">Instagram</p>
             {studio.instagram.map((h) => (
-              <span key={h} className="block">
+              <a key={h} href={instagramUrl(h)} target="_blank" rel="noreferrer noopener" className="block hover:underline">
                 {h}
-              </span>
+              </a>
             ))}
           </div>
         </section>
