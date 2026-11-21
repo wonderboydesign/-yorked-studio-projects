@@ -31,6 +31,8 @@ interface PortalState {
   portalMode: string;
   portalHidden: string[];
   progressOverride: number | null;
+  wantsInvoice: boolean | null;
+  invoiceChosenAt: string | null;
   creditBalance: number | null;
   creditNote: string | null;
   creditVisible: boolean;
@@ -664,6 +666,14 @@ export default function ClientPortalPanel({
                   {formatMoney(paid)} de {formatMoney(total)} pagado
                 </span>
               </div>
+              {s.wantsInvoice !== null && (
+                <p className="rounded-2xl bg-ink/[0.04] px-4 py-2.5 text-xs">
+                  {s.wantsInvoice ? "🧾 El cliente pidió factura (se sumó el IVA a sus pagos pendientes)" : "El cliente eligió no requerir factura"}
+                  {s.invoiceChosenAt && (
+                    <span className="text-muted"> · {new Date(s.invoiceChosenAt).toLocaleDateString("es-MX", { day: "numeric", month: "short" })}</span>
+                  )}
+                </p>
+              )}
               {s.payments.length === 0 && (
                 <div className="rounded-2xl bg-ink/[0.04] p-4 text-sm flex flex-wrap items-center justify-between gap-3">
                   <span className="text-muted">Sin pagos todavía.</span>
@@ -722,6 +732,16 @@ export default function ClientPortalPanel({
                       >
                         {p.withIva ? `✓ IVA · cliente paga ${formatMoney(clientAmount(p.amount, true))}` : "+ IVA"}
                       </button>
+                      {!p.paidAt && (
+                        <button
+                          onClick={() => patchPayment(p.id, { method: p.method === "cash" ? "transfer" : "cash" })}
+                          title="Forma de pago (el cliente también la puede elegir)"
+                          className="rounded-full bg-button px-3 py-1 text-ink hover:bg-button-hover"
+                        >
+                          {p.method === "cash" ? "Efectivo" : "Transferencia"}
+                          {p.methodChosenAt && <span className="text-muted"> · elegido por el cliente</span>}
+                        </button>
+                      )}
                       {p.paidAt && s.portalToken && (
                         <a href={`/c/${s.portalToken}/recibo/${p.id}`} target="_blank" rel="noreferrer" className="text-muted hover:text-ink">
                           Recibo ↗

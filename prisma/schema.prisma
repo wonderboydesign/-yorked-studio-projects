@@ -46,6 +46,9 @@ model Project {
   estimatedEnd     DateTime?
   // Saldo a favor opcional del cliente para proyectos futuros (interno; se
   // puede mostrar en su portal)
+  // ¿El cliente pidió factura? (null = aún no elige) — suma IVA a sus pagos pendientes
+  wantsInvoice     Boolean?
+  invoiceChosenAt  DateTime?
   creditBalance    Float?
   creditNote       String?
   creditVisible    Boolean           @default(true)
@@ -143,6 +146,9 @@ model Payment {
   paidAt    DateTime?
   // Si este pago se cobra con IVA (el cliente ve el monto con IVA incluido)
   withIva   Boolean   @default(false)
+  // Forma de pago: "transfer" (datos bancarios) o "cash" (se acuerda por WhatsApp)
+  method          String    @default("transfer")
+  methodChosenAt  DateTime?
   order     Int       @default(0)
   createdAt DateTime  @default(now())
 }
