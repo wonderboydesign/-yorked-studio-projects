@@ -352,6 +352,9 @@ export default async function ClientPortal({
               initialAnswers={brief.answers as unknown as BriefAnswers}
               initialStatus={brief.status}
               submittedAt={brief.submittedAt ? brief.submittedAt.toISOString() : null}
+              emails={studio.emails}
+              whatsappUrl={whatsappLink(studio.whatsapp, `Hola, te comparto referencias para el proyecto de ${project.name}.`)}
+              projectName={project.name}
             />
           </section>
         )}
