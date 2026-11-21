@@ -166,10 +166,23 @@ export default function BriefForm({
                     <div className="space-y-2">
                       {(q.options ?? []).map((o) => (
                         <label key={o} className="flex items-center gap-3 text-[15px]">
-                          <input type="radio" name={`bq-${q.id}`} checked={value === o} onChange={() => change(q.id, o)} className="h-4 w-4 accent-black" />
+                          <input
+                            type="radio"
+                            name={`bq-${q.id}`}
+                            checked={value === o}
+                            onChange={() => change(q.id, o)}
+                            // Volver a tocar la opción elegida la desmarca
+                            onClick={() => value === o && change(q.id, "")}
+                            className="h-4 w-4 accent-black"
+                          />
                           {o}
                         </label>
                       ))}
+                      {hasAnswer(value) && (
+                        <button type="button" onClick={() => change(q.id, "")} className="text-[13px] text-black/70 underline hover:text-black">
+                          Quitar selección
+                        </button>
+                      )}
                     </div>
                   )}
                   {q.type === "multi" && <MultiField q={q} value={Array.isArray(value) ? value : []} onChange={(v) => change(q.id, v)} />}
