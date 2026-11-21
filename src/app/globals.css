@@ -506,7 +506,15 @@ select:focus-visible,
   text-transform: none;
   letter-spacing: 0;
   font-size: 13px;
-  color: rgb(17 17 17 / 0.5);
+  color: rgb(17 17 17 / 0.72);
+}
+/* Textos secundarios en gris: al menos 4.5:1 sobre blanco y gris claro */
+.portal-lab [class*="text-black/"] {
+  color: rgb(0 0 0 / 0.72);
+}
+/* Etiquetas sobre tarjetas claras que viven dentro de secciones oscuras */
+.portal-lab .eyebrow.eyebrow-ink {
+  color: rgb(17 17 17 / 0.72) !important;
 }
 .portal-lab .dot {
   display: none;
@@ -607,13 +615,42 @@ select:focus-visible,
   border-color: transparent !important;
   background: #f5f5f5;
 }
-.portal-lab [class*="bg-white"][class*="rounded"] {
+.portal-lab [class*="bg-white"][class*="rounded"]:not([class*="bg-white/"]) {
   background: #ffffff !important;
 }
 .portal-lab .pill-outline {
   background: transparent !important;
   border: 1px solid #111111 !important;
   color: #111111 !important;
+}
+/* Secciones oscuras: etiquetas, contornos y campos con texto claro, para que
+   siempre se lean sin importar el color elegido */
+.portal-lab #aprobar .eyebrow,
+.portal-lab #pagos .eyebrow,
+.portal-lab #marca .eyebrow,
+.portal-lab [style*="var(--dark)"] .eyebrow {
+  color: rgb(241 239 233 / 0.65);
+}
+.portal-lab #aprobar .pill-outline,
+.portal-lab #pagos .pill-outline,
+.portal-lab #marca .pill-outline,
+.portal-lab [style*="var(--dark)"] .pill-outline {
+  border-color: #f1efe9 !important;
+  color: #f1efe9 !important;
+}
+.portal-lab #aprobar input:not([type="checkbox"]),
+.portal-lab #aprobar textarea {
+  background: rgb(255 255 255 / 0.1) !important;
+  color: #f1efe9 !important;
+}
+.portal-lab #aprobar input::placeholder,
+.portal-lab #aprobar textarea::placeholder {
+  color: rgb(241 239 233 / 0.6);
+}
+/* Botón inhabilitado: sigue legible */
+.portal-lab .pill-dark:disabled,
+.portal-lab .pill-light:disabled {
+  opacity: 0.6;
 }
 .portal-lab .no-plus::before {
   content: none !important;

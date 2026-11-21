@@ -66,7 +66,7 @@ export default function ReceiptUpload({
         />
       </label>
       {error && <p className="mt-3 text-[13px] text-red-300">{error}</p>}
-      <p className="mt-3 text-[12px] text-[#f1efe9]/50">PDF o imagen, máximo 10 MB.</p>
+      <p className="mt-3 text-[12px] text-[#f1efe9]/70">PDF o imagen, máximo 10 MB.</p>
     </div>
   );
 }

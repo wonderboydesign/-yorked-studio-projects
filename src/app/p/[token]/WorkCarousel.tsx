@@ -62,7 +62,7 @@ export default function WorkCarousel({ images, alt }: { images: string[]; alt: s
           }`}
         />
       ))}
-      <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-black/0 to-black/30" />
+      <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/45" />
 
       {count > 1 && (
         <>

@@ -104,7 +104,7 @@ export default function ApproveForm({
         <button
           type="submit"
           disabled={!name.trim() || !accepted || busy}
-          className="pill-light !bg-[#f1efe9] disabled:cursor-not-allowed disabled:opacity-50"
+          className="pill-light !bg-[#f1efe9] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {busy ? "Aprobando…" : "Aprobar propuesta"} <span aria-hidden>→</span>
         </button>

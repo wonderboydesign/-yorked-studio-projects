@@ -162,11 +162,60 @@ export function redistribute(
   });
 }
 
-// Texto de los botones sobre el color de acento: blanco si es oscuro, negro si es claro
-export function isDarkColor(hex: string) {
+// Contraste (WCAG) para escoger el color del texto según el fondo
+function rgbOf(hex: string): [number, number, number] | null {
   const h = (hex ?? "").replace("#", "");
   const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h.slice(0, 6);
-  const [r, g, b] = [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16));
-  if ([r, g, b].some((n) => Number.isNaN(n))) return true;
-  return 0.299 * r + 0.587 * g + 0.114 * b < 150;
+  const rgb = [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16));
+  return rgb.some((n) => Number.isNaN(n)) ? null : (rgb as [number, number, number]);
+}
+
+function luminance([r, g, b]: [number, number, number]) {
+  const c = [r, g, b].map((v) => {
+    const x = v / 255;
+    return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+}
+
+// Texto de los botones sobre el color de acento: blanco o negro, el que más
+// contraste le dé (en colores medios, como un verde, gana el negro)
+export function isDarkColor(hex: string) {
+  const rgb = rgbOf(hex);
+  if (!rgb) return true;
+  return luminance(rgb) < 0.179;
+}
+
+// Fondo oscuro garantizado para secciones con texto claro (#f1efe9): si el
+// color elegido es demasiado claro, se oscurece hasta que el texto se lea (≥ 4.5:1, también con textos al 65%)
+export function readableDark(hex: string, fallback = "#121210") {
+  const rgb = rgbOf(hex);
+  if (!rgb) return fallback;
+  let [r, g, b] = rgb;
+  for (let i = 0; i < 20 && luminance([r, g, b]) > 0.05; i++) {
+    r = Math.round(r * 0.88);
+    g = Math.round(g * 0.88);
+    b = Math.round(b * 0.88);
+  }
+  return `#${[r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("")}`;
+}
+
+// Color de acento usado COMO TEXTO sobre un fondo claro u oscuro: si no da el
+// contraste mínimo (4.5:1), se oscurece (fondo claro) o se aclara (fondo oscuro)
+// hasta que se lea. Conserva el tono del color en lo posible.
+export function accentInk(hex: string, background: string) {
+  const rgb = rgbOf(hex);
+  const bg = rgbOf(background);
+  if (!rgb || !bg) return hex;
+  const lb = luminance(bg);
+  const ratio = (c: [number, number, number]) => {
+    const l = luminance(c);
+    return (Math.max(l, lb) + 0.05) / (Math.min(l, lb) + 0.05);
+  };
+  const toward = lb > 0.4 ? 0 : 255;
+  let c: [number, number, number] = rgb;
+  for (let i = 0; i < 40 && ratio(c) < 4.5; i++) {
+    c = c.map((v) => Math.round(v + (toward - v) * 0.1)) as [number, number, number];
+  }
+  return `#${c.map((v) => v.toString(16).padStart(2, "0")).join("")}`;
 }
