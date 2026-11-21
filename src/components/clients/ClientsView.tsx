@@ -190,6 +190,7 @@ function ProspectCard({ prospect: p, onOpen }: { prospect: Prospect; onOpen: () 
             }`}
           />
           {QUOTE_STATUS_LABELS[q.status]}
+          {q.receiptUrl && <span className="text-green-700">· Comprobante recibido</span>}
           {q.viewCount > 0 && q.status !== "approved" && <span className="text-muted">· {q.viewCount} vista{q.viewCount === 1 ? "" : "s"}</span>}
         </p>
       )}

@@ -16,6 +16,9 @@ model Project {
   logoUrl          String?
   // Con logotipo, mostrar o no el nombre del cliente en el portal
   showName         Boolean           @default(true)
+  // Tipo de portal ("project" | "retainer") y secciones que NO se muestran
+  portalMode       String            @default("project")
+  portalHidden     String[]          @default([])
   startDate        DateTime
   endDate          DateTime
   notes            String?
@@ -373,6 +376,9 @@ model Quote {
   approvedOption String?
   approvedName   String?
   approvedEmail  String?
+  receiptUrl     String?
+  receiptName    String?
+  receiptAt      DateTime?
   approvedNote   String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt

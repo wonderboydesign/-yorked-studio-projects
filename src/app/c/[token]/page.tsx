@@ -111,30 +111,91 @@ export default async function ClientPortal({
   const nextMeeting = upcoming[0];
   const deliveries = project.links.filter((l) => l.kind === "delivery");
   const brandFiles = project.links.filter((l) => l.kind === "brand");
+  // Secciones que el estudio decidió ocultar y tipo de portal (retainer = "Lo nuevo")
+  const hidden = new Set(project.portalHidden);
+  const retainer = project.portalMode === "retainer";
+  const show = (id: string) => !hidden.has(id);
   const proposalUrl = quote && quote.status !== "draft" ? `/p/${quote.token}` : null;
   const phaseName = new Map(progress.phases.map((p) => [p.number, p.name]));
 
   // Numeración de secciones según lo que tenga el proyecto
   const order = [
-    "fases",
-    meetings.length > 0 && "reuniones",
-    deliveries.length > 0 && "entregas",
-    project.supplierQuotes.length > 0 && "cotizaciones",
-    payments.length > 0 && "pagos",
-    "facturacion",
-    brandFiles.length > 0 && "marca",
+    show("fases") && "fases",
+    meetings.length > 0 && show("reuniones") && "reuniones",
+    deliveries.length > 0 && show("entregas") && "entregas",
+    project.supplierQuotes.length > 0 && show("cotizaciones") && "cotizaciones",
+    payments.length > 0 && show("pagos") && "pagos",
+    show("facturacion") && "facturacion",
+    brandFiles.length > 0 && show("marca") && "marca",
   ].filter(Boolean) as string[];
   const num = (id: string) => String(order.indexOf(id) + 2).padStart(2, "0");
   const NAV_LABELS: Record<string, string> = {
     fases: "Fases",
     reuniones: "Reuniones",
-    entregas: "Entregas",
+    entregas: retainer ? "Lo nuevo" : "Entregas",
     cotizaciones: "Cotizaciones",
     pagos: "Pagos",
     facturacion: "Facturas y recibos",
     marca: "Tu marca",
   };
   const navItems = [{ id: "inicio", label: "Inicio" }, ...order.map((id) => ({ id, label: NAV_LABELS[id] })), { id: "contacto", label: "Contacto" }];
+
+  // Entregas: más recientes primero; en un retainer se agrupan por mes
+  const deliveryDate = (d: (typeof deliveries)[number]) => d.date ?? d.createdAt;
+  const sortedDeliveries = [...deliveries].sort((a, b) => deliveryDate(b).getTime() - deliveryDate(a).getTime());
+  const monthOf = (d: Date) => d.toLocaleDateString("es-MX", { month: "long", year: "numeric", timeZone: "America/Mexico_City" });
+  const deliveryMonths: { key: string; label: string; items: typeof deliveries }[] = [];
+  for (const d of sortedDeliveries) {
+    const label = monthOf(deliveryDate(d));
+    const last = deliveryMonths[deliveryMonths.length - 1];
+    if (last && last.key === label) last.items.push(d);
+    else deliveryMonths.push({ key: label, label, items: [d] });
+  }
+  const deliveriesThisMonth = deliveries.filter((d) => monthOf(deliveryDate(d)) === monthOf(new Date())).length;
+  const renderDelivery = (d: (typeof deliveries)[number]) => {
+    const isNew = now - d.createdAt.getTime() < 7 * 86400000;
+    const hasLink = !!d.url;
+    const isPdf = !!d.pathname || /\.pdf(\?|$)/i.test(d.url);
+    const isImage = /\.(png|jpe?g|webp|gif|svg)(\?|$)/i.test(d.url);
+    const showPhase = d.phase && show("fases");
+    const cls = "group flex min-h-[220px] flex-col rounded-[22px] border border-black/10 p-5";
+    const body = (
+      <>
+        {isImage && retainer && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={d.url} alt={d.title} loading="lazy" className="mb-4 h-44 w-full rounded-[14px] bg-black/[0.04] object-cover" />
+        )}
+        <div className="flex items-center justify-between gap-2">
+          <span className="eyebrow">{showPhase ? `Fase ${d.phase}${phaseName.get(d.phase!) ? ` · ${phaseName.get(d.phase!)}` : ""}` : retainer ? "Nuevo contenido" : "Entrega"}</span>
+          {isNew && (
+            <span className="rounded-full px-2 py-0.5 text-[11px] text-white" style={{ background: "var(--accent)" }}>
+              Nueva
+            </span>
+          )}
+        </div>
+        <p className="mt-4 text-[24px] font-medium leading-tight tracking-[-0.02em]">{d.title}</p>
+        {d.note && <p className="mt-2 text-[13px] text-black/60">{d.note}</p>}
+        <div className="mt-auto flex items-center justify-between pt-6 text-[13px] text-black/55">
+          <span>{shortDate(d.date ?? d.createdAt)}</span>
+          {hasLink && (
+            <span className="pill-dark no-plus">
+              {isPdf ? "Abrir PDF" : "Abrir"} <span aria-hidden>↗</span>
+            </span>
+          )}
+        </div>
+      </>
+    );
+    // Sin link, la entrega es solo informativa (no se abre)
+    return hasLink ? (
+      <a key={d.id} href={d.url} target="_blank" rel="noreferrer" className={`${cls} hover:bg-black/[0.03]`}>
+        {body}
+      </a>
+    ) : (
+      <div key={d.id} className={cls}>
+        {body}
+      </div>
+    );
+  };
 
   const waHello = whatsappLink(studio.whatsapp, `Hola, tengo una duda sobre el proyecto de ${project.name}.`);
 
@@ -164,7 +225,7 @@ export default async function ClientPortal({
 
       <main className="mx-auto max-w-[1440px] px-5 sm:px-6">
         {/* Avance */}
-        <section id="inicio" className="flex min-h-[calc(100svh-57px)] flex-col pb-6 pt-10">
+        <section id="inicio" className={`flex flex-col pt-10 ${show("avance") ? "min-h-[calc(100svh-57px)] pb-6" : "pb-16"}`}>
           <p className="eyebrow">
             <span className="text-black">01</span> <span className="dot" /> Portal del proyecto · Actualizado al {longDate(today)}
           </p>
@@ -200,9 +261,9 @@ export default async function ClientPortal({
           )}
 
           {/* Accesos rápidos: propuesta, próxima reunión y descargables */}
-          {(proposalUrl || nextMeeting || brandFiles.length > 0) && (
+          {(proposalUrl || (nextMeeting && show("reuniones")) || (brandFiles.length > 0 && show("marca"))) && (
             <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {nextMeeting && (
+              {nextMeeting && show("reuniones") && (
                 <div className="flex flex-col rounded-[22px] p-5 text-white sm:col-span-2 lg:col-span-1" style={{ background: "var(--accent)" }}>
                   <span className="text-[11px] uppercase tracking-[0.14em] opacity-75">Próxima reunión</span>
                   <p className="mt-3 text-[22px] font-medium leading-tight">{nextMeeting.title}</p>
@@ -220,7 +281,7 @@ export default async function ClientPortal({
                   <span className="mt-auto pt-5 text-[13px] text-black/60 group-hover:text-black">Ver propuesta ↗</span>
                 </a>
               )}
-              {brandFiles.length > 0 && (
+              {brandFiles.length > 0 && show("marca") && (
                 <a href="#marca" className="group flex flex-col rounded-[22px] bg-[#121210] p-5 text-[#f1efe9]">
                   <span className="text-[11px] uppercase tracking-[0.14em] text-[#f1efe9]/55">Tu marca</span>
                   <p className="mt-3 text-[22px] font-medium leading-tight">Descargables de tu marca</p>
@@ -232,6 +293,7 @@ export default async function ClientPortal({
             </div>
           )}
 
+          {show("avance") && (
           <div className="mt-auto pt-12">
             <div className="flex flex-wrap items-end justify-between gap-6">
               <p className="pt-percent text-[clamp(72px,12vw,168px)] font-medium leading-none tracking-[-0.05em] tabular-nums">
@@ -258,9 +320,10 @@ export default async function ClientPortal({
               <div className="h-full rounded-full" style={{ width: `${progress.percent}%`, background: "var(--accent)" }} />
             </div>
           </div>
+          )}
         </section>
 
-        {/* Fases */}
+        {show("fases") && (
         <section id="fases" className="py-24">
           <SectionHead n={num("fases")} title="Fases del proyecto" tagline={allDone ? "Así lo hicimos, paso a paso." : "Dónde vamos y lo que sigue."} />
           <div className="mt-16">
@@ -274,8 +337,10 @@ export default async function ClientPortal({
           </div>
         </section>
 
+        )}
+
         {/* Reuniones */}
-        {meetings.length > 0 && (
+        {meetings.length > 0 && show("reuniones") && (
           <section id="reuniones" className="pb-24">
             <SectionHead n={num("reuniones")} title="Reuniones" tagline="Fecha, hora y link para unirte." />
             <ul className="mt-14">
@@ -306,55 +371,33 @@ export default async function ClientPortal({
           </section>
         )}
 
-        {/* Entregas */}
-        {deliveries.length > 0 && (
+        {/* Entregas (en un retainer: "Lo nuevo", agrupado por mes) */}
+        {deliveries.length > 0 && show("entregas") && (
           <section id="entregas" className="pb-24">
-            <SectionHead n={num("entregas")} title="Entregas" tagline="Lo que te hemos presentado, siempre a la mano." />
-            <div className="mt-14 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {deliveries.map((d) => {
-                const isNew = now - d.createdAt.getTime() < 7 * 86400000;
-                const hasLink = !!d.url;
-                const isPdf = !!d.pathname || /\.pdf(\?|$)/i.test(d.url);
-                const cls = "group flex min-h-[220px] flex-col rounded-[22px] border border-black/10 p-5";
-                const body = (
-                  <>
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="eyebrow">{d.phase ? `Fase ${d.phase}${phaseName.get(d.phase) ? ` · ${phaseName.get(d.phase)}` : ""}` : "Entrega"}</span>
-                      {isNew && (
-                        <span className="rounded-full px-2 py-0.5 text-[11px] text-white" style={{ background: "var(--accent)" }}>
-                          Nueva
-                        </span>
-                      )}
-                    </div>
-                    <p className="mt-4 text-[24px] font-medium leading-tight tracking-[-0.02em]">{d.title}</p>
-                    {d.note && <p className="mt-2 text-[13px] text-black/60">{d.note}</p>}
-                    <div className="mt-auto flex items-center justify-between pt-6 text-[13px] text-black/55">
-                      <span>{shortDate(d.date ?? d.createdAt)}</span>
-                      {hasLink && (
-                        <span className="pill-dark no-plus">
-                          {isPdf ? "Abrir PDF" : "Abrir"} <span aria-hidden>↗</span>
-                        </span>
-                      )}
-                    </div>
-                  </>
-                );
-                // Sin link, la entrega es solo informativa (no se abre)
-                return hasLink ? (
-                  <a key={d.id} href={d.url} target="_blank" rel="noreferrer" className={`${cls} hover:bg-black/[0.03]`}>
-                    {body}
-                  </a>
-                ) : (
-                  <div key={d.id} className={cls}>
-                    {body}
-                  </div>
-                );
-              })}
-            </div>
+            <SectionHead
+              n={num("entregas")}
+              title={retainer ? "Lo nuevo" : "Entregas"}
+              tagline={
+                retainer
+                  ? `${deliveriesThisMonth} ${deliveriesThisMonth === 1 ? "entrega" : "entregas"} este mes · lo más reciente primero.`
+                  : "Lo que te hemos presentado, siempre a la mano."
+              }
+            />
+            {retainer ? (
+              deliveryMonths.map((g) => (
+                <div key={g.key} className="mt-14">
+                  <p className="eyebrow mb-4 capitalize">{g.label}</p>
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{g.items.map(renderDelivery)}</div>
+                </div>
+              ))
+            ) : (
+              <div className="mt-14 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{deliveries.map(renderDelivery)}</div>
+            )}
           </section>
         )}
 
         {/* Cotizaciones y opciones de proveedores */}
-        {project.supplierQuotes.length > 0 && (
+        {project.supplierQuotes.length > 0 && show("cotizaciones") && (
           <section id="cotizaciones" className="pb-24">
             <SectionHead n={num("cotizaciones")} title="Cotizaciones" tagline="Producción, impresión y opciones que gestionamos para tu marca." />
             <div className="mt-14 grid gap-3 lg:grid-cols-2">
@@ -426,7 +469,7 @@ export default async function ClientPortal({
         )}
 
         {/* Pagos */}
-        {payments.length > 0 && (
+        {payments.length > 0 && show("pagos") && (
           <section id="pagos" className="rounded-[28px] px-6 py-16 text-[#f1efe9] sm:px-10" style={{ background: "#121210" }}>
             <SectionHead
               dark
@@ -514,7 +557,7 @@ export default async function ClientPortal({
           </section>
         )}
 
-        {/* Facturación */}
+        {show("facturacion") && (
         <section id="facturacion" className="py-24">
           <SectionHead n={num("facturacion")} title="Facturas y recibos" tagline="Descarga tus recibos o sube tu constancia si requieres factura." />
           <PortalBilling
@@ -531,8 +574,10 @@ export default async function ClientPortal({
           />
         </section>
 
+        )}
+
         {/* Tu marca */}
-        {brandFiles.length > 0 && (
+        {brandFiles.length > 0 && show("marca") && (
           <section id="marca" className="mb-8 rounded-[28px] bg-[#121210] px-6 py-16 text-[#f1efe9] sm:px-10">
             <SectionHead dark n={num("marca")} title="Tu marca" tagline="Todos tus archivos finales, listos para usarse." />
             <ul className="mt-14">
