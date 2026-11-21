@@ -14,6 +14,9 @@ export default function BriefForm({
   initialAnswers,
   initialStatus,
   submittedAt,
+  emails = [],
+  whatsappUrl = "",
+  projectName = "",
 }: {
   token: string;
   intro: string | null;
@@ -21,6 +24,9 @@ export default function BriefForm({
   initialAnswers: BriefAnswers;
   initialStatus: string;
   submittedAt: string | null;
+  emails?: string[];
+  whatsappUrl?: string;
+  projectName?: string;
 }) {
   const [answers, setAnswers] = useState<BriefAnswers>(initialAnswers);
   const [status, setStatus] = useState(initialStatus);
@@ -172,6 +178,29 @@ export default function BriefForm({
               </div>
             );
           })}
+          {(emails.length > 0 || whatsappUrl) && (
+            <div className="border-t border-black pt-4">
+              <p className="eyebrow mb-4">Referencias e información extra</p>
+              <p className="text-[17px] font-medium leading-snug">Envía aquí todas las referencias que tengas e información extra</p>
+              <p className="mt-1 text-[13px] text-black/70">Imágenes, links, logos actuales, documentos o lo que creas que nos ayude a conocer mejor tu marca.</p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                {emails.map((e) => (
+                  <a
+                    key={e}
+                    href={`mailto:${e}?subject=${encodeURIComponent(`Referencias${projectName ? ` · ${projectName}` : ""}`)}`}
+                    className="border border-black/20 px-4 py-2.5 text-[14px] hover:border-black"
+                  >
+                    ✉ {e}
+                  </a>
+                ))}
+                {whatsappUrl && (
+                  <a href={whatsappUrl} target="_blank" rel="noreferrer" className="border border-black/20 px-4 py-2.5 text-[14px] hover:border-black">
+                    WhatsApp ↗
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
           <div className="border-t border-black pt-6">
             <button type="submit" disabled={busy} className="pill-dark disabled:opacity-60">
               {busy ? "Enviando…" : status === "submitted" ? "Volver a enviar mi brief" : "Enviar mi brief"} <span aria-hidden>→</span>
