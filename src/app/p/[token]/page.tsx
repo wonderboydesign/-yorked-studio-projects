@@ -8,7 +8,7 @@ import CopyRows from "@/components/CopyRows";
 import { AUTH_COOKIE_NAME, verifySessionToken } from "@/lib/auth";
 import { getStudio } from "@/lib/quotesServer";
 import { accentInk, clientAmount, isDarkColor, readableDark } from "@/lib/portal";
-import { QuoteContent, StudioWork, fillNote, formatMoney, formatMonthYear, whatsappLink, worksForQuote } from "@/lib/quotes";
+import { instagramUrl, QuoteContent, StudioWork, fillNote, formatMoney, formatMonthYear, whatsappLink, worksForQuote } from "@/lib/quotes";
 import ApproveForm from "./ApproveForm";
 import ReceiptUpload from "./ReceiptUpload";
 import InvoiceChoice from "./InvoiceChoice";
@@ -501,9 +501,9 @@ export default async function ProposalPage({
             <div>
               <p className="eyebrow mb-2 text-[#f1efe9]/50">Instagram</p>
               {studio.instagram.map((h) => (
-                <span key={h} className="block">
+                <a key={h} href={instagramUrl(h)} target="_blank" rel="noreferrer noopener" className="block hover:underline">
                   {h}
-                </span>
+                </a>
               ))}
             </div>
           </div>
