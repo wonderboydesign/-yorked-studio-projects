@@ -15,7 +15,7 @@ async function state(projectId: string) {
   }
   const project = await prisma.project.findUnique({
     where: { id: projectId },
-    select: { id: true, name: true, portalToken: true, portalViewedAt: true, priceTotal: true, logoUrl: true, showName: true, portalMode: true, portalHidden: true, progressOverride: true, creditBalance: true, creditNote: true, creditVisible: true, estimatedEnd: true },
+    select: { id: true, name: true, portalToken: true, portalViewedAt: true, priceTotal: true, logoUrl: true, showName: true, portalMode: true, portalHidden: true, progressOverride: true, creditBalance: true, creditNote: true, creditVisible: true, wantsInvoice: true, invoiceChosenAt: true, estimatedEnd: true },
   });
   if (!project) return null;
   const [payments, progress, quote, documents, links, supplierQuotes] = await Promise.all([

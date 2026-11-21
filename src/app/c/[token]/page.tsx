@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { InvoiceChoice, MethodChoice } from "./PaymentChoices";
 import Isotipo from "@/components/Isotipo";
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
@@ -102,6 +103,7 @@ export default async function ClientPortal({
   const next = pending[0];
   const current = progress.phases.find((p) => p.state === "active");
   const allDone = progress.percent >= 100 || (progress.phases.length > 0 && progress.phases.every((p) => p.state === "done"));
+  const waCash = whatsappLink(studio.whatsapp, `Hola, quiero pagar en efectivo "${next?.label ?? ""}" de ${project.name}. ¿Cómo lo coordinamos?`);
   const waPaid = whatsappLink(studio.whatsapp, `Hola, ya hice el pago de "${next?.label ?? ""}" de ${project.name}. Te comparto el comprobante.`);
   // Reuniones: la próxima (o la que está en curso, hasta 2 h después) arriba
   const now = Date.now();
@@ -502,6 +504,7 @@ export default async function ClientPortal({
                     </p>
                   </div>
                 </div>
+                <InvoiceChoice token={params.token} wants={project.wantsInvoice} hasPending={pending.length > 0} />
                 {project.creditVisible && (project.creditBalance ?? 0) > 0 && (
                   <div className="mt-8 border-t border-white/15 pt-6 text-[13px]">
                     <p className="text-[#f1efe9]/50">Saldo a favor</p>
@@ -528,6 +531,7 @@ export default async function ClientPortal({
                             : "Pendiente"}
                           {p.iva && " · IVA incluido"}
                         </p>
+                        {!p.paidAt && <MethodChoice token={params.token} paymentId={p.id} method={p.method} />}
                         {p.paidAt && (
                           <a
                             href={`/c/${params.token}/recibo/${p.id}`}
@@ -552,10 +556,22 @@ export default async function ClientPortal({
               </ul>
 
               <div className="space-y-4">
-                <BankDetails studio={studio} label={next?.label} amount={next?.amount} withIva={next?.iva} />
+                {next?.method === "cash" ? (
+                  <div className="rounded-[22px] bg-[#f1efe9] p-6 text-[#121210]">
+                    <p className="eyebrow eyebrow-ink mb-1">Pago en efectivo · {next.label}</p>
+                    <p className="text-[34px] font-medium tracking-[-0.03em]">
+                      {formatMoney(next.amount)} <span className="text-[14px] tracking-normal text-black/55">MXN</span>
+                    </p>
+                    <p className="mt-3 text-[14px] leading-relaxed text-black/70">
+                      Acordamos contigo el día y el lugar para recibirlo. Escríbenos por WhatsApp y lo coordinamos.
+                    </p>
+                  </div>
+                ) : (
+                  <BankDetails studio={studio} label={next?.label} amount={next?.amount} withIva={next?.iva} />
+                )}
                 {next && (
-                  <a href={waPaid} target="_blank" rel="noreferrer" className="pill-light w-full justify-center">
-                    Ya hice mi pago · enviar comprobante <span aria-hidden>→</span>
+                  <a href={next.method === "cash" ? waCash : waPaid} target="_blank" rel="noreferrer" className="pill-light w-full justify-center">
+                    {next.method === "cash" ? "Coordinar pago en efectivo" : "Ya hice mi pago · enviar comprobante"} <span aria-hidden>→</span>
                   </a>
                 )}
               </div>
@@ -568,6 +584,7 @@ export default async function ClientPortal({
           <SectionHead n={num("facturacion")} title="Facturas y recibos" tagline="Descarga tus recibos o sube tu constancia si requieres factura." />
           <PortalBilling
             token={params.token}
+            wantsInvoice={project.wantsInvoice}
             receipts={payments
               .filter((p) => p.paidAt)
               .map((p) => ({ id: p.id, label: p.label, amount: formatMoney(p.amount), paidAt: p.paidAt!.toISOString(), url: `/c/${params.token}/recibo/${p.id}` }))}

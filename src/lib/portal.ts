@@ -38,6 +38,8 @@ export interface PaymentRow {
   dueDate: string | null;
   paidAt: string | null;
   withIva: boolean;
+  method: string;
+  methodChosenAt: string | null;
   order: number;
 }
 

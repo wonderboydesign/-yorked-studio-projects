@@ -21,11 +21,13 @@ export default function PortalBilling({
   certificates,
   invoices,
   receipts = [],
+  wantsInvoice = null,
 }: {
   token: string;
   certificates: PortalDoc[];
   invoices: PortalDoc[];
   receipts?: { id: string; label: string; amount: string; paidAt: string; url: string }[];
+  wantsInvoice?: boolean | null;
 }) {
   const router = useRouter();
   const input = useRef<HTMLInputElement>(null);
@@ -85,7 +87,7 @@ export default function PortalBilling({
 
       {/* Constancia */}
       <div className="flex flex-col rounded-[22px] border border-black/10 p-6">
-        <p className="eyebrow">¿Requieres factura?</p>
+        <p className="eyebrow">{wantsInvoice && !latest ? "Pediste factura · falta tu constancia" : "¿Requieres factura?"}</p>
         <h3 className="mt-3 text-[26px] font-medium leading-tight tracking-[-0.02em]">Tu constancia de situación fiscal</h3>
         <p className="mt-2 text-[14px] leading-relaxed text-black/60">
           Súbela aquí (PDF o foto legible) y con ella emitimos tus facturas. Si no requieres factura, descarga el recibo de cada
