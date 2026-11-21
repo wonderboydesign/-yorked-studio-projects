@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Isotipo from "@/components/Isotipo";
 import { notFound } from "next/navigation";
 import localFont from "next/font/local";
 import { prisma } from "@/lib/prisma";
@@ -82,9 +83,12 @@ export default async function Receipt({
           <div className="p-6 sm:p-12">
             <header className="flex flex-wrap items-start justify-between gap-6 border-b border-black/10 pb-8">
               <div>
-                <p className="text-[20px] font-medium tracking-tight">
-                  {studio.brandMark}
-                  <sup className="text-[10px]">®</sup>
+                <p className="flex items-center gap-3 text-[20px] font-medium tracking-tight">
+                  <Isotipo className="h-[26px] w-auto" />
+                  <span>
+                    {studio.brandMark}
+                    <sup className="text-[10px]">®</sup>
+                  </span>
                 </p>
                 <p className="mt-1 text-[12px] text-black/55">{studio.studioName}</p>
                 <p className="text-[12px] text-black/55">{studio.city}, México</p>
