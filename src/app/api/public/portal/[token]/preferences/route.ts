@@ -13,6 +13,8 @@ export async function POST(request: NextRequest, { params }: { params: { token: 
     await prisma.$transaction([
       prisma.project.update({ where: { id: project.id }, data: { wantsInvoice: body.invoice, invoiceChosenAt: new Date(), withIva: false } }),
       prisma.payment.updateMany({ where: { projectId: project.id, paidAt: null }, data: { withIva: body.invoice } }),
+      // La propuesta aprobada muestra la misma elección
+      prisma.quote.updateMany({ where: { status: "approved", prospect: { projectId: project.id } }, data: { wantsInvoice: body.invoice, invoiceChosenAt: new Date() } }),
     ]);
   }
 

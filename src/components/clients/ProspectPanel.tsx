@@ -196,6 +196,9 @@ export default function ProspectPanel({
                       {new Date(q.createdAt).toLocaleDateString("es-MX", { day: "numeric", month: "short" })}
                     </span>
                   </div>
+                  {q.status === "approved" && q.wantsInvoice !== null && (
+                    <p className="mt-1 text-xs">{q.wantsInvoice ? "🧾 El cliente pidió factura (anticipo con IVA)" : "El cliente eligió no requerir factura"}</p>
+                  )}
                   {q.receiptUrl && (
                     <p className="mt-1 text-xs text-green-700">
                       ✓ Comprobante de anticipo recibido

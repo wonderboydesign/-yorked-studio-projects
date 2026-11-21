@@ -34,7 +34,12 @@ export async function ensurePayments(projectId: string) {
   if (!quote || quote.status !== "approved") return 0;
   const progress = await projectProgress(projectId);
   const rows = paymentsFromQuote(quote.content as unknown as QuoteContent, quote.approvedOption, quote.approvedAt, progress.end);
-  await prisma.payment.createMany({ data: rows.map((r) => ({ ...r, projectId })) });
+  // Si el cliente ya eligió factura al aprobar, los pagos nacen con IVA
+  const withIva = quote.wantsInvoice === true;
+  await prisma.payment.createMany({ data: rows.map((r) => ({ ...r, projectId, withIva })) });
+  if (quote.wantsInvoice !== null) {
+    await prisma.project.update({ where: { id: projectId }, data: { wantsInvoice: quote.wantsInvoice, invoiceChosenAt: quote.invoiceChosenAt } });
+  }
   // El precio completo del proyecto parte de la propuesta
   await prisma.project.updateMany({
     where: { id: projectId, priceTotal: null },

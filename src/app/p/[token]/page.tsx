@@ -7,10 +7,11 @@ import { prisma } from "@/lib/prisma";
 import CopyRows from "@/components/CopyRows";
 import { AUTH_COOKIE_NAME, verifySessionToken } from "@/lib/auth";
 import { getStudio } from "@/lib/quotesServer";
-import { accentInk, isDarkColor, readableDark } from "@/lib/portal";
+import { accentInk, clientAmount, isDarkColor, readableDark } from "@/lib/portal";
 import { QuoteContent, StudioWork, fillNote, formatMoney, formatMonthYear, whatsappLink, worksForQuote } from "@/lib/quotes";
 import ApproveForm from "./ApproveForm";
 import ReceiptUpload from "./ReceiptUpload";
+import InvoiceChoice from "./InvoiceChoice";
 import WorkCarousel from "./WorkCarousel";
 
 // La tipografía de las propuestas del estudio
@@ -428,6 +429,7 @@ export default async function ProposalPage({
                   {quote.approvedAt?.toLocaleDateString("es-MX", { day: "numeric", month: "long" })}. Con el anticipo
                   apartamos tu lugar en la agenda y arrancamos con el briefing.
                 </p>
+                <InvoiceChoice token={quote.token} wants={quote.wantsInvoice} />
                 <ReceiptUpload
                   token={quote.token}
                   initialUrl={quote.receiptUrl}
@@ -449,7 +451,12 @@ export default async function ProposalPage({
                   .
                 </p>
               </div>
-              <BankDetails studio={studio} amount={(chosen.price * c.advancePercent) / 100} percent={c.advancePercent} />
+              <BankDetails
+                studio={studio}
+                amount={clientAmount((chosen.price * c.advancePercent) / 100, quote.wantsInvoice === true)}
+                percent={c.advancePercent}
+                withIva={quote.wantsInvoice}
+              />
             </div>
           ) : expired ? (
             <p className="mt-10 max-w-md text-[17px]">
@@ -514,10 +521,12 @@ function BankDetails({
   studio,
   amount,
   percent,
+  withIva,
 }: {
   studio: Awaited<ReturnType<typeof getStudio>>;
   amount: number;
   percent: number;
+  withIva: boolean | null;
 }) {
   const b = studio.bank;
   const rows = [
@@ -534,7 +543,7 @@ function BankDetails({
       <p className="text-[34px] font-medium tracking-[-0.03em]">
         {formatMoney(amount)} <span className="text-[14px] tracking-normal text-black/55">MXN · {percent}%</span>
       </p>
-      <p className="mb-3 text-[11px] text-black/55">Más IVA en caso de requerir factura.</p>
+      <p className="mb-3 text-[11px] text-black/55">{withIva === true ? "IVA incluido." : withIva === false ? "Sin factura: no lleva IVA." : "Elige si requieres factura para ver el monto con IVA."}</p>
       <CopyRows rows={rows as [string, string][]} />
     </div>
   );
