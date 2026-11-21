@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useRef, useEffect } from "react";
 import { Task, Project } from "@/lib/types";
+import { isDarkColor } from "@/lib/portal";
 import {
   parseDate,
   addDays,
@@ -19,16 +20,9 @@ interface DragState {
   moved: boolean;
 }
 
-// Texto negro sobre colores claros y blanco sobre oscuros
+// Texto blanco o negro, el que más contraste (WCAG) dé sobre el color del proyecto
 function readableText(hex: string): string {
-  const m = /^#?([0-9a-f]{6})$/i.exec(hex);
-  if (!m) return "#ffffff";
-  const n = parseInt(m[1], 16);
-  const r = (n >> 16) & 255;
-  const g = (n >> 8) & 255;
-  const b = n & 255;
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance > 0.6 ? "#1d1d1f" : "#ffffff";
+  return isDarkColor(hex) ? "#ffffff" : "#1d1d1f";
 }
 
 type Zoom = "day" | "wide" | "wide2" | "wide3";

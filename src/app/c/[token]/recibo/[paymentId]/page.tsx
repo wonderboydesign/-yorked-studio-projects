@@ -71,12 +71,12 @@ export default async function Receipt({
 
         <article className="overflow-hidden rounded-[22px] bg-white [print-color-adjust:exact] [-webkit-print-color-adjust:exact] print:rounded-none">
           {/* Franja con el color del proyecto */}
-          <div className="flex items-end justify-between gap-6 px-6 py-6 text-white sm:px-12 sm:py-8" style={{ background: accent }}>
+          <div className="flex items-end justify-between gap-6 px-6 py-6 sm:px-12 sm:py-8" style={{ background: accent, color: "var(--accent-text)" }}>
             <div className="min-w-0">
-              <p className="text-[11px] uppercase tracking-[0.14em] opacity-75">Recibo de pago</p>
+              <p className="text-[11px] uppercase tracking-[0.14em] opacity-90">Recibo de pago</p>
               <p className="mt-2 text-[clamp(30px,6vw,48px)] font-medium leading-none tracking-[-0.03em]">{project.name}</p>
             </div>
-            <span className="shrink-0 border border-white px-3 py-1.5 text-[13px] font-medium tracking-[0.12em]">Pagado</span>
+            <span className="shrink-0 border border-current px-3 py-1.5 text-[13px] font-medium tracking-[0.12em]">Pagado</span>
           </div>
 
           <div className="p-6 sm:p-12">

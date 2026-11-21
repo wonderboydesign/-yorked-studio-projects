@@ -7,7 +7,7 @@ import CopyRows from "@/components/CopyRows";
 import { AUTH_COOKIE_NAME, verifySessionToken } from "@/lib/auth";
 import { getStudio } from "@/lib/quotesServer";
 import { QuoteContent, formatMoney, whatsappLink } from "@/lib/quotes";
-import { PortalPhase, clientAmount, computeProgress, isDarkColor } from "@/lib/portal";
+import { PortalPhase, clientAmount, computeProgress, accentInk, isDarkColor, readableDark } from "@/lib/portal";
 import { projectQuote } from "@/lib/portalServer";
 import { localTodayUTC } from "@/lib/portalDates";
 import PortalBilling from "./PortalBilling";
@@ -85,7 +85,7 @@ export default async function ClientPortal({
     end: project.estimatedEnd ?? auto.end,
   };
   const accent = c?.accent ?? project.color;
-  const dark = c?.dark ?? "#121210";
+  const dark = readableDark(c?.dark ?? "#121210");
   const line1 = c?.brandLine1 || project.name;
   const line2 = c?.brandLine1 ? c.brandLine2 : "";
 
@@ -168,7 +168,7 @@ export default async function ClientPortal({
         <div className="flex items-center justify-between gap-2">
           <span className="eyebrow">{showPhase ? `Fase ${d.phase}${phaseName.get(d.phase!) ? ` · ${phaseName.get(d.phase!)}` : ""}` : retainer ? "Nuevo contenido" : "Entrega"}</span>
           {isNew && (
-            <span className="rounded-full px-2 py-0.5 text-[11px] text-white" style={{ background: "var(--accent)" }}>
+            <span className="rounded-full px-2 py-0.5 text-[11px]" style={{ background: "var(--accent)", color: "var(--accent-text)" }}>
               Nueva
             </span>
           )}
@@ -205,6 +205,8 @@ export default async function ClientPortal({
       style={{
         ["--accent" as string]: accent,
         ["--dark" as string]: dark,
+        ["--accent-ink" as string]: accentInk(accent, "#f2f2f2"),
+        ["--accent-ink-dark" as string]: accentInk(accent, dark),
         // Texto de los botones: blanco sobre acentos oscuros, negro sobre claros
         ["--accent-text" as string]: isDarkColor(accent) ? "#ffffff" : "#111111",
       }}
@@ -243,7 +245,7 @@ export default async function ClientPortal({
                 {line2 && (
                   <>
                     {" "}
-                    <span style={{ color: "var(--accent)" }}>{line2}</span>
+                    <span style={{ color: "var(--accent-ink)" }}>{line2}</span>
                   </>
                 )}
               </h1>
@@ -254,7 +256,7 @@ export default async function ClientPortal({
               {line2 && (
                 <>
                   <br />
-                  <span style={{ color: "var(--accent)" }}>{line2}</span>
+                  <span style={{ color: "var(--accent-ink)" }}>{line2}</span>
                 </>
               )}
             </h1>
@@ -264,11 +266,11 @@ export default async function ClientPortal({
           {(proposalUrl || (nextMeeting && show("reuniones")) || (brandFiles.length > 0 && show("marca"))) && (
             <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {nextMeeting && show("reuniones") && (
-                <div className="flex flex-col rounded-[22px] p-5 text-white sm:col-span-2 lg:col-span-1" style={{ background: "var(--accent)" }}>
-                  <span className="text-[11px] uppercase tracking-[0.14em] opacity-75">Próxima reunión</span>
+                <div className="flex flex-col rounded-[22px] p-5 sm:col-span-2 lg:col-span-1" style={{ background: "var(--accent)", color: "var(--accent-text)" }}>
+                  <span className="text-[11px] uppercase tracking-[0.14em] opacity-90">Próxima reunión</span>
                   <p className="mt-3 text-[22px] font-medium leading-tight">{nextMeeting.title}</p>
-                  <p className="mt-1 text-[14px] opacity-85">{meetingDate(nextMeeting.date!)}</p>
-                  {nextMeeting.note && <p className="mt-2 text-[13px] opacity-75">{nextMeeting.note}</p>}
+                  <p className="mt-1 text-[14px] opacity-95">{meetingDate(nextMeeting.date!)}</p>
+                  {nextMeeting.note && <p className="mt-2 text-[13px] opacity-90">{nextMeeting.note}</p>}
                   <a href={nextMeeting.url} target="_blank" rel="noreferrer" className="pill-light mt-5 w-fit">
                     Unirme a la reunión <span aria-hidden>→</span>
                   </a>
@@ -349,7 +351,7 @@ export default async function ClientPortal({
                 .map((m) => {
                   const past = m.date!.getTime() < now - 2 * 3600 * 1000;
                   return (
-                    <li key={m.id} className={`grid gap-3 border-t border-black/10 py-6 md:grid-cols-[1fr_auto] md:items-center ${past ? "opacity-50" : ""}`}>
+                    <li key={m.id} className={`grid gap-3 border-t border-black/10 py-6 md:grid-cols-[1fr_auto] md:items-center ${past ? "opacity-80" : ""}`}>
                       <div className="min-w-0">
                         <p className="text-[22px] font-medium leading-tight tracking-[-0.01em]">{m.title}</p>
                         <p className="mt-1 text-[13px] text-black/55">
@@ -542,7 +544,7 @@ export default async function ClientPortal({
                     </li>
                   );
                 })}
-                <li className="border-t border-white/15 pt-4 text-[12px] text-[#f1efe9]/45">Montos en MXN.</li>
+                <li className="border-t border-white/15 pt-4 text-[12px] text-[#f1efe9]/65">Montos en MXN.</li>
               </ul>
 
               <div className="space-y-4">
@@ -645,7 +647,7 @@ function PhaseRow({ phase: ph }: { phase: PortalPhase }) {
   const chip =
     ph.state === "done" ? "✓ Terminada" : ph.state === "active" ? `En curso · ${ph.percent}%` : "Por venir";
   return (
-    <article className={`grid gap-4 border-t border-black/10 py-8 md:grid-cols-[80px_1fr_auto] md:items-center md:gap-8 ${ph.state === "upcoming" ? "opacity-55" : ""}`}>
+    <article className={`grid gap-4 border-t border-black/10 py-8 md:grid-cols-[80px_1fr_auto] md:items-center md:gap-8 ${ph.state === "upcoming" ? "opacity-80" : ""}`}>
       <p className="text-[12px] text-black/50">Fase {ph.number}</p>
       <div className="min-w-0">
         <h3 className="text-[28px] font-medium leading-tight tracking-[-0.02em]">{ph.name}</h3>
@@ -657,8 +659,8 @@ function PhaseRow({ phase: ph }: { phase: PortalPhase }) {
         </div>
       </div>
       <span
-        className={`h-fit w-fit rounded-full px-3 py-1 text-[12px] ${ph.state === "active" ? "text-white" : "border border-black/15"}`}
-        style={ph.state === "active" ? { background: "var(--accent)" } : undefined}
+        className={`h-fit w-fit rounded-full px-3 py-1 text-[12px] ${ph.state === "active" ? "" : "border border-black/15"}`}
+        style={ph.state === "active" ? { background: "var(--accent)", color: "var(--accent-text)" } : undefined}
       >
         {chip}
       </span>
@@ -690,14 +692,14 @@ function BankDetails({
     <div className="rounded-[22px] bg-[#f1efe9] p-6 text-[#121210]">
       {label && amount !== undefined ? (
         <>
-          <p className="eyebrow mb-1">Siguiente pago · {label}</p>
+          <p className="eyebrow eyebrow-ink mb-1">Siguiente pago · {label}</p>
           <p className="text-[34px] font-medium tracking-[-0.03em]">
             {formatMoney(amount)} <span className="text-[14px] tracking-normal text-black/55">MXN</span>
           </p>
           {withIva ? <p className="mb-3 text-[11px] text-black/55">IVA incluido.</p> : <div className="mb-3" />}
         </>
       ) : (
-        <p className="eyebrow mb-3">Datos para transferencia</p>
+        <p className="eyebrow eyebrow-ink mb-3">Datos para transferencia</p>
       )}
       <CopyRows rows={rows as [string, string][]} />
     </div>

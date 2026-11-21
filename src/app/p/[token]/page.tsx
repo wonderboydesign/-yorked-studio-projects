@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import CopyRows from "@/components/CopyRows";
 import { AUTH_COOKIE_NAME, verifySessionToken } from "@/lib/auth";
 import { getStudio } from "@/lib/quotesServer";
-import { isDarkColor } from "@/lib/portal";
+import { accentInk, isDarkColor, readableDark } from "@/lib/portal";
 import { QuoteContent, StudioWork, fillNote, formatMoney, formatMonthYear, whatsappLink, worksForQuote } from "@/lib/quotes";
 import ApproveForm from "./ApproveForm";
 import ReceiptUpload from "./ReceiptUpload";
@@ -77,7 +77,10 @@ export default async function ProposalPage({
       className={`${helvetica.variable} proposal min-h-screen${lab ? " portal-lab" : ""}`}
       style={{
         ["--accent" as string]: c.accent,
-        ["--dark" as string]: c.dark,
+        ["--dark" as string]: readableDark(c.dark),
+        // Acento usado como texto: versión legible sobre fondo claro y sobre el oscuro
+        ["--accent-ink" as string]: accentInk(c.accent, "#f2f2f2"),
+        ["--accent-ink-dark" as string]: accentInk(c.accent, readableDark(c.dark)),
         ["--accent-text" as string]: isDarkColor(c.accent) ? "#ffffff" : "#111111",
       }}
     >
@@ -109,7 +112,7 @@ export default async function ProposalPage({
           <h1 className="pt-hero-title mt-6 text-[clamp(72px,15vw,216px)] font-medium leading-[0.86] tracking-[-0.055em]">
             {c.brandLine1}
             <br />
-            <span style={{ color: "var(--accent)" }}>{c.brandLine2}</span>
+            <span style={{ color: "var(--accent-ink)" }}>{c.brandLine2}</span>
           </h1>
           <div className="mt-auto grid gap-6 border-t border-black/10 pt-8 sm:grid-cols-3 sm:items-end">
             <p className="max-w-xs text-[17px] leading-snug">{c.summary}</p>
@@ -187,7 +190,7 @@ export default async function ProposalPage({
           <div className="mt-14 grid gap-6 border-t border-white/10 pt-8 sm:grid-cols-2 lg:grid-cols-4">
             {c.visionPoints.map((v, i) => (
               <div key={i}>
-                <span className="text-[12px]" style={{ color: "var(--accent)" }}>
+                <span className="text-[12px]" style={{ color: "var(--accent-ink-dark)" }}>
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <p className="mt-2 text-[17px] leading-snug">{v}</p>
@@ -345,7 +348,7 @@ export default async function ProposalPage({
                   <div className="flex items-center justify-between text-[12px]">
                     <span className="opacity-60">Opción {o.key}</span>
                     {o.recommended && (
-                      <span className="rounded-full px-2.5 py-0.5 text-[11px]" style={{ background: "var(--accent)", color: "#fff" }}>
+                      <span className="rounded-full px-2.5 py-0.5 text-[11px]" style={{ background: "var(--accent)", color: "var(--accent-text)" }}>
                         Recomendada
                       </span>
                     )}
@@ -523,7 +526,7 @@ function BankDetails({
   if (rows.length <= 1) return null;
   return (
     <div className="rounded-[22px] bg-[#f1efe9] p-6 text-[#121210]">
-      <p className="eyebrow mb-1">Datos para el anticipo</p>
+      <p className="eyebrow eyebrow-ink mb-1">Datos para el anticipo</p>
       <p className="text-[34px] font-medium tracking-[-0.03em]">
         {formatMoney(amount)} <span className="text-[14px] tracking-normal text-black/55">MXN · {percent}%</span>
       </p>
