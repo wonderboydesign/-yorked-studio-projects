@@ -9,6 +9,7 @@ import { Button } from "../branding/ui";
 import PortalLinksEditor, { PortalLinkRow } from "./PortalLinksEditor";
 import PhaseBuilder from "./PhaseBuilder";
 import SupplierQuotesEditor from "./SupplierQuotesEditor";
+import BriefEditor from "./BriefEditor";
 import { SupplierQuoteRow } from "@/lib/supplierQuotes";
 
 type Notify = (message: string, tone?: "ok" | "error") => void;
@@ -389,6 +390,8 @@ export default function ClientPortalPanel({
                 </div>
               )}
             </section>
+
+            <BriefEditor projectId={projectId} notify={notify} />
 
             {/* Tipo de portal y secciones visibles */}
             <section className="space-y-3">
