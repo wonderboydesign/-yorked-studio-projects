@@ -3,6 +3,7 @@
 // portal se vuelve una bandeja de "Lo nuevo", sin avance, fases ni pagos.
 
 export const PORTAL_SECTIONS: { id: string; label: string; hint: string }[] = [
+  { id: "brief", label: "Brief (formulario)", hint: "Formulario que el cliente llena" },
   { id: "avance", label: "Avance y fecha de entrega", hint: "El porcentaje grande del inicio" },
   { id: "fases", label: "Fases", hint: "Calendario por fases" },
   { id: "reuniones", label: "Reuniones", hint: "Próxima reunión y links" },

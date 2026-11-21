@@ -14,6 +14,8 @@ model Project {
   color            String            @default("#1E4FFF")
   // Logotipo del cliente (archivo en Vercel Blob), opcional
   logoUrl          String?
+  // Formulario de brief propio dentro del portal (opcional)
+  clientBrief      ProjectBrief?
   // Con logotipo, mostrar o no el nombre del cliente en el portal
   showName         Boolean           @default(true)
   // Tipo de portal ("project" | "retainer") y secciones que NO se muestran
@@ -59,6 +61,23 @@ model Project {
   supplierQuotes   SupplierQuote[]
 
   @@index([portalToken])
+}
+
+// Brief que el cliente llena desde su portal. Las preguntas son editables por
+// proyecto (ver BriefQuestion en src/lib/brief.ts) y las respuestas van por id.
+model ProjectBrief {
+  id          String    @id @default(cuid())
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId   String    @unique
+  title       String    @default("Sobre tu marca")
+  intro       String?
+  questions   Json
+  answers     Json      @default("{}")
+  // "draft" mientras lo llena, "submitted" cuando lo envía
+  status      String    @default("draft")
+  submittedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 // Documento de facturación en el portal del cliente: la constancia de

@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import BriefForm from "./BriefForm";
+import { BriefAnswers, BriefQuestion } from "@/lib/brief";
 import { InvoiceChoice, MethodChoice } from "./PaymentChoices";
 import Isotipo from "@/components/Isotipo";
 import { notFound } from "next/navigation";
@@ -67,6 +69,7 @@ export default async function ClientPortal({
       documents: { orderBy: { createdAt: "desc" } },
       links: { orderBy: [{ date: "desc" }, { createdAt: "desc" }] },
       supplierQuotes: { orderBy: { createdAt: "desc" } },
+      clientBrief: true,
     },
   });
   if (!project) notFound();
@@ -122,7 +125,9 @@ export default async function ClientPortal({
   const phaseName = new Map(progress.phases.map((p) => [p.number, p.name]));
 
   // Numeración de secciones según lo que tenga el proyecto
+  const brief = project.clientBrief;
   const order = [
+    brief && show("brief") && "brief",
     show("fases") && "fases",
     meetings.length > 0 && show("reuniones") && "reuniones",
     deliveries.length > 0 && show("entregas") && "entregas",
@@ -133,6 +138,7 @@ export default async function ClientPortal({
   ].filter(Boolean) as string[];
   const num = (id: string) => String(order.indexOf(id) + 2).padStart(2, "0");
   const NAV_LABELS: Record<string, string> = {
+    brief: "Brief",
     fases: "Fases",
     reuniones: "Reuniones",
     entregas: retainer ? "Lo nuevo" : "Entregas",
@@ -330,6 +336,25 @@ export default async function ClientPortal({
           </div>
           )}
         </section>
+
+        {/* Brief: formulario del cliente */}
+        {brief && show("brief") && (
+          <section id="brief" className="py-24">
+            <SectionHead
+              n={num("brief")}
+              title={brief.title}
+              tagline={brief.status === "submitted" ? "Gracias, ya recibimos tu brief." : "Cuéntanos de tu marca. Se guarda solo."}
+            />
+            <BriefForm
+              token={params.token}
+              intro={brief.intro}
+              questions={brief.questions as unknown as BriefQuestion[]}
+              initialAnswers={brief.answers as unknown as BriefAnswers}
+              initialStatus={brief.status}
+              submittedAt={brief.submittedAt ? brief.submittedAt.toISOString() : null}
+            />
+          </section>
+        )}
 
         {show("fases") && (
         <section id="fases" className="py-24">
