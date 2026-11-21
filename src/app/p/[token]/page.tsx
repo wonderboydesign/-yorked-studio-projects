@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Isotipo from "@/components/Isotipo";
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import localFont from "next/font/local";
@@ -87,9 +88,12 @@ export default async function ProposalPage({
       {/* Barra superior */}
       <header className="pt-header sticky top-0 z-30 border-b border-black/10 bg-[#f1efe9]/85 backdrop-blur">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-4 px-5 py-3 sm:px-6">
-          <span className="text-[15px] font-medium tracking-tight">
-            {studio.brandMark}
-            <sup className="text-[9px]">®</sup>
+          <span className="flex items-center gap-2.5 text-[15px] font-medium tracking-tight">
+            <Isotipo className="h-[20px] w-auto" />
+            <span>
+              {studio.brandMark}
+              <sup className="text-[9px]">®</sup>
+            </span>
           </span>
           <nav className="hidden gap-7 text-[13px] text-black/60 md:flex">
             <a href="#proceso" className="hover:text-black">Proceso</a>
