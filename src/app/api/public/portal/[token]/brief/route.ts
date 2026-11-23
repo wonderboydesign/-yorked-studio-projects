@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { BriefAnswers, BriefQuestion, missingRequired, sanitizeAnswers } from "@/lib/brief";
+import { BriefAnswers, BriefQuestion, answeredCount, missingRequired, sanitizeAnswers } from "@/lib/brief";
+import { notifyStudio } from "@/lib/notifications";
 
 // Público (sin sesión, solo con la liga vigente): el cliente guarda sus
 // respuestas del brief y lo envía
@@ -40,5 +41,11 @@ export async function POST(request: NextRequest, { params }: { params: { token: 
     return NextResponse.json({ error: `Falta responder: ${missing.map((q) => q.label).join("; ")}`, missing: missing.map((q) => q.id) }, { status: 400 });
   }
   await prisma.projectBrief.update({ where: { id: brief.id }, data: { answers, status: "submitted", submittedAt: new Date() } });
+  const project = await prisma.project.findUnique({ where: { id: brief.projectId }, select: { name: true } });
+  await notifyStudio({
+    kind: "brief",
+    message: `📝 ${project?.name ?? "Un cliente"} ${brief.submittedAt ? "volvió a enviar" : "envió"} su brief (${answeredCount(questions, answers as BriefAnswers)} de ${questions.length} respondidas)`,
+    projectId: brief.projectId,
+  });
   return NextResponse.json({ ok: true });
 }

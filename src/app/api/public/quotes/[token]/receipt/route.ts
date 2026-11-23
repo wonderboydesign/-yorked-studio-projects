@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isBlobUrl } from "@/lib/portalServer";
+import { notifyStudio } from "@/lib/notifications";
 
 // Público (sin sesión): el cliente deja registrado el comprobante del anticipo
 export async function POST(request: NextRequest, { params }: { params: { token: string } }) {
-  const quote = await prisma.quote.findUnique({ where: { token: params.token }, select: { id: true, status: true } });
+  const quote = await prisma.quote.findUnique({ where: { token: params.token }, select: { id: true, status: true, prospect: { select: { id: true, brandName: true, projectId: true } } } });
   if (!quote || quote.status !== "approved") {
     return NextResponse.json({ error: "Primero aprueba la propuesta." }, { status: 404 });
   }
@@ -14,6 +15,12 @@ export async function POST(request: NextRequest, { params }: { params: { token: 
   await prisma.quote.update({
     where: { id: quote.id },
     data: { receiptUrl: body.url, receiptName: name || null, receiptAt: new Date() },
+  });
+  await notifyStudio({
+    kind: "receipt",
+    message: `🧾 ${quote.prospect.brandName} subió el comprobante de su anticipo`,
+    prospectId: quote.prospect.id,
+    projectId: quote.prospect.projectId,
   });
   return NextResponse.json({ ok: true, receiptAt: new Date().toISOString() });
 }

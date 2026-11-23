@@ -15,10 +15,14 @@ export default function ClientsView({
   notify,
   onDataChanged,
   onOpenPortal,
+  focusProspectId,
+  onFocusHandled,
 }: {
   notify: Notify;
   onDataChanged?: () => void;
   onOpenPortal?: (projectId: string) => void;
+  focusProspectId?: string | null;
+  onFocusHandled?: () => void;
 }) {
   const [prospects, setProspects] = useState<Prospect[] | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
@@ -66,6 +70,14 @@ export default function ClientsView({
       load();
     }
   }
+
+  // Viene de un aviso: abre ese prospecto en cuanto cargue la lista
+  useEffect(() => {
+    if (focusProspectId && prospects) {
+      if (prospects.some((p) => p.id === focusProspectId)) setOpenId(focusProspectId);
+      onFocusHandled?.();
+    }
+  }, [focusProspectId, prospects, onFocusHandled]);
 
   const open = prospects?.find((p) => p.id === openId) ?? null;
   const all = prospects ?? [];

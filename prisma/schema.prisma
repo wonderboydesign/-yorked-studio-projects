@@ -256,8 +256,14 @@ model Notification {
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
-  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  taskId    String
+  // Avisos de tareas llevan taskId; los de clientes (brief, propuesta, comprobante) no
+  task      Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskId    String?
+  // "task" | "brief" | "quote" | "receipt"
+  kind      String   @default("task")
+  // A dónde lleva al hacer clic: el portal de un proyecto o la ficha de un prospecto
+  projectId  String?
+  prospectId String?
 
   @@index([userId, read])
 }

@@ -125,6 +125,8 @@ La propuesta, el portal y el recibo usan el estilo "laboratorio" (blanco y gris 
 
 **Factura y forma de pago (cliente):** en la sección de pagos el cliente elige *¿Requieres factura?* (Sí suma el 16% de IVA a sus pagos pendientes y le pide su constancia; No lo quita; los pagos ya pagados no cambian) y, por cada pago pendiente, *Transferencia* (datos bancarios) o *Efectivo* (sin datos bancarios, con botón de WhatsApp para coordinarlo). En el panel se ve lo que eligió y la forma de pago se puede cambiar por pago.
 
+**Avisos de lo que hace el cliente:** cuando un cliente **envía su brief**, **aprueba una propuesta** o **sube el comprobante del anticipo**, le llega un aviso a todo el equipo en la campana 🔔 (se actualiza cada 30 s; al tocarlo abre el portal del proyecto o la ficha del prospecto). Si `RESEND_API_KEY` está configurada en Vercel, también se manda por correo a los usuarios del equipo (`RESEND_FROM_EMAIL` define el remitente).
+
 **Bienvenida y redes:** la primera vez que el cliente abre su portal en un navegador sale un cintillo arriba: *Te damos la bienvenida a tu proyecto, {nombre del campo Cliente del proyecto}* y, si la propuesta está aprobada, *Gracias por aprobar tu propuesta* (se cierra con la ×; el estudio lo ve siempre como vista previa). Los Instagram del estudio (de *Datos del estudio*) son ligas a su perfil en la propuesta y el portal.
 
 **Isotipo de Wonder Boy:** aparece junto al nombre del estudio en la barra superior de la propuesta y del portal, y en el recibo (componente `src/components/Isotipo.tsx`, SVG que toma el color del texto).
