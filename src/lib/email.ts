@@ -53,3 +53,23 @@ export async function sendTaskAssignedEmail({
     console.error("Error al enviar el correo de asignación:", err);
   }
 }
+
+// Correo de aviso cuando un cliente hace algo (brief, propuesta, comprobante).
+// Solo se envía si RESEND_API_KEY está configurada.
+export async function sendStudioEventEmail({ to, subject, message }: { to: string[]; subject: string; message: string }) {
+  const resend = getResend();
+  if (!resend || to.length === 0) return;
+  const from = process.env.RESEND_FROM_EMAIL || "Yorked Studio <onboarding@resend.dev>";
+  const esc = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://yorked-studio-projects.vercel.app";
+  try {
+    await resend.emails.send({
+      from,
+      to,
+      subject: esc(subject),
+      html: `<p>${esc(message)}</p><p><a href="${appUrl}">Abrir Yorked Studio</a></p>`,
+    });
+  } catch (err) {
+    console.error("Error al enviar el correo de aviso:", err);
+  }
+}

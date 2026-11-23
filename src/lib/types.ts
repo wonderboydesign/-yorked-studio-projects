@@ -61,8 +61,11 @@ export interface Notification {
   message: string;
   read: boolean;
   createdAt: string;
-  taskId: string;
-  task: { id: string; name: string; status: Status };
+  taskId: string | null;
+  task: { id: string; name: string; status: Status } | null;
+  kind: string;
+  projectId: string | null;
+  prospectId: string | null;
 }
 
 export const STATUS_LABELS: Record<Status, string> = {

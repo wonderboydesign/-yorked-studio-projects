@@ -19,9 +19,12 @@ function timeAgo(iso: string): string {
 export default function NotificationBell({
   enabled,
   onOpenTask,
+  onOpenEvent,
 }: {
   enabled: boolean;
   onOpenTask: (taskId: string) => void;
+  // Avisos de clientes (brief, propuesta, comprobante): abre el portal o el prospecto
+  onOpenEvent: (n: Notification) => void;
 }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -101,13 +104,14 @@ export default function NotificationBell({
           ) : (
             <div className="divide-y divide-line">
               {notifications.map((n) => {
-                const done = n.task.status === "DONE";
+                const done = n.task?.status === "DONE";
                 return (
                   <button
                     key={n.id}
                     onClick={() => {
                       setOpen(false);
-                      onOpenTask(n.taskId);
+                      if (n.taskId) onOpenTask(n.taskId);
+                      else onOpenEvent(n);
                     }}
                     className={`w-full text-left px-4 py-3 hover:bg-ink/[0.03] ${
                       !n.read ? "bg-ink/[0.02]" : ""

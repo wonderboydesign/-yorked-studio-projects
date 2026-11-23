@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { QuoteContent } from "@/lib/quotes";
+import { QuoteContent, formatMoney } from "@/lib/quotes";
+import { notifyStudio } from "@/lib/notifications";
 
 // Público (sin sesión): el cliente aprueba la propuesta desde su liga
 export async function POST(request: NextRequest, { params }: { params: { token: string } }) {
@@ -35,6 +36,13 @@ export async function POST(request: NextRequest, { params }: { params: { token: 
       approvedNote: note || null,
     },
   });
-  await prisma.prospect.update({ where: { id: quote.prospectId }, data: { stage: "won" } });
+  const prospect = await prisma.prospect.update({ where: { id: quote.prospectId }, data: { stage: "won" }, select: { id: true, brandName: true, projectId: true } });
+  const chosen = content.options.find((o) => o.key === option);
+  await notifyStudio({
+    kind: "quote",
+    message: `✅ ${prospect.brandName} aprobó la propuesta${chosen ? ` (${chosen.name} · ${formatMoney(chosen.price)})` : ""}${name ? `, firmó ${name}` : ""}`,
+    prospectId: prospect.id,
+    projectId: prospect.projectId,
+  });
   return NextResponse.json({ ok: true });
 }

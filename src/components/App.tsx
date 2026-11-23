@@ -73,6 +73,8 @@ export default function App() {
 
   const [toast, setToast] = useState<{ id: number; message: string; tone: "ok" | "error" } | null>(null);
   const [portalProjectId, setPortalProjectId] = useState<string | null>(null);
+  // Prospecto que se abre al venir de un aviso (propuesta aprobada, comprobante)
+  const [focusProspectId, setFocusProspectId] = useState<string | null>(null);
   const notify = useCallback((message: string, tone: "ok" | "error" = "ok") => {
     setToast({ id: Date.now(), message, tone });
   }, []);
@@ -474,6 +476,16 @@ export default function App() {
             const task = tasks.find((t) => t.id === taskId);
             if (task) setTaskModal({ open: true, task });
           }}
+          onOpenEvent={(n) => {
+            if (n.kind !== "brief" && n.prospectId) {
+              setView("clients");
+              setFocusProspectId(n.prospectId);
+            } else if (n.projectId) setPortalProjectId(n.projectId);
+            else if (n.prospectId) {
+              setView("clients");
+              setFocusProspectId(n.prospectId);
+            }
+          }}
         />
         <button
           onClick={toggleDarkMode}
@@ -662,7 +674,7 @@ export default function App() {
                 onChangeStatus={changeTaskStatus}
               />
             )}
-            {view === "clients" && <ClientsView notify={notify} onDataChanged={load} onOpenPortal={setPortalProjectId} />}
+            {view === "clients" && <ClientsView notify={notify} onDataChanged={load} onOpenPortal={setPortalProjectId} focusProspectId={focusProspectId} onFocusHandled={() => setFocusProspectId(null)} />}
             {view === "branding" && (
               <BrandingView
                 projects={activeProjects}
