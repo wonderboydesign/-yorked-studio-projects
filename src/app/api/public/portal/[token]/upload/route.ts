@@ -17,7 +17,7 @@ export async function POST(request: Request, { params }: { params: { token: stri
       onBeforeGenerateToken: async (pathname) => {
         const ext = pathname.split(".").pop()?.toLowerCase();
         if (!ext || !CLIENT_UPLOAD_EXTENSIONS.includes(ext)) throw new Error("Sube un PDF, JPG o PNG.");
-        const count = await prisma.projectDocument.count({ where: { projectId: project.id, uploadedBy: "client" } });
+        const count = await prisma.projectDocument.count({ where: { projectId: project.id, kind: "tax_certificate", uploadedBy: "client" } });
         if (count >= CLIENT_UPLOAD_MAX_FILES) throw new Error("Ya hay muchos archivos; escríbenos por WhatsApp.");
         return { maximumSizeInBytes: CLIENT_UPLOAD_MAX_BYTES, addRandomSuffix: true };
       },

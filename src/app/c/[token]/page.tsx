@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import MaterialUpload from "./MaterialUpload";
 import RetainerFeed from "./RetainerFeed";
 import WelcomeRibbon from "./WelcomeRibbon";
 import BriefForm from "./BriefForm";
@@ -133,6 +134,7 @@ export default async function ClientPortal({
     show("fases") && "fases",
     meetings.length > 0 && show("reuniones") && "reuniones",
     deliveries.length > 0 && show("entregas") && "entregas",
+    project.materialEnabled && "material",
     project.supplierQuotes.length > 0 && show("cotizaciones") && "cotizaciones",
     payments.length > 0 && show("pagos") && "pagos",
     show("facturacion") && "facturacion",
@@ -144,6 +146,7 @@ export default async function ClientPortal({
     fases: "Fases",
     reuniones: "Reuniones",
     entregas: retainer ? "Lo nuevo" : "Entregas",
+    material: "Tu material",
     cotizaciones: "Cotizaciones",
     pagos: "Pagos",
     facturacion: "Facturas y recibos",
@@ -432,6 +435,20 @@ export default async function ClientPortal({
             ) : (
               <div className="mt-14 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{deliveries.map(renderDelivery)}</div>
             )}
+          </section>
+        )}
+
+        {/* Tu material: el cliente sube fotos, videos y documentos */}
+        {project.materialEnabled && (
+          <section id="material" className="pb-24">
+            <SectionHead n={num("material")} title="Tu material" tagline="Sube aquí las fotos, videos y archivos que quieras que usemos." />
+            <MaterialUpload
+              token={params.token}
+              link={project.materialLink}
+              initialFiles={project.documents
+                .filter((d) => d.kind === "client_material")
+                .map((d) => ({ id: d.id, name: d.name, url: d.url, size: d.size, createdAt: d.createdAt.toISOString() }))}
+            />
           </section>
         )}
 

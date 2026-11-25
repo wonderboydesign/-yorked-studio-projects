@@ -29,6 +29,8 @@ interface PortalState {
   priceTotal: number | null;
   logoUrl: string | null;
   showName: boolean;
+  materialEnabled: boolean;
+  materialLink: string | null;
   portalMode: string;
   portalHidden: string[];
   progressOverride: number | null;
@@ -47,9 +49,10 @@ interface PortalState {
 
 interface PortalDocument {
   id: string;
-  kind: "tax_certificate" | "invoice";
+  kind: "tax_certificate" | "invoice" | "client_material";
   name: string;
   url: string;
+  size?: number | null;
   uploadedBy: "client" | "studio";
   createdAt: string;
 }
@@ -176,6 +179,18 @@ export default function ClientPortalPanel({
     } else notify((await res.json().catch(() => null))?.error ?? "No se pudo guardar.", "error");
   }
 
+  async function saveMaterial(fields: { enabled?: boolean; link?: string }) {
+    const res = await fetch(`/api/projects/${projectId}/portal`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "material", ...fields }),
+    });
+    if (res.ok) {
+      setS(await res.json());
+      notify("Guardado");
+    } else notify((await res.json().catch(() => null))?.error ?? "No se pudo guardar.", "error");
+  }
+
   async function savePrice(fields: { priceTotal?: number | null }) {
     const res = await fetch(`/api/projects/${projectId}/portal`, {
       method: "POST",
@@ -270,6 +285,7 @@ export default function ClientPortalPanel({
 
   const certificates = s?.documents.filter((d) => d.kind === "tax_certificate") ?? [];
   const invoices = s?.documents.filter((d) => d.kind === "invoice") ?? [];
+  const materials = s?.documents.filter((d) => d.kind === "client_material") ?? [];
   const shortDate = (iso: string) => new Date(iso).toLocaleDateString("es-MX", { day: "numeric", month: "short" });
 
   const clientTotal = s?.payments.reduce((n, p) => n + clientAmount(p.amount, p.withIva), 0) ?? 0;
@@ -392,6 +408,57 @@ export default function ClientPortalPanel({
             </section>
 
             <BriefEditor projectId={projectId} notify={notify} />
+
+            {/* Material del cliente: subida directa + link para archivos pesados */}
+            <section className="space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="text-base">Material del cliente</h3>
+                {s.materialEnabled && <span className="text-xs text-muted">{materials.length} {materials.length === 1 ? "archivo" : "archivos"}</span>}
+              </div>
+              <div className="space-y-3 rounded-2xl bg-ink/[0.04] p-4">
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" checked={s.materialEnabled} onChange={(e) => saveMaterial({ enabled: e.target.checked })} />
+                  Pedirle material al cliente en su portal (sección “Tu material”)
+                </label>
+                {s.materialEnabled && (
+                  <>
+                    <label className="block space-y-1">
+                      <span className="text-xs text-muted">Link para videos y archivos pesados (opcional)</span>
+                      <input
+                        key={`ml-${s.materialLink ?? ""}`}
+                        defaultValue={s.materialLink ?? ""}
+                        placeholder="https://www.dropbox.com/request/… o carpeta de Drive"
+                        onBlur={(e) => e.target.value.trim() !== (s.materialLink ?? "") && saveMaterial({ link: e.target.value })}
+                        onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
+                        className="field w-full rounded-xl px-3 py-2 text-sm"
+                      />
+                    </label>
+                    <p className="text-xs text-muted">
+                      Fotos y archivos ligeros se suben directo al portal (hasta 100 MB cada uno). Para videos pesados te recomiendo una{" "}
+                      <span className="text-ink">solicitud de archivos de Dropbox</span> (el cliente sube sin tener cuenta): se muestra como “Subir archivos grandes”.
+                    </p>
+                    {materials.length > 0 && (
+                      <ul className="max-h-60 divide-y divide-ink/10 overflow-y-auto rounded-xl bg-paper/60 px-3 text-sm">
+                        {materials.map((d) => (
+                          <li key={d.id} className="flex items-center gap-3 py-2">
+                            <a href={d.url} target="_blank" rel="noreferrer" className="min-w-0 flex-1 truncate hover:underline">
+                              {d.name}
+                            </a>
+                            <span className="shrink-0 text-xs text-muted">
+                              {d.size ? `${(d.size / 1024 / 1024).toFixed(1)} MB · ` : ""}
+                              {shortDate(d.createdAt)}
+                            </span>
+                            <button onClick={() => deleteDocument(d)} className="shrink-0 text-xs text-muted hover:text-red-600">
+                              Quitar
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </>
+                )}
+              </div>
+            </section>
 
             {/* Tipo de portal y secciones visibles */}
             <section className="space-y-3">

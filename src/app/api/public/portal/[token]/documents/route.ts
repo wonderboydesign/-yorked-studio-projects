@@ -13,7 +13,7 @@ export async function POST(request: NextRequest, { params }: { params: { token: 
   if (!isBlobUrl(body.url) || !name || !ext || !CLIENT_UPLOAD_EXTENSIONS.includes(ext)) {
     return NextResponse.json({ error: "Archivo no válido" }, { status: 400 });
   }
-  const count = await prisma.projectDocument.count({ where: { projectId: project.id, uploadedBy: "client" } });
+  const count = await prisma.projectDocument.count({ where: { projectId: project.id, kind: "tax_certificate", uploadedBy: "client" } });
   if (count >= CLIENT_UPLOAD_MAX_FILES) return NextResponse.json({ error: "Demasiados archivos" }, { status: 400 });
 
   const doc = await prisma.projectDocument.create({

@@ -90,6 +90,14 @@ export function isBlobUrl(url: unknown): url is string {
   }
 }
 
+// Material que el cliente manda (fotos, videos cortos, documentos): subida directa
+export const MATERIAL_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "gif", "heic", "heif", "pdf", "mp4", "mov", "webm", "zip"];
+export const MATERIAL_CONTENT_TYPES = [
+  "image/jpeg", "image/png", "image/webp", "image/gif", "image/heic", "image/heif",
+  "application/pdf", "video/mp4", "video/quicktime", "video/webm", "application/zip", "application/x-zip-compressed",
+];
+export const MATERIAL_MAX_BYTES = 100 * 1024 * 1024;
+export const MATERIAL_MAX_FILES = 300;
 export const CLIENT_UPLOAD_EXTENSIONS = ["pdf", "jpg", "jpeg", "png"];
 export const CLIENT_UPLOAD_MAX_BYTES = 10 * 1024 * 1024;
 export const CLIENT_UPLOAD_MAX_FILES = 10;
