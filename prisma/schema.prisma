@@ -18,6 +18,10 @@ model Project {
   clientBrief      ProjectBrief?
   // Con logotipo, mostrar o no el nombre del cliente en el portal
   showName         Boolean           @default(true)
+  // Pedir material al cliente en su portal (subida directa) y, opcional, un
+  // link de Dropbox/Drive para archivos pesados como videos
+  materialEnabled  Boolean           @default(false)
+  materialLink     String?
   // Tipo de portal ("project" | "retainer") y secciones que NO se muestran
   portalMode       String            @default("project")
   portalHidden     String[]          @default([])

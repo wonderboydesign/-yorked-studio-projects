@@ -31,7 +31,7 @@ export async function notifyStudio({
   projectId,
   prospectId,
 }: {
-  kind: "brief" | "quote" | "receipt";
+  kind: "brief" | "quote" | "receipt" | "material";
   message: string;
   projectId?: string | null;
   prospectId?: string | null;

@@ -15,7 +15,7 @@ async function state(projectId: string) {
   }
   const project = await prisma.project.findUnique({
     where: { id: projectId },
-    select: { id: true, name: true, portalToken: true, portalViewedAt: true, priceTotal: true, logoUrl: true, showName: true, portalMode: true, portalHidden: true, progressOverride: true, creditBalance: true, creditNote: true, creditVisible: true, wantsInvoice: true, invoiceChosenAt: true, estimatedEnd: true },
+    select: { id: true, name: true, portalToken: true, portalViewedAt: true, priceTotal: true, logoUrl: true, showName: true, materialEnabled: true, materialLink: true, portalMode: true, portalHidden: true, progressOverride: true, creditBalance: true, creditNote: true, creditVisible: true, wantsInvoice: true, invoiceChosenAt: true, estimatedEnd: true },
   });
   if (!project) return null;
   const [payments, progress, quote, documents, links, supplierQuotes] = await Promise.all([
@@ -88,6 +88,16 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     }
     const hidden = Array.from(new Set<string>(body.hidden));
     await prisma.project.update({ where: { id: params.id }, data: { portalMode: mode, portalHidden: hidden } });
+  } else if (action === "material") {
+    // Pedir material al cliente: activar y link opcional para archivos pesados
+    const data: { materialEnabled?: boolean; materialLink?: string | null } = {};
+    if (typeof body.enabled === "boolean") data.materialEnabled = body.enabled;
+    if (body.link !== undefined) {
+      const link = typeof body.link === "string" ? body.link.trim().slice(0, 2000) : "";
+      if (link && !/^https?:\/\/\S+$/i.test(link)) return NextResponse.json({ error: "La liga debe empezar con https://" }, { status: 400 });
+      data.materialLink = link || null;
+    }
+    await prisma.project.update({ where: { id: params.id }, data });
   } else if (action === "showName") {
     if (typeof body.showName !== "boolean") return NextResponse.json({ error: "Valor no válido" }, { status: 400 });
     await prisma.project.update({ where: { id: params.id }, data: { showName: body.showName } });
