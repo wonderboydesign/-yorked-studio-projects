@@ -101,7 +101,7 @@ export function receiptFolio(payment: { id: string; paidAt: Date | null; created
 }
 
 export const LINK_KINDS = ["delivery", "meeting", "brand"] as const;
-export const LINK_SELECT = { id: true, kind: true, title: true, url: true, pathname: true, note: true, phase: true, date: true, createdAt: true } as const;
+export const LINK_SELECT = { id: true, kind: true, title: true, url: true, pathname: true, note: true, phase: true, folder: true, date: true, createdAt: true } as const;
 
 // Campos de un link del portal que llegan del panel; solo ligas http(s)
 export function linkFields(body: Record<string, unknown>) {
@@ -118,6 +118,7 @@ export function linkFields(body: Record<string, unknown>) {
   if (body.pathname !== undefined) data.pathname = str(body.pathname, 500) || null;
   if (body.note !== undefined) data.note = str(body.note, 1000) || null;
   if (body.phase !== undefined) data.phase = str(body.phase, 4) || null;
+  if (body.folder !== undefined) data.folder = str(body.folder, 60) || null;
   if (body.date !== undefined) {
     const d = typeof body.date === "string" && body.date ? new Date(body.date) : null;
     data.date = d && !Number.isNaN(d.getTime()) ? d : null;
