@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import RetainerFeed from "./RetainerFeed";
 import WelcomeRibbon from "./WelcomeRibbon";
 import BriefForm from "./BriefForm";
 import { BriefAnswers, BriefQuestion } from "@/lib/brief";
@@ -153,15 +154,6 @@ export default async function ClientPortal({
   // Entregas: más recientes primero; en un retainer se agrupan por mes
   const deliveryDate = (d: (typeof deliveries)[number]) => d.date ?? d.createdAt;
   const sortedDeliveries = [...deliveries].sort((a, b) => deliveryDate(b).getTime() - deliveryDate(a).getTime());
-  const monthOf = (d: Date) => d.toLocaleDateString("es-MX", { month: "long", year: "numeric", timeZone: "America/Mexico_City" });
-  const deliveryMonths: { key: string; label: string; items: typeof deliveries }[] = [];
-  for (const d of sortedDeliveries) {
-    const label = monthOf(deliveryDate(d));
-    const last = deliveryMonths[deliveryMonths.length - 1];
-    if (last && last.key === label) last.items.push(d);
-    else deliveryMonths.push({ key: label, label, items: [d] });
-  }
-  const deliveriesThisMonth = deliveries.filter((d) => monthOf(deliveryDate(d)) === monthOf(new Date())).length;
   const renderDelivery = (d: (typeof deliveries)[number]) => {
     const isNew = now - d.createdAt.getTime() < 7 * 86400000;
     const hasLink = !!d.url;
@@ -420,19 +412,23 @@ export default async function ClientPortal({
             <SectionHead
               n={num("entregas")}
               title={retainer ? "Lo nuevo" : "Entregas"}
-              tagline={
-                retainer
-                  ? `${deliveriesThisMonth} ${deliveriesThisMonth === 1 ? "entrega" : "entregas"} este mes · lo más reciente primero.`
-                  : "Lo que te hemos presentado, siempre a la mano."
-              }
+              tagline={retainer ? "Tu material, siempre actualizado: lo nuevo arriba y todo el historial abajo." : "Lo que te hemos presentado, siempre a la mano."}
             />
             {retainer ? (
-              deliveryMonths.map((g) => (
-                <div key={g.key} className="mt-14">
-                  <p className="eyebrow mb-4 capitalize">{g.label}</p>
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{g.items.map(renderDelivery)}</div>
-                </div>
-              ))
+              <RetainerFeed
+                token={params.token}
+                nowIso={new Date().toISOString()}
+                items={sortedDeliveries.map((d) => ({
+                  id: d.id,
+                  title: d.title,
+                  url: d.url,
+                  isFile: !!d.pathname,
+                  note: d.note,
+                  folder: d.folder,
+                  dateIso: deliveryDate(d).toISOString(),
+                  createdIso: d.createdAt.toISOString(),
+                }))}
+              />
             ) : (
               <div className="mt-14 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{deliveries.map(renderDelivery)}</div>
             )}

@@ -15,6 +15,7 @@ export interface PortalLinkRow {
   pathname: string | null;
   note: string | null;
   phase: string | null;
+  folder: string | null;
   date: string | null;
   createdAt: string;
 }
@@ -80,6 +81,7 @@ export default function PortalLinksEditor({
   const [url, setUrl] = useState("");
   const [date, setDate] = useState("");
   const [phase, setPhase] = useState("");
+  const [folder, setFolder] = useState("");
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   // Si hay algo en edición, el formulario guarda cambios en lugar de agregar
@@ -93,6 +95,7 @@ export default function PortalLinksEditor({
     setUrl("");
     setDate("");
     setPhase("");
+    setFolder("");
     setNote("");
   }
 
@@ -102,6 +105,7 @@ export default function PortalLinksEditor({
     setUrl(l.url);
     setNote(l.note ?? "");
     setPhase(l.phase ?? "");
+    setFolder(l.folder ?? "");
     setDate(toLocalInput(l.date));
     setTimeout(() => form.current?.scrollIntoView({ block: "nearest", behavior: "smooth" }), 50);
   }
@@ -116,7 +120,7 @@ export default function PortalLinksEditor({
       url: newUrl,
       note,
       ...(extra ? { pathname: extra.pathname } : newUrl !== editing.url ? { pathname: "" } : {}),
-      ...(kind === "delivery" ? { phase } : {}),
+      ...(kind === "delivery" ? { phase, folder } : {}),
       ...(kind === "meeting" && date ? { date: new Date(date).toISOString() } : {}),
     };
     const res = await fetch(`/api/links/${editing.id}`, {
@@ -144,6 +148,7 @@ export default function PortalLinksEditor({
         ...fields,
         note,
         phase: kind === "delivery" ? phase : undefined,
+        folder: kind === "delivery" && folder.trim() ? folder.trim() : undefined,
         date: kind === "meeting" && date ? new Date(date).toISOString() : kind === "delivery" ? new Date().toISOString() : undefined,
       }),
     });
@@ -233,7 +238,7 @@ export default function PortalLinksEditor({
                   )}
                   <p className="text-xs text-muted truncate">
                     {kind === "meeting" && l.date && when(l.date)}
-                    {kind === "delivery" && (l.phase ? `Fase ${l.phase} · ` : "") + new Date(l.createdAt).toLocaleDateString("es-MX", { day: "numeric", month: "short" })}
+                    {kind === "delivery" && (l.folder ? `${l.folder} · ` : "") + (l.phase ? `Fase ${l.phase} · ` : "") + new Date(l.createdAt).toLocaleDateString("es-MX", { day: "numeric", month: "short" })}
                     {kind !== "meeting" && (l.pathname ? " · archivo" : l.url ? " · link" : " · sin link")}
                     {l.note && ` · ${l.note}`}
                   </p>
@@ -273,6 +278,23 @@ export default function PortalLinksEditor({
             <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Nota (opcional): versión, formatos…" className="field rounded-lg px-2.5 py-1.5 text-sm" />
           )}
         </div>
+        {kind === "delivery" && (
+          <>
+            <input
+              value={folder}
+              onChange={(e) => setFolder(e.target.value)}
+              list={`folders-${projectId}`}
+              placeholder="Carpeta (opcional): Reels, Posts, Stories…"
+              className="field w-full rounded-lg px-2.5 py-1.5 text-sm"
+              aria-label="Carpeta"
+            />
+            <datalist id={`folders-${projectId}`}>
+              {Array.from(new Set(mine.map((l) => l.folder).filter(Boolean) as string[])).map((f) => (
+                <option key={f} value={f} />
+              ))}
+            </datalist>
+          </>
+        )}
         <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder={copy.urlPh} className="field w-full rounded-lg px-2.5 py-1.5 text-sm" aria-label="Liga" />
         {kind !== "brand" && (
           <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Nota para el cliente (opcional)" className="field w-full rounded-lg px-2.5 py-1.5 text-sm" />

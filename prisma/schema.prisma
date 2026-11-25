@@ -114,6 +114,8 @@ model PortalLink {
   pathname  String?
   note      String?
   phase     String?
+  // Carpeta opcional de una entrega (Reels, Posts, Stories…) para filtrar el historial
+  folder    String?
   date      DateTime?
   createdAt DateTime  @default(now())
 
