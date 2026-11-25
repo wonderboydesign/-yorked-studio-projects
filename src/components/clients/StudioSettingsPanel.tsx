@@ -82,6 +82,8 @@ export default function StudioSettingsPanel({ notify, onClose }: { notify: Notif
               </div>
             </section>
 
+            <EmailTest notify={notify} />
+
             <section className="space-y-3">
               <h3 className="text-base">Contacto</h3>
               <div className="grid gap-2 sm:grid-cols-2">
@@ -373,5 +375,44 @@ function PhotoStrip({
         }}
       />
     </div>
+  );
+}
+
+// Avisos por correo: comprueba que RESEND_API_KEY esté puesta en Vercel y manda una prueba
+function EmailTest({ notify }: { notify: Notify }) {
+  const [state, setState] = useState<{ configured: boolean; from: string | null } | null>(null);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    fetch("/api/studio/email-test")
+      .then((r) => (r.ok ? r.json() : null))
+      .then(setState)
+      .catch(() => setState(null));
+  }, []);
+
+  async function test() {
+    setBusy(true);
+    const res = await fetch("/api/studio/email-test", { method: "POST" });
+    const data = await res.json().catch(() => null);
+    setBusy(false);
+    if (data?.ok) notify(`Correo de prueba enviado a ${data.to}`);
+    else notify(data?.error ?? "No se pudo enviar el correo de prueba.", "error");
+  }
+
+  return (
+    <section className="space-y-3">
+      <h3 className="text-base">Avisos por correo</h3>
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-ink/[0.04] p-4">
+        <p className="min-w-0 flex-1 text-xs text-muted">
+          {state === null
+            ? "Revisando…"
+            : state.configured
+            ? "✓ El correo está configurado. Te avisamos cuando un cliente envíe su brief, apruebe una propuesta o suba un comprobante."
+            : "Aún no está activado: falta la variable RESEND_API_KEY en Vercel. Mientras tanto los avisos llegan solo a la campana."}
+        </p>
+        <button onClick={test} disabled={busy || !state?.configured} className="rounded-xl bg-ink px-4 py-2 text-sm text-paper disabled:opacity-50">
+          {busy ? "Enviando…" : "Enviar correo de prueba"}
+        </button>
+      </div>
+    </section>
   );
 }
