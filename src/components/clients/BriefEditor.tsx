@@ -83,6 +83,7 @@ export default function BriefEditor({ projectId, notify }: { projectId: string; 
     const res = await fetch(`${base}/branding`, { method: "POST" });
     const data = await res.json().catch(() => null);
     if (!res.ok) return notify(data?.error ?? "No se pudo pasar al Brief de Branding.", "error");
+    patch({ reviewed: true });
     notify(data.appended ? "Agregado debajo del Brief de Branding" : "Pasado al Brief de Branding");
   }
 
@@ -128,7 +129,7 @@ export default function BriefEditor({ projectId, notify }: { projectId: string; 
           <button onClick={() => { setEditing((v) => !v); }} className="rounded-full bg-ink px-3 py-1.5 text-paper">
             {editing ? "Cerrar editor" : "Editar preguntas"}
           </button>
-          <button onClick={async () => { if (!showAnswers) await load(); setShowAnswers((v) => !v); }} className="rounded-full bg-button px-3 py-1.5 hover:bg-button-hover">
+          <button onClick={async () => { if (!showAnswers) { await load(); patch({ reviewed: true }); } setShowAnswers((v) => !v); }} className="rounded-full bg-button px-3 py-1.5 hover:bg-button-hover">
             {showAnswers ? "Ocultar respuestas" : "Ver respuestas"}
           </button>
           <button

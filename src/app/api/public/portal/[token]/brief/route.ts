@@ -40,7 +40,7 @@ export async function POST(request: NextRequest, { params }: { params: { token: 
   if (missing.length > 0) {
     return NextResponse.json({ error: `Falta responder: ${missing.map((q) => q.label).join("; ")}`, missing: missing.map((q) => q.id) }, { status: 400 });
   }
-  await prisma.projectBrief.update({ where: { id: brief.id }, data: { answers, status: "submitted", submittedAt: new Date() } });
+  await prisma.projectBrief.update({ where: { id: brief.id }, data: { answers, status: "submitted", submittedAt: new Date(), reviewedAt: null } });
   const project = await prisma.project.findUnique({ where: { id: brief.projectId }, select: { name: true } });
   await notifyStudio({
     kind: "brief",

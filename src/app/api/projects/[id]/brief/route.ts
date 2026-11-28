@@ -27,7 +27,9 @@ export async function POST(_request: NextRequest, { params }: { params: { id: st
 // Editar título, introducción y preguntas
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   const body = await request.json().catch(() => ({}));
-  const data: { title?: string; intro?: string | null; questions?: object[]; status?: string; submittedAt?: Date | null } = {};
+  const data: { title?: string; intro?: string | null; questions?: object[]; status?: string; submittedAt?: Date | null; reviewedAt?: Date | null } = {};
+  // El estudio ya revisó las respuestas
+  if (body.reviewed === true) data.reviewedAt = new Date();
   if (typeof body.title === "string" && body.title.trim()) data.title = body.title.trim().slice(0, 120);
   if (typeof body.intro === "string") data.intro = body.intro.trim().slice(0, 1000) || null;
   if (body.questions !== undefined) {
