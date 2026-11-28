@@ -265,25 +265,30 @@ export default async function ClientPortal({
         <PortalNav variant="mobile" items={navItems} />
       </header>
 
-      {/* Recordatorio de pago: vencido (rojo) o por vencer (ámbar) hasta que se pague */}
+      {/* Recordatorio amable de pago: pasada la fecha o por llegar, hasta que se pague */}
       {reminder && (
         <div
-          role="alert"
+          role="status"
           className="border-b px-5 py-3 text-[14px] leading-snug sm:px-6"
-          style={reminder === "late" ? { background: "#fde8e6", color: "#7a1d12", borderColor: "#f3b5ad" } : { background: "#fff4d6", color: "#5c4100", borderColor: "#ecd08a" }}
+          style={reminder === "late" ? { background: "#fff1e3", color: "#6b3500", borderColor: "#f0cfa8" } : { background: "#f3f1e8", color: "#4a4630", borderColor: "#dcd8c3" }}
         >
           <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-x-6 gap-y-2">
             <p>
               <strong className="font-medium">
                 {reminder === "late"
                   ? reminderList.length === 1
-                    ? `Tienes un pago vencido: ${reminderList[0].label}`
-                    : `Tienes ${reminderList.length} pagos vencidos`
-                  : `Tu pago vence pronto: ${reminderList[0].label}`}
+                    ? `Recordatorio de pago: ${reminderList[0].label}`
+                    : `Recordatorio: tienes ${reminderList.length} pagos pendientes`
+                  : `Próximo pago: ${reminderList[0].label}`}
               </strong>
-              {reminderList.length === 1 && reminderList[0].dueDate && ` · ${reminder === "late" ? "venció" : "vence"} el ${longDate(reminderList[0].dueDate)}`}
-              {` · ${formatMoney(reminderTotal)}`}
-              {reminder === "late" && (next?.method === "cash" ? ". Escríbenos para coordinar tu pago en efectivo." : ". Realiza tu pago para continuar con tu proyecto.")}
+              {reminderList.length === 1 && reminderList[0].dueDate && ` · ${reminder === "late" ? "estaba programado para" : "vence"} el ${longDate(reminderList[0].dueDate)}`}
+              {` · ${formatMoney(reminderTotal)}.`}
+              {reminder === "late" &&
+                (next?.method === "cash"
+                  ? " Escríbenos y coordinamos tu pago en efectivo para seguir con tu proyecto."
+                  : reminderList.length === 1 && /anticipo/i.test(reminderList[0].label)
+                  ? " Con tu anticipo apartamos tu lugar en la agenda y seguimos con tu proyecto."
+                  : " Con tu pago seguimos avanzando según la agenda de tu proyecto.")}
             </p>
             <a href="#pagos" className="shrink-0 border border-current px-3 py-1.5 text-[13px] hover:bg-black/5">
               Ver cómo pagar ↓
@@ -628,7 +633,7 @@ export default async function ClientPortal({
                           {p.paidAt
                             ? `Pagado el ${longDate(p.paidAt)}`
                             : p.dueDate
-                            ? `${overdue ? "Venció" : "Vence"} el ${longDate(p.dueDate)}`
+                            ? `${overdue ? "Programado para" : "Vence"} el ${longDate(p.dueDate)}`
                             : "Pendiente"}
                           {p.iva && " · IVA incluido"}
                         </p>
@@ -645,9 +650,9 @@ export default async function ClientPortal({
                       <div className="flex shrink-0 flex-wrap items-center justify-end gap-3">
                         <span className="text-[19px] font-medium">{formatMoney(p.amount)}</span>
                         <span
-                          className={`rounded-full px-3 py-1 text-[12px] ${p.paidAt ? "bg-white/10 text-[#f1efe9]/80" : overdue ? "bg-[#ffb4a8] text-[#3a0d06]" : "bg-[#f1efe9] text-[#121210]"}`}
+                          className={`rounded-full px-3 py-1 text-[12px] ${p.paidAt ? "bg-white/10 text-[#f1efe9]/80" : overdue ? "bg-[#f4d7b0] text-[#4a2800]" : "bg-[#f1efe9] text-[#121210]"}`}
                         >
-                          {p.paidAt ? "✓ Pagado" : overdue ? "Vencido" : "Pendiente"}
+                          {p.paidAt ? "✓ Pagado" : overdue ? "Por pagar" : "Pendiente"}
                         </span>
                       </div>
                     </li>
