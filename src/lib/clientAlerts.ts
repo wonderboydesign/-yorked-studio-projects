@@ -48,9 +48,6 @@ export function buildAlerts(quote: QuoteLite | null, project: ProjectLite | null
         text: isAnticipo ? `No ha pagado el anticipo · venció ${ago(days)}` : `Pago vencido: ${p.label} · ${ago(days)}`,
       });
     }
-    if (anticipoUnpaid && !out.some((a) => a.level === "late") && /anticipo/i.test(first.label)) {
-      out.push({ id: "anticipo", level: "todo", text: "Anticipo pendiente de pago" });
-    }
   } else if (quote?.status === "approved") {
     // Aún no hay pagos en el portal: el anticipo corre desde que aprobó
     if (quote.receiptUrl) out.push({ id: "receipt", level: "info", text: "Comprobante recibido: confirma el pago" });
