@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import PortalUpdates, { PortalUpdate } from "./PortalUpdates";
 import MaterialUpload from "./MaterialUpload";
 import RetainerFeed from "./RetainerFeed";
 import WelcomeRibbon from "./WelcomeRibbon";
@@ -202,6 +203,28 @@ export default async function ClientPortal({
     );
   };
 
+  // Recordatorio de pagos: vencidos (rojo) o que vencen en los próximos 3 días (ámbar)
+  const overduePayments = show("pagos") ? payments.filter((p) => !p.paidAt && p.dueDate && p.dueDate < today) : [];
+  const dueSoonPayments = show("pagos") ? payments.filter((p) => !p.paidAt && p.dueDate && p.dueDate >= today && p.dueDate.getTime() - today.getTime() <= 3 * 86400000) : [];
+  const reminder = overduePayments.length > 0 ? "late" : dueSoonPayments.length > 0 ? "soon" : null;
+  const reminderList = reminder === "late" ? overduePayments : dueSoonPayments;
+  const reminderTotal = reminderList.reduce((n, p) => n + p.amount, 0);
+
+  // Novedades que el cliente ve en la campana de su portal
+  const updates: PortalUpdate[] = [
+    ...(brief && show("brief") ? [{ id: `brief-${brief.id}`, text: "Tu brief está listo para llenar", section: "brief", dateIso: brief.createdAt.toISOString() }] : []),
+    ...(show("entregas") ? deliveries.map((d) => ({ id: `d-${d.id}`, text: `${retainer ? "Nuevo contenido" : "Nueva entrega"}: ${d.title}`, section: "entregas", dateIso: d.createdAt.toISOString() })) : []),
+    ...(show("reuniones") ? meetings.map((m) => ({ id: `m-${m.id}`, text: `Nueva reunión: ${m.title}`, section: "reuniones", dateIso: m.createdAt.toISOString() })) : []),
+    ...(show("marca") ? brandFiles.map((f) => ({ id: `b-${f.id}`, text: `Nuevo archivo de tu marca: ${f.title}`, section: "marca", dateIso: f.createdAt.toISOString() })) : []),
+    ...(show("cotizaciones") ? project.supplierQuotes.map((q) => ({ id: `q-${q.id}`, text: `Nueva cotización: ${q.title}`, section: "cotizaciones", dateIso: q.createdAt.toISOString() })) : []),
+    ...(show("facturacion")
+      ? [
+          ...project.documents.filter((d) => d.kind === "invoice").map((d) => ({ id: `i-${d.id}`, text: `Tu factura está lista: ${d.name}`, section: "facturacion", dateIso: d.createdAt.toISOString() })),
+          ...payments.filter((p) => p.paidAt).map((p) => ({ id: `r-${p.id}`, text: `Recibo disponible: ${p.label}`, section: "facturacion", dateIso: p.paidAt!.toISOString() })),
+        ]
+      : []),
+  ].sort((a, b) => new Date(b.dateIso).getTime() - new Date(a.dateIso).getTime());
+
   const waHello = whatsappLink(studio.whatsapp, `Hola, tengo una duda sobre el proyecto de ${project.name}.`);
 
   return (
@@ -232,12 +255,42 @@ export default async function ClientPortal({
             </span>
           </span>
           <PortalNav variant="desktop" items={navItems} />
-          <a href={waHello} target="_blank" rel="noreferrer" className="pill-dark">
-            Escríbenos <span aria-hidden>→</span>
-          </a>
+          <div className="flex items-center gap-3">
+            <PortalUpdates token={params.token} updates={updates} />
+            <a href={waHello} target="_blank" rel="noreferrer" className="pill-dark">
+              Escríbenos <span aria-hidden>→</span>
+            </a>
+          </div>
         </div>
         <PortalNav variant="mobile" items={navItems} />
       </header>
+
+      {/* Recordatorio de pago: vencido (rojo) o por vencer (ámbar) hasta que se pague */}
+      {reminder && (
+        <div
+          role="alert"
+          className="border-b px-5 py-3 text-[14px] leading-snug sm:px-6"
+          style={reminder === "late" ? { background: "#fde8e6", color: "#7a1d12", borderColor: "#f3b5ad" } : { background: "#fff4d6", color: "#5c4100", borderColor: "#ecd08a" }}
+        >
+          <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-x-6 gap-y-2">
+            <p>
+              <strong className="font-medium">
+                {reminder === "late"
+                  ? reminderList.length === 1
+                    ? `Tienes un pago vencido: ${reminderList[0].label}`
+                    : `Tienes ${reminderList.length} pagos vencidos`
+                  : `Tu pago vence pronto: ${reminderList[0].label}`}
+              </strong>
+              {reminderList.length === 1 && reminderList[0].dueDate && ` · ${reminder === "late" ? "venció" : "vence"} el ${longDate(reminderList[0].dueDate)}`}
+              {` · ${formatMoney(reminderTotal)}`}
+              {reminder === "late" && (next?.method === "cash" ? ". Escríbenos para coordinar tu pago en efectivo." : ". Realiza tu pago para continuar con tu proyecto.")}
+            </p>
+            <a href="#pagos" className="shrink-0 border border-current px-3 py-1.5 text-[13px] hover:bg-black/5">
+              Ver cómo pagar ↓
+            </a>
+          </div>
+        </div>
+      )}
 
       <main className="mx-auto max-w-[1440px] px-5 sm:px-6">
         {/* Avance */}
@@ -592,9 +645,9 @@ export default async function ClientPortal({
                       <div className="flex shrink-0 flex-wrap items-center justify-end gap-3">
                         <span className="text-[19px] font-medium">{formatMoney(p.amount)}</span>
                         <span
-                          className={`rounded-full px-3 py-1 text-[12px] ${p.paidAt ? "bg-white/10 text-[#f1efe9]/80" : "bg-[#f1efe9] text-[#121210]"}`}
+                          className={`rounded-full px-3 py-1 text-[12px] ${p.paidAt ? "bg-white/10 text-[#f1efe9]/80" : overdue ? "bg-[#ffb4a8] text-[#3a0d06]" : "bg-[#f1efe9] text-[#121210]"}`}
                         >
-                          {p.paidAt ? "✓ Pagado" : "Pendiente"}
+                          {p.paidAt ? "✓ Pagado" : overdue ? "Vencido" : "Pendiente"}
                         </span>
                       </div>
                     </li>

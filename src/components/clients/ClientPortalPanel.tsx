@@ -812,6 +812,17 @@ export default function ClientPortalPanel({
                           {p.methodChosenAt && <span className="text-muted"> · elegido por el cliente</span>}
                         </button>
                       )}
+                      {!p.paidAt && p.dueDate && day(p.dueDate) < todayIso && s.portalToken && (
+                        <a
+                          href={`https://wa.me/?text=${encodeURIComponent(`Hola, te recuerdo el pago "${p.label}" de ${s.name}, que venció el ${new Date(`${day(p.dueDate)}T12:00:00`).toLocaleDateString("es-MX", { day: "numeric", month: "long" })}. Aquí puedes ver cómo pagar: ${url}`)}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          title="Abre WhatsApp con el recordatorio y la liga del portal"
+                          className="rounded-full bg-red-500/15 px-3 py-1 text-red-700 hover:bg-red-500/25 dark:text-red-400"
+                        >
+                          Recordar por WhatsApp
+                        </a>
+                      )}
                       {p.paidAt && s.portalToken && (
                         <a href={`/c/${s.portalToken}/recibo/${p.id}`} target="_blank" rel="noreferrer" className="text-muted hover:text-ink">
                           Recibo ↗
