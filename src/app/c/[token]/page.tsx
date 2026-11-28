@@ -203,11 +203,9 @@ export default async function ClientPortal({
     );
   };
 
-  // Recordatorio de pagos: vencidos (rojo) o que vencen en los próximos 3 días (ámbar)
-  const overduePayments = show("pagos") ? payments.filter((p) => !p.paidAt && p.dueDate && p.dueDate < today) : [];
-  const dueSoonPayments = show("pagos") ? payments.filter((p) => !p.paidAt && p.dueDate && p.dueDate >= today && p.dueDate.getTime() - today.getTime() <= 3 * 86400000) : [];
-  const reminder = overduePayments.length > 0 ? "late" : dueSoonPayments.length > 0 ? "soon" : null;
-  const reminderList = reminder === "late" ? overduePayments : dueSoonPayments;
+  // Recordatorio de pagos: solo los que ya pasaron su fecha (los próximos no avisan)
+  const reminderList = show("pagos") ? payments.filter((p) => !p.paidAt && p.dueDate && p.dueDate < today) : [];
+  const reminder = reminderList.length > 0 ? "late" : null;
   const reminderTotal = reminderList.reduce((n, p) => n + p.amount, 0);
 
   // Novedades que el cliente ve en la campana de su portal
@@ -270,25 +268,20 @@ export default async function ClientPortal({
         <div
           role="status"
           className="border-b px-5 py-3 text-[14px] leading-snug sm:px-6"
-          style={reminder === "late" ? { background: "#fff1e3", color: "#6b3500", borderColor: "#f0cfa8" } : { background: "#f3f1e8", color: "#4a4630", borderColor: "#dcd8c3" }}
+          style={{ background: "#fff1e3", color: "#6b3500", borderColor: "#f0cfa8" }}
         >
           <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-x-6 gap-y-2">
             <p>
               <strong className="font-medium">
-                {reminder === "late"
-                  ? reminderList.length === 1
-                    ? `Recordatorio de pago: ${reminderList[0].label}`
-                    : `Recordatorio: tienes ${reminderList.length} pagos pendientes`
-                  : `Próximo pago: ${reminderList[0].label}`}
+                {reminderList.length === 1 ? `Recordatorio de pago: ${reminderList[0].label}` : `Recordatorio: tienes ${reminderList.length} pagos pendientes`}
               </strong>
-              {reminderList.length === 1 && reminderList[0].dueDate && ` · ${reminder === "late" ? "estaba programado para" : "vence"} el ${longDate(reminderList[0].dueDate)}`}
+              {reminderList.length === 1 && reminderList[0].dueDate && ` · estaba programado para el ${longDate(reminderList[0].dueDate)}`}
               {` · ${formatMoney(reminderTotal)}.`}
-              {reminder === "late" &&
-                (next?.method === "cash"
-                  ? " Escríbenos y coordinamos tu pago en efectivo para seguir con tu proyecto."
-                  : reminderList.length === 1 && /anticipo/i.test(reminderList[0].label)
-                  ? " Con tu anticipo apartamos tu lugar en la agenda y seguimos con tu proyecto."
-                  : " Con tu pago seguimos avanzando según la agenda de tu proyecto.")}
+              {next?.method === "cash"
+                ? " Escríbenos y coordinamos tu pago en efectivo para seguir con tu proyecto."
+                : reminderList.length === 1 && /anticipo/i.test(reminderList[0].label)
+                ? " Con tu anticipo apartamos tu lugar en la agenda y seguimos con tu proyecto."
+                : " Con tu pago seguimos avanzando según la agenda de tu proyecto."}
             </p>
             <a href="#pagos" className="shrink-0 border border-current px-3 py-1.5 text-[13px] hover:bg-black/5">
               Ver cómo pagar ↓
