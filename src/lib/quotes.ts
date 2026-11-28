@@ -40,6 +40,8 @@ export interface Prospect {
   createdAt: string;
   updatedAt: string;
   quotes?: QuoteSummary[];
+  // Pendientes por revisar (solo clientes ganados): se calculan en el servidor
+  alerts?: { id: string; level: "late" | "todo" | "info"; text: string }[];
 }
 
 export interface QuoteSummary {

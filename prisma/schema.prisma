@@ -80,6 +80,8 @@ model ProjectBrief {
   // "draft" mientras lo llena, "submitted" cuando lo envía
   status      String    @default("draft")
   submittedAt DateTime?
+  // Cuándo el estudio revisó las respuestas (quita el pendiente "Brief enviado")
+  reviewedAt  DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }

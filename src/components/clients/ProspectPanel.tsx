@@ -1,5 +1,6 @@
 "use client";
 
+import { ALERT_STYLE } from "./alertStyle";
 import { useEffect, useState } from "react";
 import { PROSPECT_STAGES, Prospect, ProspectStage, QUOTE_STATUS_LABELS } from "@/lib/quotes";
 import { Button, DeleteButton } from "../branding/ui";
@@ -131,6 +132,19 @@ export default function ProspectPanel({
             placeholder="¿Por qué se perdió? (precio, tiempos, no respondió…)"
             className="field w-full rounded-xl px-4 py-2.5 text-sm"
           />
+        )}
+
+        {prospect.stage === "won" && prospect.alerts && prospect.alerts.length > 0 && (
+          <section className="space-y-2 rounded-2xl bg-ink/[0.04] p-4">
+            <h3 className="text-sm">Pendientes por revisar</h3>
+            <ul className="space-y-1.5">
+              {prospect.alerts.map((a) => (
+                <li key={a.id} className={`rounded-lg px-3 py-1.5 text-xs ${ALERT_STYLE[a.level]}`}>
+                  {a.text}
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
 
         {prospect.stage === "won" && (

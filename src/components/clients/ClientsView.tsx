@@ -1,5 +1,6 @@
 "use client";
 
+import { ALERT_STYLE } from "./alertStyle";
 import { useCallback, useEffect, useState } from "react";
 import { PROSPECT_STAGES, Prospect, ProspectStage, QUOTE_STATUS_LABELS, QuoteSummary } from "@/lib/quotes";
 import { Button } from "../branding/ui";
@@ -38,6 +39,10 @@ export default function ClientsView({
 
   useEffect(() => {
     load();
+    // Al volver a la pestaña, se actualizan los pendientes (pagos, briefs…)
+    const onFocus = () => load();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
   }, [load]);
 
   async function createProspect(brandName: string) {
@@ -119,7 +124,17 @@ export default function ClientsView({
             >
               <h3 className="flex items-baseline justify-between px-3 pb-3 text-base">
                 {stage.label}
-                <span className="text-sm text-muted">{list.length}</span>
+                <span className="flex items-center gap-2 text-sm text-muted">
+                  {stage.key === "won" && list.some((p) => p.alerts?.length) && (
+                    <span
+                      title="Clientes con pendientes por revisar"
+                      className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[11px] text-amber-700 dark:text-amber-400"
+                    >
+                      {list.filter((p) => p.alerts?.length).length} con pendientes
+                    </span>
+                  )}
+                  {list.length}
+                </span>
               </h3>
               <div className="space-y-2 flex-1">
                 {list.map((p) => (
@@ -159,7 +174,10 @@ export default function ClientsView({
             setOpenId(null);
             setProspects((list) => (list ?? []).filter((x) => x.id !== open.id));
           }}
-          onClose={() => setOpenId(null)}
+          onClose={() => {
+            setOpenId(null);
+            load();
+          }}
           onEditQuote={(id) => setEditingQuoteId(id)}
           onReload={load}
           onScheduled={() => onDataChanged?.()}
@@ -193,6 +211,16 @@ function ProspectCard({ prospect: p, onOpen }: { prospect: Prospect; onOpen: () 
       <p className="text-sm truncate">{p.brandName}</p>
       {(p.contact || p.category) && (
         <p className="text-xs text-muted truncate">{[p.contact, p.category].filter(Boolean).join(" · ")}</p>
+      )}
+      {p.alerts && p.alerts.length > 0 && (
+        <ul className="mt-2 space-y-1">
+          {p.alerts.slice(0, 3).map((a) => (
+            <li key={a.id}>
+              <span className={`inline-block rounded-lg px-2 py-1 text-[11px] leading-snug ${ALERT_STYLE[a.level]}`}>{a.text}</span>
+            </li>
+          ))}
+          {p.alerts.length > 3 && <li className="text-[11px] text-muted">+{p.alerts.length - 3} más</li>}
+        </ul>
       )}
       {q && (
         <p className="mt-2 flex items-center gap-1.5 text-xs">
